@@ -9,7 +9,7 @@ namespace backend.Model
     public class AppUser : IdentityUser
     {
         public string AccountId { get; set; } = string.Empty;
-        public bool IsSuspicios { get; set; }
+        public bool IsSuspicious { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
 

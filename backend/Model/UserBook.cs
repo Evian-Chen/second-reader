@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 using backend.Enums;
 
 namespace backend.Model
 {
+    [Table("UserBook")]
     public class UserBook
     {
         public int Id { get; set; }
@@ -24,6 +26,8 @@ namespace backend.Model
         public AppUser? AppUser { get; set; }
         public int BookId { get; set; }  // FK
         public Book? Book { get; set; }
+        public int? OrderId { get; set; }  // FK
+        public Order? Order { get; set; }
     }
 
     public class UserBookPayMethod
