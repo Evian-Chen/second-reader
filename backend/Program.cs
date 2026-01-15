@@ -1,4 +1,10 @@
 using System.Text.Json.Serialization;
+using backend.Auth;
+using backend.Data;
+using backend.Interface;
+using backend.Model;
+using backend.Repository;
+using backend.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -38,15 +44,17 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
+// add controller
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 });
 
-builder.Services.AddControllers().AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    });
+// add DBContext
+builder.Services.AddDbContext<ApplicationDBContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 
 builder.Services.AddAuthentication(option =>
@@ -73,6 +81,44 @@ builder.Services.AddAuthentication(option =>
 }
 );
 
+// add scope
+builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
+builder.Services.AddScoped<IAppUserService, AppUserService>();
+
+// Auth switch
+var useDevFakeAuth = builder.Configuration.GetValue<bool>("Auth:UseDevFakeAuth");
+
+if (useDevFakeAuth)
+{
+    builder.Services
+        .AddAuthentication("Dev")
+        .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, DevAuthHandler>("Dev", _ => { });
+}
+else
+{
+    var issuer = builder.Configuration["Clerk:Issuer"];
+    var audience = builder.Configuration["Clerk:Audience"];
+
+    builder.Services
+        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.Authority = issuer;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = issuer,
+                ValidateAudience = true,
+                ValidAudience = audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromMinutes(2),
+                NameClaimType = "sub",
+            };
+        });
+}
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -84,6 +130,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// 對每個 request 都會做，但裡面有檢查該 API 是否是 [Authorize]
+app.UseMiddleware<UserProvisioningMiddleware>();
 
 app.MapControllers();
 
