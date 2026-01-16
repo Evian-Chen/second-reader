@@ -10,15 +10,13 @@ namespace backend.Auth
     public class UserProvisioningMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IAppUserService _userService;
 
-        public UserProvisioningMiddleware(RequestDelegate next, IAppUserService userService)
+        public UserProvisioningMiddleware(RequestDelegate next)
         {
             _next = next;
-            _userService = userService;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, IAppUserService userService)
         {
             if (context.User?.Identity?.IsAuthenticated != true)
             {
@@ -35,7 +33,7 @@ namespace backend.Auth
             }
 
             var email = context.User.FindFirstValue("email");
-            var appUser = await _userService.EnsureLocalUserAsync(clerkUserId, email);
+            var appUser = await userService.EnsureLocalUserAsync(clerkUserId, email);
 
             // 給 controller 拿
             context.Items["AppUser"] = appUser;

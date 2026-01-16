@@ -14,7 +14,6 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>
 {
@@ -26,7 +25,7 @@ builder.Services.AddSwaggerGen(option =>
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         BearerFormat = "JWT",
-        Scheme = "Bearer"
+        Scheme = "bearer"
     });
     option.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -56,48 +55,22 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-
-builder.Services.AddAuthentication(option =>
-{
-    option.DefaultAuthenticateScheme =
-    option.DefaultChallengeScheme =
-    option.DefaultScheme =
-    option.DefaultForbidScheme =
-    option.DefaultSignInScheme =
-    option.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(option =>
-{
-    option.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["JWT:Audience"],
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(
-            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"])
-        )
-    };
-}
-);
-
-// add scope
+// add scope，每個 request 一個 scope
 builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
 builder.Services.AddScoped<IAppUserService, AppUserService>();
 
 // Auth switch
 var useDevFakeAuth = builder.Configuration.GetValue<bool>("Auth:UseDevFakeAuth");
 
-if (useDevFakeAuth)
+if (useDevFakeAuth)  // dev
 {
     builder.Services
         .AddAuthentication("Dev")
         .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, DevAuthHandler>("Dev", _ => { });
 }
-else
+else  // production
 {
     var issuer = builder.Configuration["Clerk:Issuer"];
-    var audience = builder.Configuration["Clerk:Audience"];
 
     builder.Services
         .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -108,10 +81,8 @@ else
             {
                 ValidateIssuer = true,
                 ValidIssuer = issuer,
-                ValidateAudience = true,
-                ValidAudience = audience,
+                ValidateAudience = false,
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromMinutes(2),
                 NameClaimType = "sub",
             };
         });
@@ -129,10 +100,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthentication();
-app.UseAuthorization();
-
-// 對每個 request 都會做，但裡面有檢查該 API 是否是 [Authorize]
+// 應用程式啟動時建立一次，對每個 request 都會做，但裡面有檢查該 API 是否是 [Authorize]
 app.UseMiddleware<UserProvisioningMiddleware>();
+app.UseAuthorization();
 
 app.MapControllers();
 
