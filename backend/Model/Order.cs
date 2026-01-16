@@ -18,8 +18,8 @@ namespace backend.Model
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-        public string BuyerAccountId { get; set; } = string.Empty;
-        public string SellerAccountId { get; set; } = string.Empty;
+        public int BuyerId { get; set; }
+        public int SellertId { get; set; }
         public AppUser? Buyer { get; set; }
         public AppUser? Seller { get; set; }
     }

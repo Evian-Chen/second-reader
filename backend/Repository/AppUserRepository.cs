@@ -26,7 +26,7 @@ namespace backend.Repository
 
         public Task<AppUser?> GetByClerkUserIdAsync(string ClerkUserId)
         {
-            return _context.AppUsers.FirstOrDefaultAsync(x => x.ClerkUserId == ClerkUserId);
+            return _context.AppUsers.Include(u => u.UserProfile).FirstOrDefaultAsync(x => x.ClerkUserId == ClerkUserId);
         }
     }
 }

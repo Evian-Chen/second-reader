@@ -20,7 +20,7 @@ namespace backend.Service
         }
         public async Task<AppUser> EnsureLocalUserAsync(string ClerkUserId, string Email)
         {
-            var user = await _context.AppUsers.FirstOrDefaultAsync(x => x.ClerkUserId == ClerkUserId);
+            var user = await _context.AppUsers.Include(u => u.UserProfile).FirstOrDefaultAsync(x => x.ClerkUserId == ClerkUserId);
             if (user != null) return user;
 
             var newUser = new AppUser

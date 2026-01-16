@@ -29,8 +29,10 @@ namespace backend.Data
             base.OnModelCreating(builder);
 
             builder.Entity<AppUser>()
-                .HasIndex(x => x.AccountId)
-                .IsUnique();
+                .HasIndex(x => x.AccountId).IsUnique();
+
+            builder.Entity<AppUser>()
+                .HasIndex(x => x.Email).IsUnique();
 
 
             builder.Entity<UserBookPayMethod>()
@@ -42,23 +44,21 @@ namespace backend.Data
             builder.Entity<Order>()
                 .HasOne(o => o.Buyer)                   // 只有一個 buyer
                 .WithMany()                             // buyer 可以有很多 order
-                .HasForeignKey(o => o.BuyerAccountId)   // FK > BuyerAccountId
-                .HasPrincipalKey(u => u.AccountId)      // 指定要關聯的主鍵是 AccountId 而不是 Id
+                .HasForeignKey(o => o.BuyerId)          // FK 
                 .OnDelete(DeleteBehavior.Restrict);     // 刪掉 buyer 的時候不能連帶刪掉 order
 
             builder.Entity<Order>()
                 .HasOne(o => o.Seller)
                 .WithMany()
-                .HasForeignKey(o => o.SellerAccountId)
-                .HasPrincipalKey(u => u.AccountId)
+                .HasForeignKey(o => o.SellertId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // 配置 AppUser 和 UserProfile 之間的一對一關係
             builder.Entity<AppUser>()
                 .HasOne(a => a.UserProfile)
                 .WithOne(u => u.AppUser)
-                .HasForeignKey<UserProfile>(u => u.AccountId)
-                .HasPrincipalKey<AppUser>(a => a.AccountId)
+                .HasForeignKey<UserProfile>(u => u.UserId)
+                .HasPrincipalKey<AppUser>(a => a.Id)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // 同一個 UserBook 只能被加入 Cart 一次:不可以從同個賣家加入兩本 UserBookId 一樣的書

@@ -58,6 +58,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 // add scope，每個 request 一個 scope
 builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
 builder.Services.AddScoped<IAppUserService, AppUserService>();
+builder.Services.AddScoped<IMeRepository, MeRepository>();
 
 // Auth switch
 var useDevFakeAuth = builder.Configuration.GetValue<bool>("Auth:UseDevFakeAuth");

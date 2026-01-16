@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using backend.Dto.Me;
+using backend.Interface;
 using backend.Mapper;
 using backend.Model;
 using Microsoft.AspNetCore.Authorization;
@@ -14,6 +15,12 @@ namespace backend.Controller
     [ApiController]
     public class MeController : ControllerBase
     {
+        private readonly IMeRepository _meRepo;
+        public MeController(IMeRepository meRepo)
+        {
+            _meRepo = meRepo;
+        }
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetMe()
@@ -25,6 +32,29 @@ namespace backend.Controller
             if (appUser == null) return Unauthorized();
 
             return Ok(appUser.ToUserDto());
+        }
+
+        [HttpPut]
+        [Authorize]
+        public async Task<IActionResult> UpdateMe([FromBody] UpdateUserDto updateUserDto)
+        {
+            if (!ModelState.IsValid) return BadRequest();
+
+            var appUser = HttpContext.Items["AppUser"] as AppUser;
+            if (appUser == null) return Unauthorized();
+
+            AppUser? newUser;
+            if (appUser.UserProfile == null)  // 初次登入，尚未設定使用者資料，強制使用者更新資料
+            {
+                newUser = await _meRepo.FirstTimeUpdateUserInfoAsync(appUser, updateUserDto);
+            }
+            else
+            {
+                newUser = await _meRepo.UpdateUserInfoAsync(appUser, updateUserDto);
+            }
+
+            if (newUser == null) return Conflict(new { message = "AccountId already exists." });
+            return Ok(newUser.ToUserDto());
         }
     }
 }
