@@ -8,46 +8,55 @@ using backend.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Converters;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(option =>
+builder.Services.AddSwaggerGen(c =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
-    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "SecondReader API", Version = "v1" });
+
+    // ✅ 讓右上角出現 Authorize 按鈕
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
         BearerFormat = "JWT",
-        Scheme = "bearer"
+        In = ParameterLocation.Header,
+        Description = "Enter: Bearer {token}"
     });
-    option.AddSecurityRequirement(new OpenApiSecurityRequirement
+
+    // ✅ 讓所有有 [Authorize] 的 endpoint 會帶上鎖頭，並支援送 token
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
             {
                 Reference = new OpenApiReference
                 {
-                    Type=ReferenceType.SecurityScheme,
-                    Id="Bearer"
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
                 }
             },
-            new string[]{}
+            Array.Empty<string>()
         }
     });
 });
+builder.Services.AddSwaggerGenNewtonsoftSupport();
 
 // add controller
-builder.Services.AddControllers().AddNewtonsoftJson(options =>
-{
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-});
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.Converters.Add(new StringEnumConverter());
+        options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    });
 
 // add DBContext
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
@@ -59,6 +68,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
 builder.Services.AddScoped<IAppUserService, AppUserService>();
 builder.Services.AddScoped<IMeRepository, MeRepository>();
+builder.Services.AddScoped<IBooksRepository, BooksRepository>();
 
 // Auth switch
 var useDevFakeAuth = builder.Configuration.GetValue<bool>("Auth:UseDevFakeAuth");

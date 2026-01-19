@@ -23,18 +23,28 @@ namespace backend.Service
 
         public async Task<List<UserBook>> CreateUserBookAsync(List<UploadUserBooksDto> uploadDtos, AppUser appUser)
         {
-            var userBookModels = uploadDtos.Select(dto =>
-            {
+            var userBooksModels = new List<UserBook>();
+            foreach (var dto in uploadDtos)
+            {  // 確認所有要新增的書都存在 Books 資料表
+                var book = await _context.Books.FirstOrDefaultAsync(b => b.ISBN == dto.Book.ISBN);
+                if (book == null)
+                {
+                    var bookModel = dto.Book.ToBookModelDto();
+                    book = _context.Books.Add(bookModel).Entity;
+                }
+
                 var model = dto.ToUserBookModelFromUpload();
                 model.AppUser = appUser;
                 model.UserId = appUser.Id;
-                return model;
-            }).ToList();
+                model.UserBookStatus = Enums.UserBookStatus.Listed;
+                model.Book = book;
 
-            await _context.UserBooks.AddRangeAsync(userBookModels);
+                userBooksModels.Add(model);
+            }
+            await _context.UserBooks.AddRangeAsync(userBooksModels);
             await _context.SaveChangesAsync();
 
-            return userBookModels;
+            return userBooksModels;
         }
 
         public async Task<AppUser> EnsureLocalUserAsync(string ClerkUserId, string Email)

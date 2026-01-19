@@ -27,7 +27,7 @@ namespace backend.Mapper
                 SellerAccountId = userBook.AppUser?.AccountId ?? null,
                 Book = new UserBookSummaryDto
                 {
-                    BookId = userBook.Book.Id,
+                    UserBookId = userBook.Book.Id,
                     ISBN = userBook.Book.ISBN,
                     Title = userBook.Book.Title,
                     Author = userBook.Book.Author,
@@ -42,7 +42,7 @@ namespace backend.Mapper
             if (userBook.Book == null) throw new InvalidOperationException("userBook.Book is null");
             return new UserBookSummaryDto
             {
-                BookId = userBook.Book.Id,
+                UserBookId = userBook.Id,
                 Title = userBook.Book.Title,
                 ISBN = userBook.Book.ISBN,
                 Author = userBook.Book.Author,
@@ -67,15 +67,18 @@ namespace backend.Mapper
                 Price = uploadDto.Price,
                 UserBookStatus = uploadDto.UserBookStatus,
                 CreatedAt = uploadDto.CreatedAt,
+            };
+        }
 
-                Book = new Book
-                {
-                    Title = uploadDto.Book.Title,
-                    ISBN = uploadDto.Book.ISBN,
-                    Author = uploadDto.Book.Author,
-                    Description = uploadDto.Book.Description,
-                    BookCategory = uploadDto.Book.BookCategory
-                }
+        public static Book ToBookModelDto(this UserBookSummaryDto bookSummaryDto)
+        {
+            return new Book
+            {
+                Title = bookSummaryDto.Title,
+                ISBN = bookSummaryDto.ISBN,
+                Author = bookSummaryDto.Author,
+                Description = bookSummaryDto.Description,
+                BookCategory = bookSummaryDto.BookCategory
             };
         }
     }
