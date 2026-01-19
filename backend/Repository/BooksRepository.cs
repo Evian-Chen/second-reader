@@ -20,6 +20,15 @@ namespace backend.Repository
             _context = context;
         }
 
+        public async Task<UserBook?> DeleteBookByIdAsync(int id)
+        {
+            var book = await _context.UserBooks.FirstOrDefaultAsync(u => u.Id == id);
+            if (book == null) return null;
+            _context.UserBooks.Remove(book);
+            await _context.SaveChangesAsync();
+            return book;
+        }
+
         public async Task<List<UserBook?>> GetAllAsync()
         {
             var bookModels = await _context.UserBooks.Include(ub => ub.AppUser).Include(ub => ub.Book).ToListAsync();
@@ -31,8 +40,6 @@ namespace backend.Repository
             var bookModel = await _context.UserBooks
                                 .Include(ub => ub.AppUser)
                                 .Include(ub => ub.Book)
-                                .Include(ub => ub.SellerDeliveryMethods)
-                                .Include(ub => ub.BuyerDeliveryMethod)
                                 .FirstOrDefaultAsync(b => b.Id == id);
             if (bookModel == null) return null;
             return bookModel;
@@ -57,7 +64,7 @@ namespace backend.Repository
             {
                 userBooks = userBooks.Where(ub => ub.AppUser.UserProfile.DisplayName.Contains(queryDto.SellerDisplayName));
             }
-            if (!queryDto.BookCategory.HasValue)
+            if (queryDto.BookCategory.HasValue)
             {
                 userBooks = userBooks.Where(ub => ub.Book.BookCategory == queryDto.BookCategory.Value);
             }

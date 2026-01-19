@@ -42,7 +42,15 @@ namespace backend.Controller
             return Ok(book.ToUserBookListingDetailDto());
         }
 
-        [HttpGet]
+        [HttpDelete("{id:int}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteBookById([FromRoute] int id)
+        {
+            var book = await _booksRepo.DeleteBookByIdAsync(id);
+            return book == null ? BadRequest() : Ok();
+        }
+
+        [HttpPost("search")]
         public async Task<IActionResult> GetBookSearchResult([FromBody] BookSearchQueryDto bookSearchQueryDto)
         {
             if (!ModelState.IsValid) return BadRequest();
