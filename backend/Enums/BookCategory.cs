@@ -2,6 +2,7 @@ namespace backend.Enums
 {
     public enum BookCategory
     {
+        Undefined = 0,
         Mandarin = 1,
         World,
         GenreFic, // 類型文學

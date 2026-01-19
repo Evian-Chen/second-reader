@@ -1,0 +1,24 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
+using backend.Dto.UserBook;
+using backend.Enums;
+
+namespace backend.Dto.Book
+{
+    public class UploadUserBooksDto
+    {
+        public int UserBookId { get; set; }
+        public BookCondition bookCondition { get; set; }
+        public List<PayMethod> SellerPayMethods { get; set; } = new List<PayMethod>();
+        public List<DeliveryMethod> SellerDeliveryMethods { get; set; } = new List<DeliveryMethod>();
+        public int Price { get; set; }
+        public UserBookStatus UserBookStatus { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+        // 書的細節
+        public UserBookSummaryDto Book { get; set; } = null!;
+    }
+}
