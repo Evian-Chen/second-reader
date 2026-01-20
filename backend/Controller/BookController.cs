@@ -19,10 +19,14 @@ namespace backend.Controller
     {
         private readonly IBooksRepository _booksRepo;
         private readonly IAppUserService _userService;
-        public BookController(IBooksRepository booksRepo, IAppUserService userService)
+        private readonly IOcrService _ocrService;
+        private readonly IGoogleBookService _googleService;
+        public BookController(IBooksRepository booksRepo, IAppUserService userService, IOcrService ocrService, IGoogleBookService googleService)
         {
             _booksRepo = booksRepo;
             _userService = userService;
+            _ocrService = ocrService;
+            _googleService = googleService;
         }
 
         [HttpGet]
@@ -40,6 +44,16 @@ namespace backend.Controller
             var book = await _booksRepo.GetBookByIdAsync(id);
             if (book == null) return NotFound();
             return Ok(book.ToUserBookListingDetailDto());
+        }
+
+        [HttpPut("{id:int}")]
+        [Authorize]
+        public async Task<IActionResult> EditUserBookById([FromRoute] int id, [FromBody] UpdateUserBookDto updateUserBookDto)
+        {
+            // 不允許更改書本身的內容，因為書籍在上架時就會被放入資料庫（TODO: 加入驗證書籍存在的機制）
+            var userBook = await _booksRepo.EditUserBookById(id, updateUserBookDto);
+            if (userBook == null) return NotFound();
+            return Ok(userBook.ToUserBookListingDetailDto());
         }
 
         [HttpDelete("{id:int}")]
@@ -70,6 +84,19 @@ namespace backend.Controller
 
             var uploadedBooksModels = await _userService.CreateUserBookAsync(uploadDtos, appUser);
             return Ok(uploadedBooksModels.Select(u => u.ToUserBookSummaryDto()).ToList());
+        }
+
+        [HttpPost("isbn")]
+        [Consumes("multipart/form-data")]
+        [Authorize]
+        public async Task<IActionResult> PrefillBooksInfoByIsbn([FromForm] OcrIsbnForm ocrIsbnForm)
+        {
+            // 會回傳預填好的 Book 內容，前端填入 UI，等使用者確定要上傳再去打 POST api/books
+            var isbn = await _ocrService.ExtractIsbnAsync(ocrIsbnForm.Img);
+            if (isbn == null) return BadRequest("isbn can not be extracted.");
+            var googleResult = await _googleService.GetByIsbnAsync(isbn);
+            if (googleResult == null) return NotFound();
+            return Ok(googleResult);
         }
     }
 }

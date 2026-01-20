@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Converters;
 using Microsoft.OpenApi.Models;
+using TesseractOCR;
+using TesseractOCR.Enums;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,6 +71,8 @@ builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
 builder.Services.AddScoped<IAppUserService, AppUserService>();
 builder.Services.AddScoped<IMeRepository, MeRepository>();
 builder.Services.AddScoped<IBooksRepository, BooksRepository>();
+builder.Services.AddScoped<IOcrService, OcrService>();
+builder.Services.AddHttpClient<IGoogleBookService, GoogleBookService>();
 
 // Auth switch
 var useDevFakeAuth = builder.Configuration.GetValue<bool>("Auth:UseDevFakeAuth");
@@ -117,5 +121,29 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// === test OCR === //
+
+// var tessdataPath = Path.Combine(AppContext.BaseDirectory, "tessdata");
+// var imagePath = Path.Combine(AppContext.BaseDirectory, "test_images", "test6.png");
+
+// Console.WriteLine($"Tessdata path: {tessdataPath}");
+// Console.WriteLine($"Image path: {imagePath}");
+
+// using var engine = new Engine(tessdataPath, Language.ChineseTraditional | Language.English, EngineMode.Default);
+
+// using var img = TesseractOCR.Pix.Image.LoadFromFile(imagePath);
+// using var page = engine.Process(img);
+
+// var text = page.Text;
+
+// Console.WriteLine("===== OCR RESULT =====");
+// Console.WriteLine(text);
+// Console.WriteLine("======================");
+
+// === test OCR === //
+
 app.Run();
+
+
+
 
