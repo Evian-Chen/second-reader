@@ -110,8 +110,25 @@ builder.Services.AddCors(options =>
 
 // 使用 PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDBContext>(options =>
-    options.UseNpgsql(connectionString));
+
+// add DBContext
+// builder.Services.AddDbContext<ApplicationDBContext>(options =>
+// {
+//     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+// });
+var skipDb = builder.Configuration.GetValue<bool>("SkipDb");
+
+if (skipDb)
+{
+    builder.Services.AddDbContext<ApplicationDBContext>(opt =>
+        opt.UseInMemoryDatabase("SwaggerOnly"));
+}
+else
+{
+    builder.Services.AddDbContext<ApplicationDBContext>(options =>
+        options.UseNpgsql(connectionString));
+}
+
 
 // add scope，每個 request 一個 scope
 builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
@@ -165,7 +182,7 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
