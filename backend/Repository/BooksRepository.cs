@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using backend.Data;
 using backend.Dto.Book;
 using backend.Dto.UserBook;
+using backend.Enums;
 using backend.Interface;
 using backend.Mapper;
 using backend.Model;
+using Clerk.BackendAPI.Models.Components;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repository
@@ -29,6 +31,30 @@ namespace backend.Repository
             return book;
         }
 
+        public async Task<UserBook?> EditUserBookById(int id, UpdateUserBookDto updateUserBookDto)
+        {
+            var userBook = await _context.UserBooks
+                    .Include(ub => ub.SellerPayMethods)
+                    .Include(ub => ub.SellerDeliveryMethods)
+                    .Include(b => b.Book).FirstOrDefaultAsync(b => b.Id == id);
+            if (userBook == null) return null;
+            userBook.BookCondition = updateUserBookDto.bookCondition;
+            userBook.Price = updateUserBookDto.Price;
+            userBook.UserBookStatus = updateUserBookDto.UserBookStatus;
+            userBook.SellerDeliveryMethods.Clear();
+            userBook.SellerPayMethods.Clear();
+            foreach (var d in updateUserBookDto.SellerDeliveryMethods)
+            {
+                userBook.SellerDeliveryMethods.Add(new UserBookDeliveryMethod { DeliveryMethod = d });
+            }
+            foreach (var p in updateUserBookDto.SellerPayMethods)
+            {
+                userBook.SellerPayMethods.Add(new UserBookPayMethod { PayMethod = p });
+            }
+            await _context.SaveChangesAsync();
+            return userBook;
+        }
+
         public async Task<List<UserBook?>> GetAllAsync()
         {
             var bookModels = await _context.UserBooks.Include(ub => ub.AppUser).Include(ub => ub.Book).ToListAsync();
@@ -40,6 +66,8 @@ namespace backend.Repository
             var bookModel = await _context.UserBooks
                                 .Include(ub => ub.AppUser)
                                 .Include(ub => ub.Book)
+                                .Include(ub => ub.SellerPayMethods)
+                                .Include(ub => ub.SellerDeliveryMethods)
                                 .FirstOrDefaultAsync(b => b.Id == id);
             if (bookModel == null) return null;
             return bookModel;

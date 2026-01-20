@@ -12,6 +12,7 @@ namespace backend.Interface
     {
         Task<UserBook?> GetBookByIdAsync(int id);  // 點進去該本書的詳細資訊
         Task<UserBook?> DeleteBookByIdAsync(int id);
+        Task<UserBook?> EditUserBookById(int id, UpdateUserBookDto updateUserBookDto);
         Task<List<UserBook>?> GetBookSearchResult(BookSearchQueryDto bookSearchQueryDto);
         Task<List<UserBook?>> GetAllAsync();
     }

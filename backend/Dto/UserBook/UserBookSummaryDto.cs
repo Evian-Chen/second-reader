@@ -10,7 +10,7 @@ namespace backend.Dto.UserBook
 {
     public class UserBookSummaryDto
     {
-        [BindNever]  // 阻止 model binding (不用輸入) 但不影響輸出
+        [BindNever]  // 阻止 model binding (不用輸入)
         public int UserBookId { get; set; }
         // 單純展示書的簡單資訊
         public string ISBN { get; set; } = string.Empty;

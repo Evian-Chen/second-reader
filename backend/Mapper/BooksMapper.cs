@@ -27,7 +27,7 @@ namespace backend.Mapper
                 SellerAccountId = userBook.AppUser?.AccountId ?? null,
                 Book = new UserBookSummaryDto
                 {
-                    UserBookId = userBook.Book.Id,
+                    UserBookId = userBook.Id,
                     ISBN = userBook.Book.ISBN,
                     Title = userBook.Book.Title,
                     Author = userBook.Book.Author,
