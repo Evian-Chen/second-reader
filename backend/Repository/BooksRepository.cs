@@ -73,6 +73,19 @@ namespace backend.Repository
             return bookModel;
         }
 
+        public async Task<List<UserBook>?> GetBooksByAccountIdAsync(string accountId, UserBookStatusFilterDto query)
+        {
+            var books = _context.UserBooks.Include(b => b.Book)
+                                            .Include(b => b.AppUser)
+                                            .Where(b => b.AppUser.AccountId == accountId)
+                                            .AsQueryable();
+            if (query.Status.HasValue)
+            {
+                books = books.Where(b => b.UserBookStatus == query.Status.Value);
+            }
+            return await books.ToListAsync();
+        }
+
         public async Task<List<UserBook>?> GetBookSearchResult(BookSearchQueryDto queryDto)
         {
             var userBooks = _context.UserBooks.Include(ub => ub.Book).AsQueryable();
