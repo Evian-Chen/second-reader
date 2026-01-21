@@ -5,11 +5,13 @@ using System.Net;
 using System.Threading.Tasks;
 using backend.Dto.Book;
 using backend.Dto.UserBook;
+using backend.Enums;
 using backend.Interface;
 using backend.Mapper;
 using backend.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 
 namespace backend.Controller
 {
@@ -34,6 +36,14 @@ namespace backend.Controller
         {
             var books = await _booksRepo.GetAllAsync();
             if (books == null) return NotFound("No book in database");
+            return Ok(books.Select(b => b.ToUserBookSummaryDto()).ToList());
+        }
+
+        [HttpGet("{accountId}")]
+        public async Task<IActionResult> GetBooksByAccountId([FromRoute] string accountId, [FromQuery] UserBookStatusFilterDto query)
+        {
+            var books = await _booksRepo.GetBooksByAccountIdAsync(accountId, query);
+            if (!books.Any()) return NotFound();
             return Ok(books.Select(b => b.ToUserBookSummaryDto()).ToList());
         }
 

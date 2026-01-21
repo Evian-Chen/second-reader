@@ -15,5 +15,6 @@ namespace backend.Interface
         Task<UserBook?> EditUserBookById(int id, UpdateUserBookDto updateUserBookDto);
         Task<List<UserBook>?> GetBookSearchResult(BookSearchQueryDto bookSearchQueryDto);
         Task<List<UserBook?>> GetAllAsync();
+        Task<List<UserBook>?> GetBooksByAccountIdAsync(string accountId, UserBookStatusFilterDto query);
     }
 }
