@@ -1,0 +1,38 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using backend.Dto.ReadingPost;
+using backend.Model;
+
+namespace backend.Mapper
+{
+    public static class ReadingPostMapper
+    {
+        public static ReadingPostDto ToReadingPostDto(this ReadingPost model)
+        {
+            return new ReadingPostDto
+            {
+                Id = model.Id,
+                Title = model.Title,
+                Content = model.Content,
+                Rating = model.Rating,
+                Likes = model.Likes,
+                UpdatedAt = model.UpdatedAt,
+                AccountId = model.AccountId
+            };
+        }
+
+        public static ReadingPost ToReadingPostFromCreate(this createReadingPostDto dto)
+        {
+            return new ReadingPost
+            {
+                Title = dto.Title,
+                Content = dto.Content,
+                Rating = dto.Rating,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = dto.UpdatedAt,
+            };
+        }
+    }
+}
