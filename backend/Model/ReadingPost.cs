@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace backend.Model
 {
-    [Table("ReadingBook")]
+    [Table("ReadingPost")]
     public class ReadingPost
     {
         public int Id { get; set; }

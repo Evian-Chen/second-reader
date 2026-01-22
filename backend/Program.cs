@@ -23,7 +23,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "SecondReader API", Version = "v1" });
 
-    // ✅ 讓右上角出現 Authorize 按鈕
+    // 讓右上角出現 Authorize 按鈕
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -34,7 +34,7 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Enter: Bearer {token}"
     });
 
-    // ✅ 讓所有有 [Authorize] 的 endpoint 會帶上鎖頭，並支援送 token
+    // 讓所有有 [Authorize] 的 endpoint 會帶上鎖頭，並支援送 token
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -73,6 +73,7 @@ builder.Services.AddScoped<IMeRepository, MeRepository>();
 builder.Services.AddScoped<IBooksRepository, BooksRepository>();
 builder.Services.AddScoped<IOcrService, OcrService>();
 builder.Services.AddHttpClient<IGoogleBookService, GoogleBookService>();
+builder.Services.AddScoped<IReadingPostRepository, ReadingPostRepository>();
 
 // Auth switch
 var useDevFakeAuth = builder.Configuration.GetValue<bool>("Auth:UseDevFakeAuth");
