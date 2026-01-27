@@ -13,6 +13,6 @@ namespace backend.Interface
         Task<CartDto> GetCartAsync(AppUser user);
         Task<CartItemListingDto?> AddItemToCartByIdAsync(AppUser user, CartItemDto itemDto);
         Task<CartItemListingDto?> DeleteItemFromCartByIdAsync(AppUser user, int userBookId);
-        Task<OrderDto> CreateOrderAsync(AppUser user);
+        Task<OrderDto> CreateOrderAsync(AppUser user, CheckoutCartDto checkoutDto);
     }
 }

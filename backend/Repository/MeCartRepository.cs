@@ -111,7 +111,7 @@ namespace backend.Repository
             return cartModel!.ToCartDtoFromCart();
         }
 
-        public async Task<OrderDto> CreateOrderAsync(AppUser user)
+        public async Task<OrderDto> CreateOrderAsync(AppUser user, CheckoutCartDto checkoutDto)
         {
             using var tx = await _context.Database.BeginTransactionAsync();
 
@@ -132,6 +132,17 @@ namespace backend.Repository
                 {
                     // 建立 order item
                     var orderItem = item.ToOrderItemFromCartItem();
+
+                    var paymethod = checkoutDto.BookMethodsPair[item.UserBookId].PaymentMethod;
+                    var deliveryMethod = checkoutDto.BookMethodsPair[item.UserBookId].DeliveryMethod;
+
+                    if (!item.UserBook!.SellerPayMethods.Any(pm => pm.PayMethod == paymethod)) throw new InvalidOperationException("buyer paymethod not in seller paymethod");
+                    if (!item.UserBook!.SellerDeliveryMethods.Any(dm => dm.DeliveryMethod == deliveryMethod)) throw new InvalidOperationException("buyer deliverymethod not in seller deliverymethod");
+
+                    // 設定買家付費與收書方式
+                    orderItem.BuyerPayMethodSnapshot = paymethod;
+                    orderItem.BuyerDeliveryMethodSnapshot = deliveryMethod;
+                    
                     order.OrderItems.Add(orderItem);
                     order.TotalAmount += orderItem.Price;
                     await _context.OrderItems.AddAsync(orderItem);
@@ -140,7 +151,7 @@ namespace backend.Repository
                     if (item.UserBook!.UserBookStatus != Enums.UserBookStatus.Listed) throw new InvalidOperationException("Book already reserved.");
                     item.UserBook.UserBookStatus = Enums.UserBookStatus.Reserved;
                 }
-
+                
                 // 將 order 加入資料庫並移除目前的購物車
                 await _context.Orders.AddAsync(order);
                 _context.Carts.Remove(cart);

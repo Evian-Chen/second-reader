@@ -14,7 +14,7 @@ namespace backend.Mapper
         public static CartItemListingDto ToCartItemListingFromCartItem(this CartItem item)
         {
             var paymethods = new List<PayMethod>();
-            foreach (var method in item.UserBook.SellerPayMethods)
+            foreach (var method in item.UserBook!.SellerPayMethods)
             {
                 paymethods.Add(method.PayMethod);
             }
@@ -31,10 +31,8 @@ namespace backend.Mapper
                 bookCondition = item.UserBook.BookCondition,
                 SellerPayMethods = paymethods,
                 SellerDeliveryMethods = deliveryMethods,
-                BuyerPayMethod = item.UserBook.BuyerPayMethod,
-                BuyerDeliveryMethod = item.UserBook.BuyerDeliveryMethod,
                 UserBookStatus = item.UserBook.UserBookStatus,
-                SellerAccountId = item.UserBook.AppUser.AccountId,
+                SellerAccountId = item.UserBook.AppUser!.AccountId,
                 Book = item.UserBook.ToUserBookSummaryDto()
             };
         }
@@ -74,8 +72,8 @@ namespace backend.Mapper
                 BookConditionSnapshot = ub.BookCondition,
                 Price = ub.Price,
 
-                BuyerPayMethodSnapshot = ub.BuyerPayMethod,
-                BuyerDeliveryMethodSnapshot = ub.BuyerDeliveryMethod,
+                BuyerPayMethodSnapshot = PayMethod.Undefined,
+                BuyerDeliveryMethodSnapshot = DeliveryMethod.Undefined,
 
                 SellerAccountIdSnapshot = ub.AppUser!.AccountId
             };
