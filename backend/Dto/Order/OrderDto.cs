@@ -10,7 +10,7 @@ namespace backend.Dto.Order
     public class OrderDto
     {
         [Required]
-        public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        public List<OrderItemDto> OrderItems { get; set; } = new List<OrderItemDto>();
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

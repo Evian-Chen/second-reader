@@ -54,5 +54,15 @@ namespace backend.Controller
             if (item == null) return NotFound();
             return NoContent();
         }
+
+        [HttpPost("checkout")]
+        [Authorize]
+        public async Task<IActionResult> CreateOrder()
+        {
+            // 每個使用者只會有一個購物車，建立訂單後刪除購物車
+            var user = HttpContext.Items["AppUser"] as AppUser;
+            var orderDto = await _cartRepo.CreateOrderAsync(user);
+            return Ok(orderDto);
+        }
     }
 }

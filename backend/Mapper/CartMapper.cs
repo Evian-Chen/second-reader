@@ -57,5 +57,29 @@ namespace backend.Mapper
                 UserBookId = dto.UserBookId
             };
         }
+
+        public static OrderItem ToOrderItemFromCartItem(this CartItem cartItem)
+        {
+            var ub = cartItem.UserBook!;
+            var book = ub.Book!;
+
+            var orderItem = new OrderItem
+            {
+                UserBookId = ub.Id,
+
+                BookTitleSnapshot = book.Title,
+                BookIsbnSnapshot = book.ISBN,
+                BookAuthorSnapshot = book.Author,
+
+                BookConditionSnapshot = ub.BookCondition,
+                Price = ub.Price,
+
+                BuyerPayMethodSnapshot = ub.BuyerPayMethod,
+                BuyerDeliveryMethodSnapshot = ub.BuyerDeliveryMethod,
+
+                SellerAccountIdSnapshot = ub.AppUser!.AccountId
+            };
+            return orderItem;
+        }
     }
 }
