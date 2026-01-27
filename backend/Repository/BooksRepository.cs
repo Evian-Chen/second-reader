@@ -77,7 +77,7 @@ namespace backend.Repository
         {
             var books = _context.UserBooks.Include(b => b.Book)
                                             .Include(b => b.AppUser)
-                                            .Where(b => b.AppUser.AccountId == accountId)
+                                            .Where(b => b.AppUser!.AccountId == accountId)
                                             .AsQueryable();
             if (query.Status.HasValue)
             {
@@ -91,23 +91,23 @@ namespace backend.Repository
             var userBooks = _context.UserBooks.Include(ub => ub.Book).AsQueryable();
             if (!string.IsNullOrWhiteSpace(queryDto.Title))
             {
-                userBooks = userBooks.Where(b => b.Book.Title.Contains(queryDto.Title));
+                userBooks = userBooks.Where(b => b.Book!.Title.Contains(queryDto.Title));
             }
             if (!string.IsNullOrWhiteSpace(queryDto.Author))
             {
-                userBooks = userBooks.Where(ub => ub.Book.Author.Contains(queryDto.Author));
+                userBooks = userBooks.Where(ub => ub.Book!.Author.Contains(queryDto.Author));
             }
             if (!string.IsNullOrWhiteSpace(queryDto.SellerAccountId))
             {
-                userBooks = userBooks.Where(ub => ub.AppUser.AccountId.Contains(queryDto.SellerAccountId));
+                userBooks = userBooks.Where(ub => ub.AppUser!.AccountId.Contains(queryDto.SellerAccountId));
             }
             if (!string.IsNullOrWhiteSpace(queryDto.SellerDisplayName))
             {
-                userBooks = userBooks.Where(ub => ub.AppUser.UserProfile.DisplayName.Contains(queryDto.SellerDisplayName));
+                userBooks = userBooks.Where(ub => ub.AppUser!.UserProfile!.DisplayName.Contains(queryDto.SellerDisplayName));
             }
             if (queryDto.BookCategory.HasValue)
             {
-                userBooks = userBooks.Where(ub => ub.Book.BookCategory == queryDto.BookCategory.Value);
+                userBooks = userBooks.Where(ub => ub.Book!.BookCategory == queryDto.BookCategory.Value);
             }
 
             return userBooks.ToList();

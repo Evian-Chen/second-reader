@@ -47,19 +47,20 @@ namespace backend.Data
                 .HasForeignKey(o => o.BuyerId)          // FK 
                 .OnDelete(DeleteBehavior.Restrict);     // 刪掉 buyer 的時候不能連帶刪掉 order
 
-            builder.Entity<Order>()
-                .HasOne(o => o.Seller)
-                .WithMany()
-                .HasForeignKey(o => o.SellertId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // 配置 AppUser 和 UserProfile 之間的一對一關係
+            // 配置 AppUser 和 UserProfile 之間的一對一關係，刪一個一起刪
             builder.Entity<AppUser>()
                 .HasOne(a => a.UserProfile)
                 .WithOne(u => u.AppUser)
                 .HasForeignKey<UserProfile>(u => u.UserId)
                 .HasPrincipalKey<AppUser>(a => a.Id)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CartItem>()
+                .HasOne(ci => ci.Cart)
+                .WithMany(c => c.CartItems)
+                .HasForeignKey(ci => ci.CartId)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
             // 同一個 UserBook 只能被加入 Cart 一次:不可以從同個賣家加入兩本 UserBookId 一樣的書
             builder.Entity<CartItem>()

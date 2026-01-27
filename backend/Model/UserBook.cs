@@ -14,13 +14,10 @@ namespace backend.Model
         public BookCondition BookCondition { get; set; }
         public ICollection<UserBookPayMethod> SellerPayMethods { get; set; } = new List<UserBookPayMethod>();
         public ICollection<UserBookDeliveryMethod> SellerDeliveryMethods { get; set; } = new List<UserBookDeliveryMethod>();
-        public PayMethod BuyerPayMethod { get; set; }
-        public DeliveryMethod BuyerDeliveryMethod { get; set; }
         public int Price { get; set; } = 0;
         public UserBookStatus UserBookStatus { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
-
 
         public int UserId { get; set; }  // FK
         public AppUser? AppUser { get; set; }

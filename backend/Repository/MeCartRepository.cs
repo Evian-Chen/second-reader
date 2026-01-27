@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using backend.Data;
 using backend.Dto.Cart;
+using backend.Dto.Order;
 using backend.Interface;
 using backend.Mapper;
 using backend.Model;
@@ -24,32 +25,33 @@ namespace backend.Repository
             return _context.Carts
                 .Include(c => c.CartItems)
                     .ThenInclude(ci => ci.UserBook)
-                        .ThenInclude(ub => ub.AppUser)
+                        .ThenInclude(ub => ub!.AppUser)
                 .Include(c => c.CartItems)
                     .ThenInclude(ci => ci.UserBook)
-                        .ThenInclude(ub => ub.Book)
+                        .ThenInclude(ub => ub!.Book)
                 .Include(c => c.CartItems)
                     .ThenInclude(ci => ci.UserBook)
-                        .ThenInclude(ub => ub.SellerPayMethods)
+                        .ThenInclude(ub => ub!.SellerPayMethods)
                 .Include(c => c.CartItems)
                     .ThenInclude(ci => ci.UserBook)
-                        .ThenInclude(ub => ub.SellerDeliveryMethods);
+                        .ThenInclude(ub => ub!.SellerDeliveryMethods);
         }
 
         private IQueryable<CartItem> CartItemForDisplay()
         {
             return _context.CartItems
-                .Include(ci => ci.UserBook).ThenInclude(ub => ub.AppUser)
-                .Include(ci => ci.UserBook).ThenInclude(ub => ub.Book)
-                .Include(ci => ci.UserBook).ThenInclude(ub => ub.SellerPayMethods)
-                .Include(ci => ci.UserBook).ThenInclude(ub => ub.SellerDeliveryMethods);
+                .Include(ci => ci.UserBook).ThenInclude(ub => ub!.AppUser)
+                .Include(ci => ci.UserBook).ThenInclude(ub => ub!.Book)
+                .Include(ci => ci.UserBook).ThenInclude(ub => ub!.SellerPayMethods)
+                .Include(ci => ci.UserBook).ThenInclude(ub => ub!.SellerDeliveryMethods);
         }
 
         public async Task<CartItemListingDto?> AddItemToCartByIdAsync(AppUser user, CartItemDto itemDto)
         {
             // 確認要加入購物車的書籍存在
-            var bookExists = await _context.UserBooks.Include(ub => ub.Book).FirstOrDefaultAsync(ub => ub.Id == itemDto.UserBookId);
-            if (bookExists == null) return null;
+            var bookExists = await _context.UserBooks.Include(ub => ub.Book).FirstOrDefaultAsync(ub => ub.Id == itemDto.UserBookId)
+                                    ?? throw new InvalidOperationException("Can not add book that does not exists in databse to cart.");
+            if (bookExists.UserId == user.Id) throw new InvalidOperationException("User can not add their listed book to their own carts.");
 
             var cartModel = await _context.Carts.FirstOrDefaultAsync(c => c.AccountId == user.AccountId);
             if (cartModel == null)  // 此使用者沒有建立購物車
@@ -64,14 +66,14 @@ namespace backend.Repository
             }
 
             // 防重複加入（idempotent）
-            var existing = await CartItemForDisplay().FirstOrDefaultAsync(ci => ci.CartId == cartModel.Id && ci.UserBookId == itemDto.UserBookId);
+            var existing = await CartItemForDisplay().FirstOrDefaultAsync(ci => ci.CartId == cartModel!.Id && ci.UserBookId == itemDto.UserBookId);
 
             if (existing != null)  // 如果已經存在就直接回傳已經存在的
                 return existing.ToCartItemListingFromCartItem();
 
             _context.CartItems.Add(new CartItem
             {
-                CartId = cartModel.Id,
+                CartId = cartModel!.Id,
                 UserBookId = itemDto.UserBookId
             });
             await _context.SaveChangesAsync();
@@ -106,7 +108,64 @@ namespace backend.Repository
                 await _context.SaveChangesAsync();
             }
             var cartModel = await CartQueryForDisplay().FirstOrDefaultAsync(c => c.AccountId == user.AccountId);
-            return cartModel.ToCartDtoFromCart();
+            return cartModel!.ToCartDtoFromCart();
+        }
+
+        public async Task<OrderDto> CreateOrderAsync(AppUser user, CheckoutCartDto checkoutDto)
+        {
+            using var tx = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var cart = await CartQueryForDisplay().FirstOrDefaultAsync(c => c.AccountId == user.AccountId);
+
+                if (cart == null || cart.CartItems.Count == 0) throw new InvalidOperationException("cart is empty.");
+
+                // 建立 order
+                var order = new Order
+                {
+                    BuyerId = user.Id,
+                    OrderItems = new List<OrderItem>()
+                };
+                var orderItems = new List<OrderItem>();
+                foreach (var item in cart.CartItems)
+                {
+                    // 建立 order item
+                    var orderItem = item.ToOrderItemFromCartItem();
+
+                    var paymethod = checkoutDto.BookMethodsPair[item.UserBookId].PaymentMethod;
+                    var deliveryMethod = checkoutDto.BookMethodsPair[item.UserBookId].DeliveryMethod;
+
+                    if (!item.UserBook!.SellerPayMethods.Any(pm => pm.PayMethod == paymethod)) throw new InvalidOperationException("buyer paymethod not in seller paymethod");
+                    if (!item.UserBook!.SellerDeliveryMethods.Any(dm => dm.DeliveryMethod == deliveryMethod)) throw new InvalidOperationException("buyer deliverymethod not in seller deliverymethod");
+
+                    // 設定買家付費與收書方式
+                    orderItem.BuyerPayMethodSnapshot = paymethod;
+                    orderItem.BuyerDeliveryMethodSnapshot = deliveryMethod;
+                    
+                    order.OrderItems.Add(orderItem);
+                    order.TotalAmount += orderItem.Price;
+                    await _context.OrderItems.AddAsync(orderItem);
+
+                    // 更改書本狀態
+                    if (item.UserBook!.UserBookStatus != Enums.UserBookStatus.Listed) throw new InvalidOperationException("Book already reserved.");
+                    item.UserBook.UserBookStatus = Enums.UserBookStatus.Reserved;
+                }
+                
+                // 將 order 加入資料庫並移除目前的購物車
+                await _context.Orders.AddAsync(order);
+                _context.Carts.Remove(cart);
+
+                await _context.SaveChangesAsync();
+                await tx.CommitAsync();
+
+                return order.ToOrderDtoFromOrder();
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                throw;
+            }
         }
     }
 }

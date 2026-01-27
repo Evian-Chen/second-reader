@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using backend.Dto.Cart;
+using backend.Dto.Order;
 using backend.Interface;
 using backend.Mapper;
 using backend.Model;
@@ -53,6 +54,17 @@ namespace backend.Controller
             var item = await _cartRepo.DeleteItemFromCartByIdAsync(user, userBookId);
             if (item == null) return NotFound();
             return NoContent();
+        }
+
+        [HttpPost("checkout")]
+        [Authorize]
+        public async Task<IActionResult> CreateOrder([FromBody] CheckoutCartDto checkoutDto)
+        {
+            if (!ModelState.IsValid) return BadRequest();
+            // 每個使用者只會有一個購物車，建立訂單後刪除購物車
+            var user = HttpContext.Items["AppUser"] as AppUser;
+            var orderDto = await _cartRepo.CreateOrderAsync(user, checkoutDto);
+            return Ok(orderDto);
         }
     }
 }

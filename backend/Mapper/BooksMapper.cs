@@ -62,8 +62,6 @@ namespace backend.Mapper
                 SellerDeliveryMethods = uploadDto.SellerDeliveryMethods
                     .Select(dm => new UserBookDeliveryMethod { DeliveryMethod = dm })
                     .ToList(),
-                BuyerPayMethod = PayMethod.Undefined,
-                BuyerDeliveryMethod = DeliveryMethod.Undefined,
                 Price = uploadDto.Price,
                 UserBookStatus = uploadDto.UserBookStatus,
                 CreatedAt = uploadDto.CreatedAt,
