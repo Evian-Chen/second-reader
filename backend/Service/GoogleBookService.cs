@@ -23,18 +23,18 @@ namespace backend.Service
             if (!json.TryGetProperty("items", out var items) ||
                 items.GetArrayLength() == 0)
                 return null;
-            
+
             var volumeInfo = items[0].GetProperty("volumeInfo");
             return new GoogleBookResultDto
             {
-                Title = volumeInfo.GetProperty("title").GetString(),
+                Title = volumeInfo.GetProperty("title").GetString()!,
                 Authors = volumeInfo.TryGetProperty("authors", out var authors) ? authors.EnumerateArray()
                         .Select(a => a.GetString()!)
                         .Where(a => !string.IsNullOrWhiteSpace(a))
                         .ToList()
-                    : new List<string>(),                
+                    : new List<string>(),
                 ISBN = isbn,
-                PreviewLink = volumeInfo.GetProperty("previewLink").GetString()
+                PreviewLink = volumeInfo.GetProperty("previewLink").GetString()!
             };
         }
     }

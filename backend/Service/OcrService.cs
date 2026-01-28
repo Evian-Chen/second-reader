@@ -20,7 +20,7 @@ namespace backend.Service
 
         public async Task<string?> ExtractIsbnAsync(IFormFile img)
         {
-            var text = await ExtractTextAsync(img); 
+            var text = await ExtractTextAsync(img);
             return IsbnExtractor.TryExtractIsbn(text);
         }
 
@@ -35,7 +35,6 @@ namespace backend.Service
                 bytes = ms.ToArray();
             }
 
-            string rawText;
             using var engine = new Engine(_tessdataPath, Language.English, EngineMode.Default);
             using var pix = TesseractOCR.Pix.Image.LoadFromMemory(bytes);
             using var page = engine.Process(pix);

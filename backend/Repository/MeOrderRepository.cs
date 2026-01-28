@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repository
 {
-    public class OrderRepository : IOrderReporitory
+    public class OrderRepository : IMeOrderReporitory
     {
         private readonly ApplicationDBContext _context;
         public OrderRepository(ApplicationDBContext context)
