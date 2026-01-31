@@ -23,6 +23,8 @@ namespace backend.Data
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<ReadingPost> ReadingPosts { get; set; }
+        public DbSet<Waitlist> Waitlists { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

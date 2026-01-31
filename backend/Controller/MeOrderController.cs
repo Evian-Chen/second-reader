@@ -9,12 +9,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controller
 {
-    [Route("/api/order")]
+    [Route("/api/me/order")]
     [ApiController]
-    public class OrderController : ControllerBase
+    public class MeOrderController : ControllerBase
     {
-        private readonly IOrderReporitory _orderRepo;
-        public OrderController(IOrderReporitory orderRepo)
+        private readonly IMeOrderReporitory _orderRepo;
+        public MeOrderController(IMeOrderReporitory orderRepo)
         {
             _orderRepo = orderRepo;
         }

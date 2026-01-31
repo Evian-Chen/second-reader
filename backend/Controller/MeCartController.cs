@@ -51,7 +51,7 @@ namespace backend.Controller
         {
             if (!ModelState.IsValid) return BadRequest();
             var user = HttpContext.Items["AppUser"] as AppUser;
-            var item = await _cartRepo.DeleteItemFromCartByIdAsync(user, userBookId);
+            var item = await _cartRepo.DeleteItemFromCartByIdAsync(user!, userBookId);
             if (item == null) return NotFound();
             return NoContent();
         }

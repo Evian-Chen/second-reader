@@ -7,7 +7,7 @@ using backend.Model;
 
 namespace backend.Interface
 {
-    public interface IOrderReporitory
+    public interface IMeOrderReporitory
     {
         Task<List<OrderDto>?> GetAllOrderAsync(AppUser user);
         Task<OrderDto?> GetOrderByIdAsync(AppUser user, int orderId);

@@ -32,6 +32,7 @@ namespace backend.Mapper
         {
             return new OrderDto
             {
+                OrderId = order.Id,
                 OrderItems = order.OrderItems.Select(o => o.ToOrderItemDtoFromOrderItem()).ToList(),
                 CreatedAt = order.CreatedAt
             };
