@@ -1,4 +1,4 @@
-import './assets/main.css'
+import './styles/main.css'
 
 import { clerkPlugin } from '@clerk/vue'
 import { createPinia } from 'pinia'
