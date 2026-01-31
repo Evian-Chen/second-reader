@@ -23,7 +23,7 @@ namespace backend.Controller
         }
 
         [HttpGet("{accountId}")]
-        public async Task<IActionResult> GetAllByAccountId([FromRoute] string accountId)
+        public async Task<ActionResult<List<ReadingPostDto>>> GetAllByAccountId([FromRoute] string accountId)
         {
             var posts = await _postRepo.GetAllByAccountIdAsync(accountId);
             if (posts == null) return NotFound("No reading posts found in this account.");
@@ -31,7 +31,7 @@ namespace backend.Controller
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetPostById([FromRoute] int id)
+        public async Task<ActionResult<ReadingPostDto>> GetPostById([FromRoute] int id)
         {
             var post = await _postRepo.GetPostByIdAsync(id);
             if (post == null) return NotFound();
@@ -39,7 +39,7 @@ namespace backend.Controller
         }
 
         [HttpPut("{id:int}/like")]
-        public async Task<IActionResult> LikePosyById([FromRoute] int id, [FromBody] LikePostDto likePostDto)
+        public async Task<ActionResult<ReadingPostDto>> LikePosyById([FromRoute] int id, [FromBody] LikePostDto likePostDto)
         {
             var addedPost = await _postRepo.LikePosyByIdAsync(id, likePostDto);
             if (addedPost == null) return NotFound("no such post to like");
@@ -48,7 +48,7 @@ namespace backend.Controller
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> CreatePost([FromBody] createReadingPostDto postDto)
+        public async Task<ActionResult<ReadingPostDto>> CreatePost([FromBody] createReadingPostDto postDto)
         {
             if (!ModelState.IsValid) return BadRequest();
 
@@ -69,12 +69,12 @@ namespace backend.Controller
 
         [HttpPut("{id:int}")]
         [Authorize]
-        public async Task<IActionResult> UpdatePostById([FromRoute] int id, [FromBody] createReadingPostDto postDto)
+        public async Task<ActionResult<ReadingPostDto>> UpdatePostById([FromRoute] int id, [FromBody] createReadingPostDto postDto)
         {
             if (!ModelState.IsValid) return BadRequest();
             var appUser = HttpContext.Items["AppUser"] as AppUser;
-            var updated = await _postRepo.UpdatePostByIdAsync(id, postDto, appUser);
-            return Ok(updated.ToReadingPostDto());
+            var updated = await _postRepo.UpdatePostByIdAsync(id, postDto, appUser!);
+            return Ok(updated!.ToReadingPostDto());
         }
     }
 }

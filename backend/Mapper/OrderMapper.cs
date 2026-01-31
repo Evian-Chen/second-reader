@@ -15,6 +15,7 @@ namespace backend.Mapper
             {
                 Id = item.Id,
                 OrderId = item.OrderId,
+                OrderItemStatus = item.OrderItemStatus,
 
                 Price = item.Price,
                 BookCondition = item.BookConditionSnapshot,

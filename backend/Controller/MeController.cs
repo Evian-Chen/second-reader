@@ -23,7 +23,7 @@ namespace backend.Controller
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetMe()
+        public async Task<ActionResult<UserDto>> GetMe()
         {
             // UserProvisioningMiddleware 已經把 AppUser 放到 HttpContext.Items["AppUser"] 裡面了
             // 無論是既有或新的使用者，都確保這是一個 AppUser
@@ -36,7 +36,7 @@ namespace backend.Controller
 
         [HttpPut]
         [Authorize]
-        public async Task<IActionResult> UpdateMe([FromBody] UpdateUserDto updateUserDto)
+        public async Task<ActionResult<UserDto>> UpdateMe([FromBody] UpdateUserDto updateUserDto)
         {
             if (!ModelState.IsValid) return BadRequest();
 

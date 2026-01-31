@@ -15,8 +15,8 @@ namespace backend.Repository
     public class MeCartRepository : IMeCartRepository
     {
         private readonly ApplicationDBContext _context;
-        private readonly MeNotificationRepository _notiRepo;
-        public MeCartRepository(ApplicationDBContext context, MeNotificationRepository notiRepo)
+        private readonly IMeNotificationRepository _notiRepo;
+        public MeCartRepository(ApplicationDBContext context, IMeNotificationRepository notiRepo)
         {
             _context = context;
             _notiRepo = notiRepo;
@@ -188,6 +188,9 @@ namespace backend.Repository
                 {
                     await _notiRepo.CreateNotificationAsync(Enums.NotificationType.OrderRequest, user, order.Id, book.UserBookId);
                     // 前端賣家打開通知 => 導到 /sales/items/{orderItemId} 或 /sales?status=Reserved
+
+                    // TODO 要建立賣家的 saleitem，賣家可透過前端「商品管理」看到所有saleitem，可以透過saleitem去篩選
+                    // => 已拒絕（UserBookStatus隨之更改，排隊狀況更新）、已接受（等待出貨）、已完成（已出貨）
                 }
 
                 await tx.CommitAsync();
