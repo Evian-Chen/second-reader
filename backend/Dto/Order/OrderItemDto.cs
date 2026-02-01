@@ -11,6 +11,7 @@ namespace backend.Dto.Order
     {
         public int Id { get; set; }
         public int OrderId { get; set; }
+        public OrderItemStatus OrderItemStatus { get; set; }
 
         // snapshot
         public int Price { get; set; }

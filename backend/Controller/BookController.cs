@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using backend.Dto.Book;
+using backend.Dto.GoogleBook;
 using backend.Dto.UserBook;
 using backend.Enums;
 using backend.Interface;
@@ -32,7 +33,7 @@ namespace backend.Controller
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllBooks()
+        public async Task<ActionResult<UserBookSummaryDto>> GetAllBooks()
         {
             var books = await _booksRepo.GetAllAsync();
             if (books == null) return NotFound("No book in database");
@@ -40,15 +41,15 @@ namespace backend.Controller
         }
 
         [HttpGet("{accountId}")]
-        public async Task<IActionResult> GetBooksByAccountId([FromRoute] string accountId, [FromQuery] UserBookStatusFilterDto query)
+        public async Task<ActionResult<UserBookSummaryDto>> GetBooksByAccountId([FromRoute] string accountId, [FromQuery] UserBookStatusFilterDto query)
         {
             var books = await _booksRepo.GetBooksByAccountIdAsync(accountId, query);
-            if (!books.Any()) return NotFound();
+            if (books.Count == 0) return NotFound();
             return Ok(books.Select(b => b.ToUserBookSummaryDto()).ToList());
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetBookById([FromRoute] int id)
+        public async Task<ActionResult<UserBookListinDetailDto>> GetBookById([FromRoute] int id)
         {
             if (!ModelState.IsValid) return BadRequest();
             var book = await _booksRepo.GetBookByIdAsync(id);
@@ -58,7 +59,7 @@ namespace backend.Controller
 
         [HttpPut("{id:int}")]
         [Authorize]
-        public async Task<IActionResult> EditUserBookById([FromRoute] int id, [FromBody] UpdateUserBookDto updateUserBookDto)
+        public async Task<ActionResult<UserBookListinDetailDto>> EditUserBookById([FromRoute] int id, [FromBody] UpdateUserBookDto updateUserBookDto)
         {
             // 不允許更改書本身的內容，因為書籍在上架時就會被放入資料庫（TODO: 加入驗證書籍存在的機制）
             var userBook = await _booksRepo.EditUserBookById(id, updateUserBookDto);
@@ -68,14 +69,14 @@ namespace backend.Controller
 
         [HttpDelete("{id:int}")]
         [Authorize]
-        public async Task<IActionResult> DeleteBookById([FromRoute] int id)
+        public async Task<ActionResult<UserBookSummaryDto>> DeleteBookById([FromRoute] int id)
         {
             var book = await _booksRepo.DeleteBookByIdAsync(id);
-            return book == null ? BadRequest() : Ok();
+            return book == null ? BadRequest() : Ok(book.ToUserBookSummaryDto());
         }
 
         [HttpPost("search")]
-        public async Task<IActionResult> GetBookSearchResult([FromBody] BookSearchQueryDto bookSearchQueryDto)
+        public async Task<ActionResult<UserBookSummaryDto>> GetBookSearchResult([FromBody] BookSearchQueryDto bookSearchQueryDto)
         {
             if (!ModelState.IsValid) return BadRequest();
             var resultList = await _booksRepo.GetBookSearchResult(bookSearchQueryDto);
@@ -85,7 +86,7 @@ namespace backend.Controller
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> UploadBooks([FromBody] List<UploadUserBooksDto> uploadDtos)
+        public async Task<ActionResult<List<UserBookSummaryDto>>> UploadBooks([FromBody] List<UploadUserBooksDto> uploadDtos)
         {
             if (!ModelState.IsValid) return BadRequest();
             var appUser = HttpContext.Items["AppUser"] as AppUser;
@@ -99,7 +100,7 @@ namespace backend.Controller
         [HttpPost("isbn")]
         [Consumes("multipart/form-data")]
         [Authorize]
-        public async Task<IActionResult> PrefillBooksInfoByIsbn([FromForm] OcrIsbnForm ocrIsbnForm)
+        public async Task<ActionResult<GoogleBookResultDto>> PrefillBooksInfoByIsbn([FromForm] OcrIsbnForm ocrIsbnForm)
         {
             // 會回傳預填好的 Book 內容，前端填入 UI，等使用者確定要上傳再去打 POST api/books
             var isbn = await _ocrService.ExtractIsbnAsync(ocrIsbnForm.Img);

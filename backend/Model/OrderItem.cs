@@ -12,6 +12,7 @@ namespace backend.Model
     {
         public int Id { get; set; }
         public int Price { get; set; }
+        public OrderItemStatus OrderItemStatus { get; set; }
 
         public int OrderId { get; set; }  // FK
         public Order? Order { get; set; }

@@ -75,7 +75,8 @@ builder.Services.AddScoped<IOcrService, OcrService>();
 builder.Services.AddHttpClient<IGoogleBookService, GoogleBookService>();
 builder.Services.AddScoped<IReadingPostRepository, ReadingPostRepository>();
 builder.Services.AddScoped<IMeCartRepository, MeCartRepository>();
-builder.Services.AddScoped<IOrderReporitory, OrderRepository>();
+builder.Services.AddScoped<IMeNotificationRepository, MeNotificationRepository>();
+builder.Services.AddScoped<IMeOrderReporitory, MeOrderRepository>();
 
 // Auth switch
 var useDevFakeAuth = builder.Configuration.GetValue<bool>("Auth:UseDevFakeAuth");

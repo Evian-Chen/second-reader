@@ -25,21 +25,21 @@ namespace backend.Controller
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetCart()
+        public async Task<ActionResult<CartDto>> GetCart()
         {
             // 取得這個使用者目前購物車的所有商品，以 CartItemListingDto 做顯示
-            var user = HttpContext.Items["AppUser"] as AppUser;
+            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var cart = await _cartRepo.GetCartAsync(user);
             return Ok(cart);
         }
 
         [HttpPost("items")]
         [Authorize]
-        public async Task<IActionResult> AddItemToCartById([FromBody] CartItemDto itemDto)
+        public async Task<ActionResult<CartItemListingDto>> AddItemToCartById([FromBody] CartItemDto itemDto)
         {
             if (!ModelState.IsValid) return BadRequest();
 
-            var user = HttpContext.Items["AppUser"] as AppUser;
+            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var item = await _cartRepo.AddItemToCartByIdAsync(user, itemDto);
             if (item == null) return NotFound();
             return Ok(item);
@@ -50,7 +50,7 @@ namespace backend.Controller
         public async Task<IActionResult> DeleteItemFromCartById([FromRoute] int userBookId)
         {
             if (!ModelState.IsValid) return BadRequest();
-            var user = HttpContext.Items["AppUser"] as AppUser;
+            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var item = await _cartRepo.DeleteItemFromCartByIdAsync(user!, userBookId);
             if (item == null) return NotFound();
             return NoContent();
@@ -58,11 +58,11 @@ namespace backend.Controller
 
         [HttpPost("checkout")]
         [Authorize]
-        public async Task<IActionResult> CreateOrder([FromBody] CheckoutCartDto checkoutDto)
+        public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] CheckoutCartDto checkoutDto)
         {
             if (!ModelState.IsValid) return BadRequest();
             // 每個使用者只會有一個購物車，建立訂單後刪除購物車
-            var user = HttpContext.Items["AppUser"] as AppUser;
+            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var orderDto = await _cartRepo.CreateOrderAsync(user, checkoutDto);
             return Ok(orderDto);
         }

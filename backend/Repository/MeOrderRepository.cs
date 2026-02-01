@@ -11,10 +11,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Repository
 {
-    public class OrderRepository : IMeOrderReporitory
+    public class MeOrderRepository : IMeOrderReporitory
     {
         private readonly ApplicationDBContext _context;
-        public OrderRepository(ApplicationDBContext context)
+        public MeOrderRepository(ApplicationDBContext context)
         {
             _context = context;
         }
