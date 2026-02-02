@@ -10,7 +10,7 @@ namespace backend.Model
     [Table("Notification")]
     public class Notification
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public string ReceiverAccountId { get; set; } = string.Empty;

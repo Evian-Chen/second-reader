@@ -26,7 +26,7 @@ namespace backend.Repository
             return [.. orderList.Select(o => o.ToOrderDtoFromOrder())];  // ToList()
         }
 
-        public async Task<OrderDto?> GetOrderByIdAsync(AppUser user, int orderId)
+        public async Task<OrderDto?> GetOrderByIdAsync(AppUser user, Guid orderId)
         {
             var order = await _context.Orders.Include(o => o.OrderItems).FirstOrDefaultAsync(o => o.Id == orderId);
             if (order == null) return null;

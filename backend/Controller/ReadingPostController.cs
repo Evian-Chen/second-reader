@@ -23,6 +23,8 @@ namespace backend.Controller
         }
 
         [HttpGet("{accountId}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<ReadingPostDto>>> GetAllByAccountId([FromRoute] string accountId)
         {
             var posts = await _postRepo.GetAllByAccountIdAsync(accountId);
@@ -30,17 +32,23 @@ namespace backend.Controller
             return Ok(posts);
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<ReadingPostDto>> GetPostById([FromRoute] int id)
+        [HttpGet("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<ReadingPostDto>> GetPostById([FromRoute] Guid id)
         {
             var post = await _postRepo.GetPostByIdAsync(id);
             if (post == null) return NotFound();
             return Ok(post.ToReadingPostDto());
         }
 
-        [HttpPut("{id:int}/like")]
-        public async Task<ActionResult<ReadingPostDto>> LikePosyById([FromRoute] int id, [FromBody] LikePostDto likePostDto)
+        [HttpPut("{id:guid}/like")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<ReadingPostDto>> LikePosyById([FromRoute] Guid id, [FromBody] LikePostDto likePostDto)
         {
+            if (!ModelState.IsValid) return BadRequest();
             var addedPost = await _postRepo.LikePosyByIdAsync(id, likePostDto);
             if (addedPost == null) return NotFound("no such post to like");
             return Ok(addedPost.ToReadingPostDto());
@@ -48,31 +56,39 @@ namespace backend.Controller
 
         [HttpPost]
         [Authorize]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<ReadingPostDto>> CreatePost([FromBody] createReadingPostDto postDto)
         {
             if (!ModelState.IsValid) return BadRequest();
 
-            var appUser = HttpContext.Items["AppUser"] as AppUser;
+            var appUser = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var createdPost = await _postRepo.CreatePostAsync(postDto, appUser);
             if (createdPost == null) return StatusCode(500, "add new post to database failed");
             return Ok(createdPost.ToReadingPostDto());
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:guid}")]
         [Authorize]
-        public async Task<IActionResult> DeletePostById([FromRoute] int id)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeletePostById([FromRoute] Guid id)
         {
             var post = await _postRepo.DeletePostByIdAsync(id);
             if (post == null) return NotFound("no such post to delete");
             return Ok();
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:guid}")]
         [Authorize]
-        public async Task<ActionResult<ReadingPostDto>> UpdatePostById([FromRoute] int id, [FromBody] createReadingPostDto postDto)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<ReadingPostDto>> UpdatePostById([FromRoute] Guid id, [FromBody] createReadingPostDto postDto)
         {
             if (!ModelState.IsValid) return BadRequest();
-            var appUser = HttpContext.Items["AppUser"] as AppUser;
+            var appUser = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var updated = await _postRepo.UpdatePostByIdAsync(id, postDto, appUser!);
             return Ok(updated!.ToReadingPostDto());
         }

@@ -9,7 +9,7 @@ namespace backend.Dto.Order
 {
     public class OrderDto
     {
-        public int OrderId { get; set; }
+        public Guid OrderId { get; set; }
         [Required]
         public List<OrderItemDto> OrderItems { get; set; } = new List<OrderItemDto>();
         public DateTime CreatedAt { get; set; } = DateTime.Now;

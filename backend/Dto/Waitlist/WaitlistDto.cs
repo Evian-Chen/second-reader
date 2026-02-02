@@ -8,7 +8,7 @@ namespace backend.Dto.Waitlist
 {
     public class WaitlistDto
     {
-        public int UserBookId { get; set; }
+        public Guid UserBookId { get; set; }
         public string WaiterAccountId { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public WaitlistStatus WaitlistStatus { get; set; }

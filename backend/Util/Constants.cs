@@ -17,6 +17,9 @@ namespace backend.Util
         public const string OrderRejectedTitle = "您的訂單已被拒絕！";
         public const string OrderRequestTitle = "有人下單您的書籍哦！";
         public const string OrderCompletedTitle = "您的訂單已完成！";
+        public const string WaitlistCanceled = "您排隊的書已被取消！";
+        public const string WaitlistAccepted = "您排隊的書已成功遞補！";
+        public const string CartItemExpiredTitle = "您的購物車商品逾期！";
     }
 
     public static class Accounts

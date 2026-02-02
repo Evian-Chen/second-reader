@@ -11,7 +11,7 @@ namespace backend.Model
     [Table("Book")]
     public class Book
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
         [MaxLength(50)]
         public string Title { get; set; } = string.Empty;

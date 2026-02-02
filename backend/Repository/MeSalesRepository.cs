@@ -17,13 +17,15 @@ namespace backend.Repository
     {
         private readonly ApplicationDBContext _context;
         private readonly IMeNotificationRepository _notiRepo;
-        public MeSalesRepository(ApplicationDBContext context, IMeNotificationRepository notiRepo)
+        private readonly IWaitlistRepository _waitRepo;
+        public MeSalesRepository(ApplicationDBContext context, IMeNotificationRepository notiRepo, IWaitlistRepository waitRepo)
         {
             _context = context;
             _notiRepo = notiRepo;
+            _waitRepo = waitRepo;
         }
 
-        public async Task<OrderItemDto?> AcceptSaleItemByIdAsync(AppUser user, int id)
+        public async Task<OrderItemDto?> AcceptSaleItemByIdAsync(AppUser user, Guid id)
         {
             // 賣家接受買家的訂單 => 更改orderItem狀態、userbook狀態、發送站內通知
             var item = await _context.OrderItems.Include(o => o.UserBook).Include(o => o.Order).ThenInclude(o => o.Buyer).FirstOrDefaultAsync(o => o.Id == id && o.SellerAccountIdSnapshot == user.AccountId);
@@ -50,7 +52,7 @@ namespace backend.Repository
             }
         }
 
-        public async Task<OrderItemDto?> CompleteSaleItemByIdAsync(AppUser user, int id)
+        public async Task<OrderItemDto?> CompleteSaleItemByIdAsync(AppUser user, Guid id)
         {
             // 更改orderItem狀態、userbook狀態、發送站內通知、更改排隊狀態
             var item = await _context.OrderItems.Include(o => o.UserBook).Include(o => o.Order).ThenInclude(o => o.Buyer).FirstOrDefaultAsync(o => o.Id == id && o.SellerAccountIdSnapshot == user.AccountId);
@@ -64,9 +66,8 @@ namespace backend.Repository
                 item.UserBook!.UserBookStatus = UserBookStatus.Completed;
 
                 var buyer = item.Order!.Buyer;
-                await _notiRepo.CreateOrderCompletedAsync(buyer!, item.UserBookId);
-                // TODO: 更改排隊狀態
-
+                await _notiRepo.CreateOrderCompletedAsync(buyer!, item.UserBookId);  // 發送訊息給買家，已成功訂購
+                await _waitRepo.RemoveWaitlistAsync(item.UserBookId);  // 發送訊息給等待這本書的使用者，取消排隊
                 await _context.SaveChangesAsync();
                 await tx.CommitAsync();
                 return item.ToOrderItemDtoFromOrderItem();
@@ -78,7 +79,7 @@ namespace backend.Repository
             }
         }
 
-        public async Task<OrderItemDto?> GetSaleItemByIdAsync(AppUser user, int id)
+        public async Task<OrderItemDto?> GetSaleItemByIdAsync(AppUser user, Guid id)
         {
             // return 特定一筆訂購書的資訊，做為顯示用
             var item = await _context.OrderItems.FirstOrDefaultAsync(i => i.Id == id && i.SellerAccountIdSnapshot == user.AccountId);
@@ -98,7 +99,7 @@ namespace backend.Repository
             return [.. result.Select(r => r.ToOrderItemDtoFromOrderItem())];
         }
 
-        public async Task<OrderItemDto?> RejectSaleItemByIdAsync(AppUser user, int id)
+        public async Task<OrderItemDto?> RejectSaleItemByIdAsync(AppUser user, Guid id)
         {
             // 更改orderItem狀態、userbook狀態、發送站內通知、更改排隊狀態
             var item = await _context.OrderItems.Include(o => o.UserBook).Include(o => o.Order).ThenInclude(o => o.Buyer).FirstOrDefaultAsync(o => o.Id == id && o.SellerAccountIdSnapshot == user.AccountId);
@@ -112,7 +113,9 @@ namespace backend.Repository
                 item.UserBook!.UserBookStatus = UserBookStatus.Listed;
                 var buyer = item.Order!.Buyer;
                 await _notiRepo.CreateOrderRejectedAsync(buyer!, item.UserBookId);
-                // TODO: 更改排隊狀態
+
+                // 更改排隊狀態
+                await _waitRepo.ProcessNextInWaitlistAsync(user, item.UserBook.AppUser!, item.UserBookId);
 
                 await _context.SaveChangesAsync();
                 await tx.CommitAsync();

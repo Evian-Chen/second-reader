@@ -11,10 +11,10 @@ namespace backend.Interface
     public interface IMeSalesRepository
     {
         Task<List<OrderItemDto>?> GetSaleItemsByStatusAsync(AppUser user, OrderItemStatus? status);
-        Task<OrderItemDto?> GetSaleItemByIdAsync(AppUser user, int id);
-        Task<OrderItemDto?> AcceptSaleItemByIdAsync(AppUser user, int id);
-        Task<OrderItemDto?> RejectSaleItemByIdAsync(AppUser user, int id);
-        Task<OrderItemDto?> CompleteSaleItemByIdAsync(AppUser user, int id);
+        Task<OrderItemDto?> GetSaleItemByIdAsync(AppUser user, Guid id);
+        Task<OrderItemDto?> AcceptSaleItemByIdAsync(AppUser user, Guid id);
+        Task<OrderItemDto?> RejectSaleItemByIdAsync(AppUser user, Guid id);
+        Task<OrderItemDto?> CompleteSaleItemByIdAsync(AppUser user, Guid id);
 
     }
 }

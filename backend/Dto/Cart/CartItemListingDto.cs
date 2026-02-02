@@ -10,8 +10,8 @@ namespace backend.Dto.Cart
 {
     public class CartItemListingDto
     {
-        public int CartId { get; set; }
-        public int UserBookId { get; set; }
+        public Guid CartId { get; set; }
+        public Guid UserBookId { get; set; }
         public int Price { get; set; }
         public BookCondition bookCondition { get; set; }
         public List<PayMethod> SellerPayMethods { get; set; } = new List<PayMethod>();

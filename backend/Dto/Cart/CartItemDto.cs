@@ -7,6 +7,6 @@ namespace backend.Dto.Cart
 {
     public class CartItemDto
     {
-        public int UserBookId { get; set; }  // FK
+        public Guid UserBookId { get; set; }  // FK
     }
 }

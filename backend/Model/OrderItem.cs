@@ -10,13 +10,13 @@ namespace backend.Model
     [Table("OrderItem")]
     public class OrderItem
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public int Price { get; set; }
         public OrderItemStatus OrderItemStatus { get; set; }
 
-        public int OrderId { get; set; }  // FK
+        public Guid OrderId { get; set; }  // FK
         public Order? Order { get; set; }
-        public int UserBookId { get; set; }  // FK
+        public Guid UserBookId { get; set; }  // FK
         public UserBook? UserBook { get; set; }
 
         // ===== snapshot 欄位 =====

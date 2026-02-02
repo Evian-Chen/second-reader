@@ -55,23 +55,25 @@ namespace backend.Repository
                                     ?? throw new InvalidOperationException("Can not add book that does not exists in databse to cart.");
             if (bookExists.UserId == user.Id) throw new InvalidOperationException("User can not add their listed book to their own carts.");
 
-            // 查看此書是否已被放入別的購物車
+            // abort: 已經有背景 worker 定期檢查所有購物車裡的item是否過期
+            // 如果在其他購物車找到，代表此書在其他購物車尚未過期
             var inOtherCart = await _context.CartItems.Include(c => c.UserBook).FirstOrDefaultAsync(c => c.UserBookId == bookExists.Id);
-            if (inOtherCart != null)
-            {
-                if (inOtherCart.ExperiedAt < DateTime.Now)
-                {  // 這本書在其他人的購物車中過期了
-                    bookExists.UserBookStatus = Enums.UserBookStatus.Listed;
-                    _context.CartItems.Remove(inOtherCart);
-                    await _context.SaveChangesAsync();
-                    // 把別人購物車的東西刪掉了，要發送訊息給使用者說之前加入購物車的書過期了
-                    // TODO: 發送訊息給該購物車的使用者
-                }
-                else
-                {
-                    throw new InvalidOperationException("Book is reserved by others");
-                }
-            }
+            if (inOtherCart != null) throw new InvalidOperationException("Book is reserved by others");
+            // if (inOtherCart != null)
+            // {
+            //     if (inOtherCart.ExpiredAt < DateTime.Now)
+            //     {  // 這本書在其他人的購物車中過期了
+            //         bookExists.UserBookStatus = Enums.UserBookStatus.Listed;
+            //         _context.CartItems.Remove(inOtherCart);
+            //         await _context.SaveChangesAsync();
+            //         // 把別人購物車的東西刪掉了，要發送訊息給使用者說之前加入購物車的書過期了
+            //         // TODO: 發送訊息給該購物車的使用者
+            //     }
+            //     else
+            //     {
+            //         throw new InvalidOperationException("Book is reserved by others");
+            //     }
+            // }
 
             var cartModel = await _context.Carts.FirstOrDefaultAsync(c => c.AccountId == user.AccountId);
             if (cartModel == null)  // 此使用者沒有建立購物車
@@ -96,7 +98,7 @@ namespace backend.Repository
                 CartId = cartModel!.Id,
                 UserBookId = bookExists.Id,
                 LockedAt = DateTime.Now,
-                ExperiedAt = DateTime.Now.AddSeconds(Util.Constants.ExpiredTime)  // 對商品上鎖
+                ExpiredAt = DateTime.Now.AddSeconds(Util.Constants.ExpiredTime)  // 對商品上鎖
             };
             bookExists.UserBookStatus = Enums.UserBookStatus.Reserved;
             _context.CartItems.Add(cartItem);
@@ -108,15 +110,37 @@ namespace backend.Repository
             return created!.ToCartItemListingFromCartItem();
         }
 
-        public async Task<CartItemListingDto?> DeleteItemFromCartByIdAsync(AppUser user, int userBookId)
+        public async Task<CartItemListingDto?> DeleteItemFromCartByIdAsync(AppUser user, Guid userBookId)
         {
-            // TODO 檢查移出的時候，有沒有人在排隊，可能如果有排隊的話要用通知
             var cartModel = await _context.Carts.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.AccountId == user.AccountId);
             if (cartModel == null) return null;
             var item = await CartItemForDisplay().FirstOrDefaultAsync(i => i.UserBookId == userBookId && i.CartId == cartModel.Id);
             if (item == null) return null;
             item.UserBook!.UserBookStatus = Enums.UserBookStatus.Listed;
             _context.CartItems.Remove(item);
+
+            // 檢查移出後，有沒有人在排隊，可能如果有排隊的話要用通知
+            var waitlist = await _context.Waitlists.Include(w => w.AppUser).OrderBy(w => w.CreatedAt).FirstOrDefaultAsync();
+            if (waitlist != null)
+            {
+                // 1. 加入等待者的 cart 中
+                // 2. 通知買家
+                using var tx = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    var nextBuyer = waitlist.AppUser;
+                    var cartItemListing = await AddItemToCartByIdAsync(nextBuyer!, new CartItemDto { UserBookId = waitlist.UserBookId });
+                    await _notiRepo.CreateWaitlistAcceptedAsync(nextBuyer!, userBookId);  // 買家
+                    waitlist.WaitlistStatus = Enums.WaitlistStatus.Accepted;
+                    await tx.CommitAsync();
+                }
+                catch
+                {
+                    await tx.RollbackAsync();
+                    throw;
+                }
+            }
+
             await _context.SaveChangesAsync();
             return item.ToCartItemListingFromCartItem();
         }
@@ -146,7 +170,7 @@ namespace backend.Repository
                 var cart = await CartQueryForDisplay().FirstOrDefaultAsync(c => c.AccountId == user.AccountId);
 
                 if (cart == null || cart.CartItems.Count == 0) throw new InvalidOperationException("cart is empty.");
-                if (cart.CartItems.Any(c => c.ExperiedAt < DateTime.Now)) throw new InvalidOperationException("Book(s) is expired.");
+                if (cart.CartItems.Any(c => c.ExpiredAt < DateTime.Now)) throw new InvalidOperationException("Book(s) is expired.");
 
                 // 建立 order
                 var order = new Order
@@ -183,14 +207,11 @@ namespace backend.Repository
                 await _context.SaveChangesAsync();
 
                 // 寄送通知給買家和賣家
-                await _notiRepo.CreateNotificationAsync(Enums.NotificationType.OrderCreated, user, order.Id, null);
+                await _notiRepo.CreateOrderCreatedAsync(user, order.Id);
                 foreach (var book in orderItems)
                 {
-                    await _notiRepo.CreateNotificationAsync(Enums.NotificationType.OrderRequest, user, order.Id, book.UserBookId);
+                    await _notiRepo.CreateOrderRequestAsync(user, book.UserBookId);
                     // 前端賣家打開通知 => 導到 /sales/items/{orderItemId} 或 /sales?status=Reserved
-
-                    // TODO 要建立賣家的 saleitem，賣家可透過前端「商品管理」看到所有saleitem，可以透過saleitem去篩選
-                    // => 已拒絕（UserBookStatus隨之更改，排隊狀況更新）、已接受（等待出貨）、已完成（已出貨）
                 }
 
                 await tx.CommitAsync();

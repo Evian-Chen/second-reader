@@ -33,33 +33,36 @@ namespace backend.Controller
         }
 
         [HttpGet]
-        public async Task<ActionResult<UserBookSummaryDto>> GetAllBooks()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<UserBookSummaryDto>>> GetAllBooks()
         {
             var books = await _booksRepo.GetAllAsync();
-            if (books == null) return NotFound("No book in database");
-            return Ok(books.Select(b => b.ToUserBookSummaryDto()).ToList());
+            return Ok(books.Select(b => b!.ToUserBookSummaryDto()).ToList());
         }
 
         [HttpGet("{accountId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<UserBookSummaryDto>> GetBooksByAccountId([FromRoute] string accountId, [FromQuery] UserBookStatusFilterDto query)
         {
             var books = await _booksRepo.GetBooksByAccountIdAsync(accountId, query);
-            if (books.Count == 0) return NotFound();
             return Ok(books.Select(b => b.ToUserBookSummaryDto()).ToList());
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<UserBookListinDetailDto>> GetBookById([FromRoute] int id)
+        [HttpGet("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<UserBookListinDetailDto>> GetBookById([FromRoute] Guid id)
         {
-            if (!ModelState.IsValid) return BadRequest();
             var book = await _booksRepo.GetBookByIdAsync(id);
             if (book == null) return NotFound();
             return Ok(book.ToUserBookListingDetailDto());
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:guid}")]
         [Authorize]
-        public async Task<ActionResult<UserBookListinDetailDto>> EditUserBookById([FromRoute] int id, [FromBody] UpdateUserBookDto updateUserBookDto)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<UserBookListinDetailDto>> EditUserBookById([FromRoute] Guid id, [FromBody] UpdateUserBookDto updateUserBookDto)
         {
             // 不允許更改書本身的內容，因為書籍在上架時就會被放入資料庫（TODO: 加入驗證書籍存在的機制）
             var userBook = await _booksRepo.EditUserBookById(id, updateUserBookDto);
@@ -67,15 +70,20 @@ namespace backend.Controller
             return Ok(userBook.ToUserBookListingDetailDto());
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:guid}")]
         [Authorize]
-        public async Task<ActionResult<UserBookSummaryDto>> DeleteBookById([FromRoute] int id)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<UserBookSummaryDto>> DeleteBookById([FromRoute] Guid id, [FromQuery] bool? hard)
         {
-            var book = await _booksRepo.DeleteBookByIdAsync(id);
+            var book = await _booksRepo.DeleteBookByIdAsync(id, hard);
             return book == null ? BadRequest() : Ok(book.ToUserBookSummaryDto());
         }
 
         [HttpPost("search")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<UserBookSummaryDto>> GetBookSearchResult([FromBody] BookSearchQueryDto bookSearchQueryDto)
         {
             if (!ModelState.IsValid) return BadRequest();
@@ -86,11 +94,12 @@ namespace backend.Controller
 
         [HttpPost]
         [Authorize]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<UserBookSummaryDto>>> UploadBooks([FromBody] List<UploadUserBooksDto> uploadDtos)
         {
             if (!ModelState.IsValid) return BadRequest();
-            var appUser = HttpContext.Items["AppUser"] as AppUser;
-            if (appUser == null) return Unauthorized();
+            var appUser = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             if (uploadDtos == null || uploadDtos.Count == 0) return BadRequest("No book to upload.");
 
             var uploadedBooksModels = await _userService.CreateUserBookAsync(uploadDtos, appUser);
@@ -100,6 +109,9 @@ namespace backend.Controller
         [HttpPost("isbn")]
         [Consumes("multipart/form-data")]
         [Authorize]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<GoogleBookResultDto>> PrefillBooksInfoByIsbn([FromForm] OcrIsbnForm ocrIsbnForm)
         {
             // 會回傳預填好的 Book 內容，前端填入 UI，等使用者確定要上傳再去打 POST api/books

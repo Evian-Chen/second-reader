@@ -23,6 +23,8 @@ namespace backend.Controller
 
         [HttpGet]
         [Authorize]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<List<OrderItemDto>>> GetSaleItemsByStatus([FromQuery] OrderItemStatus? status)
         {
             // /api/me/sales?status=Pending
@@ -34,9 +36,11 @@ namespace backend.Controller
             return Ok(items);
         }
 
-        [HttpGet("{orderItemId:int}")]
+        [HttpGet("{orderItemId:guid}")]
         [Authorize]
-        public async Task<ActionResult<OrderItemDto>> GetSaleItemById([FromRoute] int orderItemId)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<OrderItemDto>> GetSaleItemById([FromRoute] Guid orderItemId)
         {
             if (!ModelState.IsValid) return BadRequest();
             var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
@@ -45,9 +49,12 @@ namespace backend.Controller
             return Ok(item);
         }
 
-        [HttpPost("{orderItemId:int}/accept")]
+        [HttpPost("{orderItemId:guid}/accept")]
         [Authorize]
-        public async Task<ActionResult<OrderItemDto>> AcceptSaleItemById([FromRoute] int orderItemId)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<OrderItemDto>> AcceptSaleItemById([FromRoute] Guid orderItemId)
         {
             // /api/me/sales/1/accept 接受這筆訂購要求
             if (!ModelState.IsValid) return BadRequest();
@@ -58,9 +65,12 @@ namespace backend.Controller
             return Ok(item);
         }
 
-        [HttpPost("{orderItemId:int}/reject")]
+        [HttpPost("{orderItemId:guid}/reject")]
         [Authorize]
-        public async Task<ActionResult<OrderItemDto>> RejectSaleItemById([FromRoute] int orderItemId)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<OrderItemDto>> RejectSaleItemById([FromRoute] Guid orderItemId)
         {
             // /api/me/sales/1/reject 拒絕這筆訂購要求
             if (!ModelState.IsValid) return BadRequest();
@@ -71,9 +81,12 @@ namespace backend.Controller
             return Ok(item);
         }
 
-        [HttpPost("{orderItemId:int}/complete")]
+        [HttpPost("{orderItemId:guid}/complete")]
         [Authorize]
-        public async Task<ActionResult<OrderItemDto>> CompleteSaleItemById([FromRoute] int orderItemId)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<OrderItemDto>> CompleteSaleItemById([FromRoute] Guid orderItemId)
         {
             // /api/me/sales/1/complete 已出貨，完成這筆訂購 => 發送通知給買家
             if (!ModelState.IsValid) return BadRequest();

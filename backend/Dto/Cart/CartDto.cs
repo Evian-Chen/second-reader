@@ -7,7 +7,7 @@ namespace backend.Dto.Cart
 {
     public class CartDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public string AccountId { get; set; } = string.Empty;

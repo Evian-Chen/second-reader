@@ -10,9 +10,9 @@ namespace backend.Interface
 {
     public interface IBooksRepository
     {
-        Task<UserBook?> GetBookByIdAsync(int id);  // 點進去該本書的詳細資訊
-        Task<UserBook?> DeleteBookByIdAsync(int id);
-        Task<UserBook?> EditUserBookById(int id, UpdateUserBookDto updateUserBookDto);
+        Task<UserBook?> GetBookByIdAsync(Guid id);  // 點進去該本書的詳細資訊
+        Task<UserBook?> DeleteBookByIdAsync(Guid id, bool? hard);
+        Task<UserBook?> EditUserBookById(Guid id, UpdateUserBookDto updateUserBookDto);
         Task<List<UserBook>?> GetBookSearchResult(BookSearchQueryDto bookSearchQueryDto);
         Task<List<UserBook?>> GetAllAsync();
         Task<List<UserBook>?> GetBooksByAccountIdAsync(string accountId, UserBookStatusFilterDto query);

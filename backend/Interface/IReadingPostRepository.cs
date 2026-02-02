@@ -11,9 +11,9 @@ namespace backend.Interface
     {
         Task<List<ReadingPostDto>?> GetAllByAccountIdAsync(string accountId);
         Task<ReadingPost?> CreatePostAsync(createReadingPostDto postDto, AppUser appUser);
-        Task<ReadingPost?> GetPostByIdAsync(int id);
-        Task<ReadingPost?> DeletePostByIdAsync(int id);
-        Task<ReadingPost?> UpdatePostByIdAsync(int id, createReadingPostDto dto, AppUser appUser);
-        Task<ReadingPost?> LikePosyByIdAsync(int id, LikePostDto likePostDto);
+        Task<ReadingPost?> GetPostByIdAsync(Guid id);
+        Task<ReadingPost?> DeletePostByIdAsync(Guid id);
+        Task<ReadingPost?> UpdatePostByIdAsync(Guid id, createReadingPostDto dto, AppUser appUser);
+        Task<ReadingPost?> LikePosyByIdAsync(Guid id, LikePostDto likePostDto);
     }
 }

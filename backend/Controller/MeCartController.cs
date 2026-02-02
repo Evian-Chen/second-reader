@@ -35,6 +35,9 @@ namespace backend.Controller
 
         [HttpPost("items")]
         [Authorize]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<CartItemListingDto>> AddItemToCartById([FromBody] CartItemDto itemDto)
         {
             if (!ModelState.IsValid) return BadRequest();
@@ -45,9 +48,12 @@ namespace backend.Controller
             return Ok(item);
         }
 
-        [HttpDelete("items/{userBookId:int}")]
+        [HttpDelete("items/{userBookId:guid}")]
         [Authorize]
-        public async Task<IActionResult> DeleteItemFromCartById([FromRoute] int userBookId)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> DeleteItemFromCartById([FromRoute] Guid userBookId)
         {
             if (!ModelState.IsValid) return BadRequest();
             var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
@@ -58,6 +64,8 @@ namespace backend.Controller
 
         [HttpPost("checkout")]
         [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] CheckoutCartDto checkoutDto)
         {
             if (!ModelState.IsValid) return BadRequest();

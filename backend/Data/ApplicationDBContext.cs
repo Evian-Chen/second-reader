@@ -69,6 +69,13 @@ namespace backend.Data
                 .HasIndex(ci => new { ci.CartId, ci.UserBookId })
                 .IsUnique();
 
+            //  waitlist 會對應到一個 AppUser 作為 FK
+            builder.Entity<Waitlist>()
+                .HasOne(w => w.AppUser)
+                .WithMany()
+                .HasForeignKey(w => w.WaiterAccountId)
+                .HasPrincipalKey(u => u.AccountId);
+
             // TODO: 可用 HasIndex 建立複合索引，加速查詢
             // example:
             // builder.Entity<UserBook>()

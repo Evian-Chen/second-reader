@@ -8,9 +8,10 @@ namespace backend.Model
 {
     public class Waitlist
     {
-        public int Id { get; set; }
-        public int UserBookId { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid UserBookId { get; set; }
         public string WaiterAccountId { get; set; } = string.Empty;
+        public AppUser? AppUser { get; set; }  // navigation
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public WaitlistStatus WaitlistStatus { get; set; }
     }
