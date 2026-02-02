@@ -23,7 +23,7 @@ namespace backend.Repository
 
         public async Task<AppUser?> FirstTimeUpdateUserInfoAsync(AppUser user, UpdateUserDto updateUserDto)
         {
-            var existing = await _context.AppUsers.FirstOrDefaultAsync(x => x.AccountId == updateUserDto.AccountId);
+            var existing = await _context.AppUsers.FirstOrDefaultAsync(x => x.AccountId == updateUserDto.AccountId && x.Id != user.Id);
             if (existing != null)  // 已經存在有相同的 accountId, accountId 不可重複
             {
                 return null;
@@ -40,14 +40,14 @@ namespace backend.Repository
             user.Email = updateUserDto.Email;
             user.InstagramAccount = updateUserDto.InstagramAccount;
             user.ThreadsAccount = updateUserDto.ThreadsAccount;
-
+            await _context.UserProfiles.AddAsync(userProfile);
             await _context.SaveChangesAsync();
             return user;
         }
 
         public async Task<AppUser?> UpdateUserInfoAsync(AppUser user, UpdateUserDto updateUserDto)
         {
-            var existing = await _context.AppUsers.FirstOrDefaultAsync(x => x.AccountId == updateUserDto.AccountId);
+            var existing = await _context.AppUsers.FirstOrDefaultAsync(x => x.AccountId == updateUserDto.AccountId && x.Id != user.Id);
             if (existing != null)  // 已經存在有相同的 accountId, accountId 不可重複
             {
                 return null;
@@ -63,7 +63,6 @@ namespace backend.Repository
             user.Email = updateUserDto.Email;
             user.InstagramAccount = updateUserDto.InstagramAccount;
             user.ThreadsAccount = updateUserDto.ThreadsAccount;
-
             await _context.SaveChangesAsync();
             return user;
         }

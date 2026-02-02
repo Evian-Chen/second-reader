@@ -13,5 +13,6 @@ namespace backend.Dto.Book
         public string SellerAccountId { get; set; } = string.Empty;
         public string SellerDisplayName { get; set; } = string.Empty;
         public BookCategory? BookCategory { get; set; }
+        public string Isbn { get; set; } = string.Empty;
     }
 }

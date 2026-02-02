@@ -59,21 +59,6 @@ namespace backend.Repository
             // 如果在其他購物車找到，代表此書在其他購物車尚未過期
             var inOtherCart = await _context.CartItems.Include(c => c.UserBook).FirstOrDefaultAsync(c => c.UserBookId == bookExists.Id);
             if (inOtherCart != null) throw new InvalidOperationException("Book is reserved by others");
-            // if (inOtherCart != null)
-            // {
-            //     if (inOtherCart.ExpiredAt < DateTime.Now)
-            //     {  // 這本書在其他人的購物車中過期了
-            //         bookExists.UserBookStatus = Enums.UserBookStatus.Listed;
-            //         _context.CartItems.Remove(inOtherCart);
-            //         await _context.SaveChangesAsync();
-            //         // 把別人購物車的東西刪掉了，要發送訊息給使用者說之前加入購物車的書過期了
-            //         // TODO: 發送訊息給該購物車的使用者
-            //     }
-            //     else
-            //     {
-            //         throw new InvalidOperationException("Book is reserved by others");
-            //     }
-            // }
 
             var cartModel = await _context.Carts.FirstOrDefaultAsync(c => c.AccountId == user.AccountId);
             if (cartModel == null)  // 此使用者沒有建立購物車

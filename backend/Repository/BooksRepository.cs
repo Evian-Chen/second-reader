@@ -116,6 +116,10 @@ namespace backend.Repository
             {
                 userBooks = userBooks.Where(ub => ub.AppUser!.UserProfile!.DisplayName.Contains(queryDto.SellerDisplayName));
             }
+            if (!string.IsNullOrWhiteSpace(queryDto.Isbn))
+            {
+                userBooks = userBooks.Where(ub => ub.Book!.ISBN == queryDto.Isbn);
+            }
             if (queryDto.BookCategory.HasValue)
             {
                 userBooks = userBooks.Where(ub => ub.Book!.BookCategory == queryDto.BookCategory.Value);

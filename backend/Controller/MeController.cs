@@ -35,6 +35,7 @@ namespace backend.Controller
         [HttpPut]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<UserDto>> UpdateMe([FromBody] UpdateUserDto updateUserDto)
         {

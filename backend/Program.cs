@@ -23,6 +23,14 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "SecondReader API", Version = "v1" });
 
+    // 讀取 XML 文檔註釋
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+    }
+
     // 讓右上角出現 Authorize 按鈕
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -79,7 +87,7 @@ builder.Services.AddScoped<IMeNotificationRepository, MeNotificationRepository>(
 builder.Services.AddScoped<IWaitlistRepository, WaitlistRepository>();
 builder.Services.AddScoped<IMeOrderReporitory, MeOrderRepository>();
 builder.Services.AddScoped<IMeSalesRepository, MeSalesRepository>();
-builder.Services.AddHostedService<CartReservationCleanUpWorker>();
+// builder.Services.AddHostedService<CartReservationCleanUpWorker>();
 
 // Auth switch
 var useDevFakeAuth = builder.Configuration.GetValue<bool>("Auth:UseDevFakeAuth");

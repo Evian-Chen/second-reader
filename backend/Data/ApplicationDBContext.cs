@@ -73,8 +73,7 @@ namespace backend.Data
             builder.Entity<Waitlist>()
                 .HasOne(w => w.AppUser)
                 .WithMany()
-                .HasForeignKey(w => w.WaiterAccountId)
-                .HasPrincipalKey(u => u.AccountId);
+                .HasForeignKey(w => w.WaiterId);
 
             // TODO: 可用 HasIndex 建立複合索引，加速查詢
             // example:

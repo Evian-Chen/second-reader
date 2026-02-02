@@ -10,6 +10,7 @@ namespace backend.Model
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public Guid UserBookId { get; set; }
+        public Guid WaiterId { get; set; }  // FK
         public string WaiterAccountId { get; set; } = string.Empty;
         public AppUser? AppUser { get; set; }  // navigation
         public DateTime CreatedAt { get; set; } = DateTime.Now;
