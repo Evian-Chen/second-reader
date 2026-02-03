@@ -21,6 +21,12 @@ namespace backend.Controller
             _saleRepo = saleRepo;
         }
 
+        /// <summary>
+        /// 取得所有此使用者被下單的紀錄
+        /// </summary>
+        /// <param name="status">可篩選被下單的狀態</param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -36,6 +42,12 @@ namespace backend.Controller
             return Ok(items);
         }
 
+        /// <summary>
+        /// 取得特定一本被下單的書
+        /// </summary>
+        /// <param name="orderItemId"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet("{orderItemId:guid}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -49,6 +61,12 @@ namespace backend.Controller
             return Ok(item);
         }
 
+        /// <summary>
+        /// 接受特定一本書的下單請求
+        /// </summary>
+        /// <param name="orderItemId"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpPost("{orderItemId:guid}/accept")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -65,6 +83,12 @@ namespace backend.Controller
             return Ok(item);
         }
 
+        /// <summary>
+        /// 拒絕特定一本書的下單請求
+        /// </summary>
+        /// <param name="orderItemId"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpPost("{orderItemId:guid}/reject")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -81,6 +105,12 @@ namespace backend.Controller
             return Ok(item);
         }
 
+        /// <summary>
+        /// 完成特定一本書的下單請求（賣家已出貨/交付）
+        /// </summary>
+        /// <param name="orderItemId"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpPost("{orderItemId:guid}/complete")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

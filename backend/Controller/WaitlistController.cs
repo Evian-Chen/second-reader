@@ -22,6 +22,11 @@ namespace backend.Controller
             _waitRepo = waitRepo;
         }
 
+        /// <summary>
+        /// 取得特定書籍的排隊狀態
+        /// </summary>
+        /// <param name="userBookId"></param>
+        /// <returns></returns>
         [HttpGet("{userBookId:guid}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -32,6 +37,13 @@ namespace backend.Controller
             return Ok(waitlist.Select(w => w.ToWaitlistDto()).ToList());
         }
 
+        /// <summary>
+        /// 加入或取消排隊一本書
+        /// </summary>
+        /// <param name="userBookId"></param>
+        /// <param name="addToWaitlist">是否加入排隊</param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpPost("{userBookId:guid}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

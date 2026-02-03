@@ -25,7 +25,12 @@ namespace backend.Service
         {
             var userBooksModels = new List<UserBook>();
             foreach (var dto in uploadDtos)
-            {  // 確認所有要新增的書都存在 Books 資料表
+            {  
+                // 同一個使用者不允許上傳同本書兩次
+                var existing = await _context.UserBooks.Include(u => u.AppUser).Where(u => u.AppUser.AccountId == appUser.AccountId && u.Book.ISBN == dto.Book.ISBN).FirstOrDefaultAsync();
+                if (existing != null) continue;
+
+                // 確認所有要新增的書都存在 Books 資料表
                 var book = await _context.Books.FirstOrDefaultAsync(b => b.ISBN == dto.Book.ISBN);
                 if (book == null)
                 {

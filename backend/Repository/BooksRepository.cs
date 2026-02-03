@@ -27,7 +27,7 @@ namespace backend.Repository
         public async Task<UserBook?> DeleteBookByIdAsync(Guid id, bool? hard)
         {
             // TODO: 如果賣家刪除書本，則所有在cart裡面或者排隊中的人都要被通知，並將cartitem刪除
-            var book = await _context.UserBooks.FirstOrDefaultAsync(u => u.Id == id);
+            var book = await _context.UserBooks.Include(ub => ub.Book).FirstOrDefaultAsync(u => u.Id == id);
             if (book == null) return null;
             if (hard == true)
             {

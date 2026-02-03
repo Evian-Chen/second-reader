@@ -21,6 +21,11 @@ namespace backend.Controller
             _meRepo = meRepo;
         }
 
+        /// <summary>
+        /// 取得此使用者的個人資料
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -32,6 +37,12 @@ namespace backend.Controller
             return Ok(appUser.ToUserDto());
         }
 
+        /// <summary>
+        /// 更改此使用者的個人資料
+        /// </summary>
+        /// <param name="updateUserDto"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpPut]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

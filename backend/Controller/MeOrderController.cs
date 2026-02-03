@@ -20,6 +20,11 @@ namespace backend.Controller
             _orderRepo = orderRepo;
         }
 
+        /// <summary>
+        /// 取得所有歷史訂單
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -32,6 +37,12 @@ namespace backend.Controller
             return Ok(orderDtos);
         }
 
+        /// <summary>
+        /// 取得特定一筆訂單
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet("{id:guid}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -22,6 +22,11 @@ namespace backend.Controller
             _postRepo = postRepo;
         }
 
+        /// <summary>
+        /// 取得某使用者的所有貼文
+        /// </summary>
+        /// <param name="accountId"></param>
+        /// <returns></returns>
         [HttpGet("{accountId}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -32,6 +37,11 @@ namespace backend.Controller
             return Ok(posts);
         }
 
+        /// <summary>
+        /// 取得特定一筆貼文
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -42,6 +52,12 @@ namespace backend.Controller
             return Ok(post.ToReadingPostDto());
         }
 
+        /// <summary>
+        /// 按或取消一筆貼文的讚
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="likePostDto"></param>
+        /// <returns></returns>
         [HttpPut("{id:guid}/like")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -54,6 +70,12 @@ namespace backend.Controller
             return Ok(addedPost.ToReadingPostDto());
         }
 
+        /// <summary>
+        /// 發布一則貼文
+        /// </summary>
+        /// <param name="postDto"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpPost]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -69,6 +91,11 @@ namespace backend.Controller
             return Ok(createdPost.ToReadingPostDto());
         }
 
+        /// <summary>
+        /// 刪除一則貼文
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id:guid}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -80,6 +107,13 @@ namespace backend.Controller
             return Ok();
         }
 
+        /// <summary>
+        /// 更改一則貼文的內容
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="postDto"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpPut("{id:guid}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

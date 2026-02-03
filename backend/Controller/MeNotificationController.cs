@@ -21,6 +21,12 @@ namespace backend.Controller
             _notiRepo = notiRepo;
         }
 
+        /// <summary>
+        /// 取得所有站內通知
+        /// </summary>
+        /// <param name="UnReadOnly">是否只取得未讀訊息</param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -37,6 +43,12 @@ namespace backend.Controller
             return Ok(notifications);
         }
 
+        /// <summary>
+        /// 取得特定一筆通知詳細資料
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet("{id:guid}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

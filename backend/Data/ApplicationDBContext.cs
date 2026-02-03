@@ -63,6 +63,12 @@ namespace backend.Data
                 .HasForeignKey(ci => ci.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<UserBook>()
+                .HasOne(ub => ub.Book)
+                .WithMany()
+                .HasForeignKey(ub => ub.BookId)
+                .OnDelete(DeleteBehavior.NoAction);
+
 
             // 同一個 UserBook 只能被加入 Cart 一次:不可以從同個賣家加入兩本 UserBookId 一樣的書
             builder.Entity<CartItem>()

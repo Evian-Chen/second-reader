@@ -18,6 +18,7 @@ namespace backend.Dto.UserBook
         public string Author { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public BookCategory BookCategory { get; set; }
-
+        public UserBookStatus UserBookStatus { get; set; }
+        public string SellerAccountId { get; set; } = string.Empty;
     }
 }

@@ -23,6 +23,11 @@ namespace backend.Controller
             _cartRepo = cartRepo;
         }
 
+        /// <summary>
+        /// 取得使用者購物車中所有商品
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet]
         [Authorize]
         public async Task<ActionResult<CartDto>> GetCart()
@@ -33,6 +38,12 @@ namespace backend.Controller
             return Ok(cart);
         }
 
+        /// <summary>
+        /// 將一商品加入購物車
+        /// </summary>
+        /// <param name="itemDto"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpPost("items")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -48,6 +59,12 @@ namespace backend.Controller
             return Ok(item);
         }
 
+        /// <summary>
+        /// 將一商品移除購物車
+        /// </summary>
+        /// <param name="userBookId"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpDelete("items/{userBookId:guid}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -62,6 +79,12 @@ namespace backend.Controller
             return NoContent();
         }
 
+        /// <summary>
+        /// 將購物車的商品結帳
+        /// </summary>
+        /// <param name="checkoutDto"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException">買家需選擇書本交付與付款方式</exception>
         [HttpPost("checkout")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
