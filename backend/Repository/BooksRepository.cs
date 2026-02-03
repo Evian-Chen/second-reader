@@ -17,22 +17,32 @@ namespace backend.Repository
     public class BooksRepository : IBooksRepository
     {
         private readonly ApplicationDBContext _context;
-        public BooksRepository(ApplicationDBContext context)
+        private readonly IWaitlistRepository _waitRepo;
+        public BooksRepository(ApplicationDBContext context, IWaitlistRepository waitRepo)
         {
             _context = context;
+            _waitRepo = waitRepo;
         }
 
-        public async Task<UserBook?> DeleteBookByIdAsync(int id)
+        public async Task<UserBook?> DeleteBookByIdAsync(Guid id, bool? hard)
         {
             // TODO: 如果賣家刪除書本，則所有在cart裡面或者排隊中的人都要被通知，並將cartitem刪除
-            var book = await _context.UserBooks.FirstOrDefaultAsync(u => u.Id == id);
+            var book = await _context.UserBooks.Include(ub => ub.Book).FirstOrDefaultAsync(u => u.Id == id);
             if (book == null) return null;
-            _context.UserBooks.Remove(book);
+            if (hard == true)
+            {
+                _context.UserBooks.Remove(book);
+            }
+            else
+            {
+                book.UserBookStatus = UserBookStatus.Delisted;  // 下架書籍
+            }
+            await _waitRepo.RemoveWaitlistAsync(id);  // 通知並移除所有等待這本書的使用者
             await _context.SaveChangesAsync();
             return book;
         }
 
-        public async Task<UserBook?> EditUserBookById(int id, UpdateUserBookDto updateUserBookDto)
+        public async Task<UserBook?> EditUserBookById(Guid id, UpdateUserBookDto updateUserBookDto)
         {
             var userBook = await _context.UserBooks
                     .Include(ub => ub.SellerPayMethods)
@@ -62,7 +72,7 @@ namespace backend.Repository
             return bookModels;
         }
 
-        public async Task<UserBook?> GetBookByIdAsync(int id)
+        public async Task<UserBook?> GetBookByIdAsync(Guid id)
         {
             var bookModel = await _context.UserBooks
                                 .Include(ub => ub.AppUser)
@@ -105,6 +115,10 @@ namespace backend.Repository
             if (!string.IsNullOrWhiteSpace(queryDto.SellerDisplayName))
             {
                 userBooks = userBooks.Where(ub => ub.AppUser!.UserProfile!.DisplayName.Contains(queryDto.SellerDisplayName));
+            }
+            if (!string.IsNullOrWhiteSpace(queryDto.Isbn))
+            {
+                userBooks = userBooks.Where(ub => ub.Book!.ISBN == queryDto.Isbn);
             }
             if (queryDto.BookCategory.HasValue)
             {

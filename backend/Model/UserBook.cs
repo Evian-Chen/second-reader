@@ -10,7 +10,7 @@ namespace backend.Model
     [Table("UserBook")]
     public class UserBook
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public BookCondition BookCondition { get; set; }
         public ICollection<UserBookPayMethod> SellerPayMethods { get; set; } = new List<UserBookPayMethod>();
         public ICollection<UserBookDeliveryMethod> SellerDeliveryMethods { get; set; } = new List<UserBookDeliveryMethod>();
@@ -19,17 +19,17 @@ namespace backend.Model
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-        public int UserId { get; set; }  // FK
+        public Guid UserId { get; set; }  // FK
         public AppUser? AppUser { get; set; }
-        public int BookId { get; set; }  // FK
+        public Guid BookId { get; set; }  // FK
         public Book? Book { get; set; }
-        public int? OrderId { get; set; }  // FK
+        public Guid? OrderId { get; set; }  // FK
         public Order? Order { get; set; }
     }
 
     public class UserBookPayMethod
     {
-        public int UserBookId { get; set; }  // FK
+        public Guid UserBookId { get; set; }  // FK
         public UserBook? UserBook { get; set; }
 
         public PayMethod PayMethod { get; set; }
@@ -37,7 +37,7 @@ namespace backend.Model
 
     public class UserBookDeliveryMethod
     {
-        public int UserBookId { get; set; }  // FK
+        public Guid UserBookId { get; set; }  // FK
         public UserBook? UserBook { get; set; }
 
         public DeliveryMethod DeliveryMethod { get; set; }

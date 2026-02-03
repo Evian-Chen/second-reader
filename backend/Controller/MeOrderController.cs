@@ -20,8 +20,15 @@ namespace backend.Controller
             _orderRepo = orderRepo;
         }
 
+        /// <summary>
+        /// 取得所有歷史訂單
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet]
         [Authorize]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<OrderDto>> GetAll()
         {
             var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
@@ -30,9 +37,17 @@ namespace backend.Controller
             return Ok(orderDtos);
         }
 
-        [HttpGet("{id:int}")]
+        /// <summary>
+        /// 取得特定一筆訂單
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        [HttpGet("{id:guid}")]
         [Authorize]
-        public async Task<ActionResult<OrderDto>> GetOrderById([FromRoute] int id)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<OrderDto>> GetOrderById([FromRoute] Guid id)
         {
             var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var orderDto = await _orderRepo.GetOrderByIdAsync(user, id);

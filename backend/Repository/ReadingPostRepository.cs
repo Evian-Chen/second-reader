@@ -29,7 +29,7 @@ namespace backend.Repository
             return model;
         }
 
-        public async Task<ReadingPost?> DeletePostByIdAsync(int id)
+        public async Task<ReadingPost?> DeletePostByIdAsync(Guid id)
         {
             var model = await _context.ReadingPosts.Include(p => p.AppUser).FirstOrDefaultAsync(p => p.Id == id);
             if (model == null) return null;
@@ -43,13 +43,13 @@ namespace backend.Repository
             return posts.Select(p => p.ToReadingPostDto()).ToList();
         }
 
-        public async Task<ReadingPost?> GetPostByIdAsync(int id)
+        public async Task<ReadingPost?> GetPostByIdAsync(Guid id)
         {
             var post = await _context.ReadingPosts.Include(p => p.AppUser).FirstOrDefaultAsync(p => p.Id == id);
             return post;
         }
 
-        public async Task<ReadingPost?> LikePosyByIdAsync(int id, LikePostDto likePostDto)
+        public async Task<ReadingPost?> LikePosyByIdAsync(Guid id, LikePostDto likePostDto)
         {
             var model = await _context.ReadingPosts.FirstOrDefaultAsync(p => p.Id == id);
             if (model == null) return null;
@@ -58,7 +58,7 @@ namespace backend.Repository
             return model;
         }
 
-        public async Task<ReadingPost?> UpdatePostByIdAsync(int id, createReadingPostDto dto, AppUser appUser)
+        public async Task<ReadingPost?> UpdatePostByIdAsync(Guid id, createReadingPostDto dto, AppUser appUser)
         {
             var model = await _context.ReadingPosts.Include(p => p.AppUser).FirstOrDefaultAsync(p => p.Id == id);
             if (model == null) return null;

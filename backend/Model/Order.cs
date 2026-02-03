@@ -10,14 +10,14 @@ namespace backend.Model
     [Table("Order")]
     public class Order
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public OrderStatus OrderStatus { get; set; }
         public int TotalAmount { get; set; } = 0;
         public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-        public int BuyerId { get; set; }
+        public Guid BuyerId { get; set; }
         public AppUser? Buyer { get; set; }
     }
 }

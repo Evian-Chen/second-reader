@@ -63,11 +63,23 @@ namespace backend.Data
                 .HasForeignKey(ci => ci.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<UserBook>()
+                .HasOne(ub => ub.Book)
+                .WithMany()
+                .HasForeignKey(ub => ub.BookId)
+                .OnDelete(DeleteBehavior.NoAction);
+
 
             // 同一個 UserBook 只能被加入 Cart 一次:不可以從同個賣家加入兩本 UserBookId 一樣的書
             builder.Entity<CartItem>()
                 .HasIndex(ci => new { ci.CartId, ci.UserBookId })
                 .IsUnique();
+
+            //  waitlist 會對應到一個 AppUser 作為 FK
+            builder.Entity<Waitlist>()
+                .HasOne(w => w.AppUser)
+                .WithMany()
+                .HasForeignKey(w => w.WaiterId);
 
             // TODO: 可用 HasIndex 建立複合索引，加速查詢
             // example:

@@ -20,47 +20,24 @@ namespace backend.Repository
             _context = context;
         }
 
-        public async Task<NotificationDto> CreateNotificationAsync(NotificationType notificationType, AppUser user, int orderId, int? userBookId)
+        public async Task<NotificationDto> CreateCartItemExpiredAsync(AppUser user, Guid? userBookId)
         {
-            NotificationDto notification;
-            switch (notificationType)
+            var book = await _context.UserBooks.Include(b => b.Book).Include(b => b.AppUser).FirstOrDefaultAsync(b => b.Id == userBookId);
+            var content = $"您放在購物車的書《{book!.Book!.Title}》逾期未結帳，已遞補給下一位排隊的使用者。";
+
+            var notification = new Notification
             {
-                case NotificationType.OrderCreated:
-                    notification = await CreateOrderCreatedAsync(user, orderId);
-                    break;
-
-                case NotificationType.OrderRequest:
-                    if (userBookId == null) throw new InvalidOperationException("When creating order request notification, userBookId is required.");
-                    notification = await CreateOrderRequestAsync(user, userBookId);
-                    break;
-
-                case NotificationType.OrderRejected:
-                    if (userBookId == null) throw new InvalidOperationException("When creating order rejected notification, userBookId is required.");
-                    notification = await CreateOrderRejectedAsync(user, userBookId);
-                    break;
-
-                case NotificationType.OrderAccepted:
-                    if (userBookId == null) throw new InvalidOperationException("When creating order accepted notification, userBookId is required.");
-                    notification = await CreateOrderAcceptedAsync(user, userBookId);
-                    break;
-
-                case NotificationType.WaitlistAccepted:
-                    if (userBookId == null) throw new InvalidOperationException("When creating waitlist accepted notification, userBookId is required.");
-                    notification = await CreateWaitlistAcceptedAsync(user, userBookId);
-                    break;
-
-                case NotificationType.WaitlistCanceled:
-                    if (userBookId == null) throw new InvalidOperationException("When creating waitlist canceled notification, userBookId is required.");
-                    notification = await CreateWaitlistCanceledAsync(user, userBookId);
-                    break;
-
-                default:
-                    throw new InvalidOperationException();
-            }
-            return notification;
+                Title = Util.Literals.CartItemExpiredTitle,
+                Content = content,
+                ReceiverAccountId = user.AccountId,
+                ActorAccountId = Util.Accounts.System,
+                NotificationType = NotificationType.CartItemExpired
+            };
+            var created = await _context.Notifications.AddAsync(notification);
+            return created.Entity.ToDtoFromModel();
         }
 
-        public async Task<NotificationDto> CreateOrderAcceptedAsync(AppUser user, int? userBookId)
+        public async Task<NotificationDto> CreateOrderAcceptedAsync(AppUser user, Guid? userBookId)
         {
             var book = await _context.UserBooks.Include(b => b.Book).Include(b => b.AppUser).FirstOrDefaultAsync(b => b.Id == userBookId);
             var content = $"您訂購的書《{book!.Book!.Title}》已被賣家 {book.AppUser!.AccountId} 接受。";
@@ -74,11 +51,10 @@ namespace backend.Repository
                 NotificationType = NotificationType.OrderAccepted
             };
             var created = await _context.Notifications.AddAsync(notification);
-            await _context.SaveChangesAsync();
             return created.Entity.ToDtoFromModel();
         }
 
-        public async Task<NotificationDto> CreateOrderCompletedAsync(AppUser user, int? userBookId)
+        public async Task<NotificationDto> CreateOrderCompletedAsync(AppUser user, Guid? userBookId)
         {
             var book = await _context.UserBooks.Include(b => b.Book).Include(b => b.AppUser).FirstOrDefaultAsync(b => b.Id == userBookId);
             var content = $"您向 {book.AppUser!.AccountId} 訂購的書《{book!.Book!.Title}》已交付成功！";
@@ -92,11 +68,10 @@ namespace backend.Repository
                 NotificationType = NotificationType.OrderCompleted
             };
             var created = await _context.Notifications.AddAsync(notification);
-            await _context.SaveChangesAsync();
             return created.Entity.ToDtoFromModel();
         }
 
-        public async Task<NotificationDto> CreateOrderCreatedAsync(AppUser user, int orderId)
+        public async Task<NotificationDto> CreateOrderCreatedAsync(AppUser user, Guid? orderId)
         {
             var order = await _context.Orders.Include(o => o.OrderItems).ThenInclude(oi => oi.UserBook).ThenInclude(ub => ub.Book).FirstOrDefaultAsync(o => o.Id == orderId);
             if (order == null) throw new InvalidCastException("Order not exists, can not send notification.");
@@ -112,11 +87,10 @@ namespace backend.Repository
                 NotificationType = NotificationType.OrderCreated
             };
             var created = await _context.Notifications.AddAsync(notification);
-            await _context.SaveChangesAsync();
             return created.Entity.ToDtoFromModel();
         }
 
-        public async Task<NotificationDto> CreateOrderRejectedAsync(AppUser user, int? userBookId)
+        public async Task<NotificationDto> CreateOrderRejectedAsync(AppUser user, Guid? userBookId)
         {
             var book = await _context.UserBooks.Include(b => b.Book).Include(b => b.AppUser).FirstOrDefaultAsync(b => b.Id == userBookId);
             var content = $"您訂購的書《{book!.Book!.Title}》已被賣家 {book.AppUser!.AccountId} 拒絕。";
@@ -130,11 +104,10 @@ namespace backend.Repository
                 NotificationType = NotificationType.OrderRejected
             };
             var created = await _context.Notifications.AddAsync(notification);
-            await _context.SaveChangesAsync();
             return created.Entity.ToDtoFromModel();
         }
 
-        public async Task<NotificationDto> CreateOrderRequestAsync(AppUser user, int? userBookId)
+        public async Task<NotificationDto> CreateOrderRequestAsync(AppUser user, Guid? userBookId)
         {
             var book = await _context.UserBooks.Include(b => b.Book).Include(b => b.AppUser).FirstOrDefaultAsync(b => b.Id == userBookId);
             var content = $"您的上架書籍《{book!.Book!.Title}》已被下單！請盡速前往訂單管理中心確認。";
@@ -148,18 +121,41 @@ namespace backend.Repository
                 NotificationType = NotificationType.OrderRequest
             };
             var created = await _context.Notifications.AddAsync(notification);
-            await _context.SaveChangesAsync();
             return created.Entity.ToDtoFromModel();
         }
 
-        public Task<NotificationDto> CreateWaitlistAcceptedAsync(AppUser user, int? userBookId)
+        public async Task<NotificationDto> CreateWaitlistAcceptedAsync(AppUser user, Guid? userBookId)
         {
-            throw new NotImplementedException();
+            var book = await _context.UserBooks.Include(b => b.Book).Include(b => b.AppUser).FirstOrDefaultAsync(b => b.Id == userBookId);
+            var content = $"您排隊的書籍《{book!.Book!.Title}》已確認！已加入購物車中，請於三日內確認下單，逾期將會遞補給下一位等候者。";
+
+            var notification = new Notification
+            {
+                Title = Util.Literals.WaitlistAccepted,
+                Content = content,
+                ReceiverAccountId = book.AppUser!.AccountId,
+                ActorAccountId = Util.Accounts.System,
+                NotificationType = NotificationType.WaitlistAccepted
+            };
+            var created = await _context.Notifications.AddAsync(notification);
+            return created.Entity.ToDtoFromModel();
         }
 
-        public Task<NotificationDto> CreateWaitlistCanceledAsync(AppUser user, int? userBookId)
+        public async Task<NotificationDto> CreateWaitlistCanceledAsync(AppUser user, Guid? userBookId)
         {
-            throw new NotImplementedException();
+            var book = await _context.UserBooks.Include(b => b.Book).Include(b => b.AppUser).FirstOrDefaultAsync(b => b.Id == userBookId);
+            var content = $"您排隊的書籍《{book!.Book!.Title}》已不再架上，因此已取消您的排隊。";
+
+            var notification = new Notification
+            {
+                Title = Util.Literals.WaitlistCanceled,
+                Content = content,
+                ReceiverAccountId = book.AppUser!.AccountId,
+                ActorAccountId = Util.Accounts.System,
+                NotificationType = NotificationType.WaitlistCanceled
+            };
+            var created = await _context.Notifications.AddAsync(notification);
+            return created.Entity.ToDtoFromModel();
         }
 
         public async Task<List<NotificationDto>?> GetNotificationAsync(bool unReadOnly, AppUser user)
@@ -171,13 +167,12 @@ namespace backend.Repository
             return [.. result.Select(n => n.ToDtoFromModel())];
         }
 
-        public async Task<NotificationDto?> GetNotificationByIdAsync(AppUser user, int id)
+        public async Task<NotificationDto?> GetNotificationByIdAsync(AppUser user, Guid id)
         {
             var notification = await _context.Notifications.FirstOrDefaultAsync(c => c.Id == id && c.ReceiverAccountId == user.AccountId);
             if (notification == null) return null;
             notification.UnRead = false;
             notification.ReadAt = DateTime.Now;
-            await _context.SaveChangesAsync();
             return notification.ToDtoFromModel();
         }
     }

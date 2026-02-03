@@ -8,7 +8,7 @@ namespace backend.Dto.Order
 {
     public class CheckoutCartDto
     {
-        public Dictionary<int, Methods> BookMethodsPair { get; set; } = new Dictionary<int, Methods>();
+        public Dictionary<Guid, Methods> BookMethodsPair { get; set; } = new Dictionary<Guid, Methods>();
     }
 
     public class Methods

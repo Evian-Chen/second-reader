@@ -21,8 +21,17 @@ namespace backend.Controller
             _notiRepo = notiRepo;
         }
 
+        /// <summary>
+        /// 取得所有站內通知
+        /// </summary>
+        /// <param name="UnReadOnly">是否只取得未讀訊息</param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet]
         [Authorize]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<NotificationDto>>> GetNotification([FromQuery] bool UnReadOnly)
         {
             // 取得通知（篩選未讀或不篩選拿全部）
@@ -34,9 +43,18 @@ namespace backend.Controller
             return Ok(notifications);
         }
 
-        [HttpGet("{id:int}")]
+        /// <summary>
+        /// 取得特定一筆通知詳細資料
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        [HttpGet("{id:guid}")]
         [Authorize]
-        public async Task<ActionResult<NotificationDto>> GetNotificationById([FromRoute] int id)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<NotificationDto>> GetNotificationById([FromRoute] Guid id)
         {
             if (!ModelState.IsValid) return BadRequest();
             // 取得特定一筆通知，並且將其改成已讀 
@@ -44,19 +62,6 @@ namespace backend.Controller
             var notification = await _notiRepo.GetNotificationByIdAsync(user, id);
             if (notification == null) return NotFound();
             return Ok(notification);
-        }
-
-        [HttpPost]
-        [Authorize]
-        public async Task<ActionResult<NotificationDto>> CreateNotification([FromQuery] NotificationType notificationType, int orderId, int? userBookId)
-        {
-            // 建立一筆站內通知, /api/me/notification?notificationType=OrderCreated&orderId=1&userBookId=
-            // 在 MeCartRepo 的 CreateOrderAsync 在建立 order 的同時也會寄出通知（automic）
-            if (!ModelState.IsValid) return BadRequest();
-
-            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
-            var _ = await _notiRepo.CreateNotificationAsync(notificationType, user, orderId, userBookId);
-            return StatusCode(204);
         }
     }
 }

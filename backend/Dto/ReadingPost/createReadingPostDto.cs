@@ -9,7 +9,7 @@ namespace backend.Dto.ReadingPost
     public class createReadingPostDto
     {
         [BindNever]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public int Rating { get; set; }

@@ -10,7 +10,7 @@ namespace backend.Model
     [Table("AppUser")]
     public class AppUser
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public string ClerkUserId { get; set; } = string.Empty;  // clerk 自動生成的，作為身分憑證，查詢時使用 accountId
         [Required]
         [MaxLength(50)]

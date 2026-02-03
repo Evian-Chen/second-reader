@@ -10,7 +10,7 @@ namespace backend.Dto.Book
 {
     public class UserBookListinDetailDto
     {
-        public int UserBookId { get; set; }
+        public Guid UserBookId { get; set; }
         public BookCondition bookCondition { get; set; }
         public List<PayMethod> SellerPayMethods { get; set; } = new List<PayMethod>();
         public List<DeliveryMethod> SellerDeliveryMethods { get; set; } = new List<DeliveryMethod>();

@@ -39,6 +39,7 @@ export interface Book {
   author: string
   description: string
   bookCategory: BookCategory
+  // userBookStatus: UserBookStatus => TODO: 新增此 enum
   // 以下欄位可能不存在於後端回傳的資料中，需要額外處理
   price?: number
   originalPrice?: number
@@ -46,6 +47,11 @@ export interface Book {
   condition?: string
   rating?: number
 }
+
+/**
+ * TODO:
+ * 點進去查看書的詳細資訊（對應後端 UserBookListingDto）
+ */
 
 export interface BookResponse {
   userBookId: number

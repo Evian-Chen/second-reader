@@ -32,7 +32,9 @@ namespace backend.Mapper
                     Title = userBook.Book.Title,
                     Author = userBook.Book.Author,
                     Description = userBook.Book.Description,
-                    BookCategory = userBook.Book.BookCategory
+                    BookCategory = userBook.Book.BookCategory,
+                    UserBookStatus = userBook.UserBookStatus,
+                    SellerAccountId = userBook.AppUser!.AccountId
                 }
             };
         }
@@ -47,7 +49,9 @@ namespace backend.Mapper
                 ISBN = userBook.Book.ISBN,
                 Author = userBook.Book.Author,
                 Description = userBook.Book.Description,
-                BookCategory = userBook.Book.BookCategory
+                BookCategory = userBook.Book.BookCategory,
+                UserBookStatus = userBook.UserBookStatus,
+                SellerAccountId = userBook.AppUser!.AccountId
             };
         }
 
@@ -76,7 +80,7 @@ namespace backend.Mapper
                 ISBN = bookSummaryDto.ISBN,
                 Author = bookSummaryDto.Author,
                 Description = bookSummaryDto.Description,
-                BookCategory = bookSummaryDto.BookCategory
+                BookCategory = bookSummaryDto.BookCategory,
             };
         }
     }
