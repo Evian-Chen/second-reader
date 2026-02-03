@@ -23,7 +23,6 @@ namespace backend.Repository
         {
             var model = postDto.ToReadingPostFromCreate();
             model.AppUser = appUser;
-            model.AccountId = appUser.AccountId;
             await _context.ReadingPosts.AddAsync(model);
             await _context.SaveChangesAsync();
             return model;
@@ -39,7 +38,7 @@ namespace backend.Repository
 
         public async Task<List<ReadingPostDto>?> GetAllByAccountIdAsync(string accountId)
         {
-            var posts = await _context.ReadingPosts.Include(p => p.AppUser).Where(p => p.AccountId == accountId).ToListAsync();
+            var posts = await _context.ReadingPosts.Include(p => p.AppUser).Where(p => p.AppUser!.AccountId == accountId).ToListAsync();
             return posts.Select(p => p.ToReadingPostDto()).ToList();
         }
 

@@ -13,6 +13,7 @@ namespace backend.Mapper
         {
             return new NotificationDto
             {
+                Id = notification.Id,
                 Title = notification.Title,
                 Content = notification.Content,
                 ReceiverAccountId = notification.ReceiverAccountId,

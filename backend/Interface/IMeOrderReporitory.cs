@@ -11,5 +11,7 @@ namespace backend.Interface
     {
         Task<List<OrderDto>?> GetAllOrderAsync(AppUser user);
         Task<OrderDto?> GetOrderByIdAsync(AppUser user, Guid orderId);
+        Task<OrderItemDto?> CompleteOrderItemByIdAsync(AppUser user, Guid orderItemId);
+        Task<OrderItemDto?> GetOrderItemByIdAsync(Guid orderItemId);
     }
 }

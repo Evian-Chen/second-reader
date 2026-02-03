@@ -17,9 +17,10 @@ namespace backend.Interface
         Task<NotificationDto> CreateOrderRequestAsync(AppUser user, Guid? userBookId);
         Task<NotificationDto> CreateOrderRejectedAsync(AppUser user, Guid? userBookId);
         Task<NotificationDto> CreateOrderAcceptedAsync(AppUser user, Guid? userBookId);
-        Task<NotificationDto> CreateOrderCompletedAsync(AppUser user, Guid? userBookId);
+        Task<NotificationDto> CompleteOrderItemFromSellerAsync(AppUser user, Guid? userBookId);
         Task<NotificationDto> CreateWaitlistAcceptedAsync(AppUser user, Guid? userBookId);
         Task<NotificationDto> CreateWaitlistCanceledAsync(AppUser user, Guid? userBookId);
         Task<NotificationDto> CreateCartItemExpiredAsync(AppUser user, Guid? userBookId);
+        Task<NotificationDto> CompleteOrderItemFromBuyerAsync(AppUser user, Guid? userBookId);
     }
 }

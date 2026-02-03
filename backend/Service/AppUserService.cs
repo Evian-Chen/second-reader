@@ -25,7 +25,7 @@ namespace backend.Service
         {
             var userBooksModels = new List<UserBook>();
             foreach (var dto in uploadDtos)
-            {  
+            {
                 // 同一個使用者不允許上傳同本書兩次
                 var existing = await _context.UserBooks.Include(u => u.AppUser).Where(u => u.AppUser.AccountId == appUser.AccountId && u.Book.ISBN == dto.Book.ISBN).FirstOrDefaultAsync();
                 if (existing != null) continue;
@@ -40,7 +40,6 @@ namespace backend.Service
 
                 var model = dto.ToUserBookModelFromUpload();
                 model.AppUser = appUser;
-                model.UserId = appUser.Id;
                 model.UserBookStatus = Enums.UserBookStatus.Listed;
                 model.Book = book;
 
@@ -52,7 +51,7 @@ namespace backend.Service
             return userBooksModels;
         }
 
-        public async Task<AppUser> EnsureLocalUserAsync(string ClerkUserId, string Email)
+        public async Task<AppUser> EnsureLocalUserAsync(string ClerkUserId, string Email, string accountIdTemp)
         {
             var user = await _context.AppUsers.Include(u => u.UserProfile).FirstOrDefaultAsync(x => x.ClerkUserId == ClerkUserId);
             if (user != null) return user;
@@ -60,6 +59,8 @@ namespace backend.Service
             var newUser = new AppUser
             {
                 ClerkUserId = ClerkUserId,
+                // ensure uniqueness when auto-provisioning
+                AccountId = accountIdTemp,
                 Email = Email,
             };
             return await _userRepo.CreateAsync(newUser);

@@ -19,7 +19,7 @@ namespace backend.Mapper
                 Rating = model.Rating,
                 Likes = model.Likes,
                 UpdatedAt = model.UpdatedAt,
-                AccountId = model.AccountId
+                AccountId = model.AppUser!.AccountId
             };
         }
 

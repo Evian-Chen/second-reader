@@ -13,7 +13,6 @@ namespace backend.Model
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-        public string AccountId { get; set; } = string.Empty;
         public AppUser? AppUser { get; set; }
         public List<CartItem> CartItems { get; set; } = new List<CartItem>();
     }

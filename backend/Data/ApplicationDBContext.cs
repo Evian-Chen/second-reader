@@ -63,6 +63,12 @@ namespace backend.Data
                 .HasForeignKey(ci => ci.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<CartItem>()
+                .HasOne(ci => ci.UserBook)
+                .WithMany()
+                .HasForeignKey(ci => ci.UserBookId)
+                .OnDelete(DeleteBehavior.NoAction);  // userbook 被刪掉時擁有該書的 cartItem 不會一起刪
+
             builder.Entity<UserBook>()
                 .HasOne(ub => ub.Book)
                 .WithMany()

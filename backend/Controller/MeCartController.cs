@@ -49,12 +49,10 @@ namespace backend.Controller
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<CartItemListingDto>> AddItemToCartById([FromBody] CartItemDto itemDto)
+        public async Task<ActionResult<CartItemListingDto>> AddItemToCartById([FromQuery] Guid userBookId)
         {
-            if (!ModelState.IsValid) return BadRequest();
-
             var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
-            var item = await _cartRepo.AddItemToCartByIdAsync(user, itemDto);
+            var item = await _cartRepo.AddItemToCartByIdAsync(user, userBookId);
             if (item == null) return NotFound();
             return Ok(item);
         }
@@ -96,6 +94,22 @@ namespace backend.Controller
             var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var orderDto = await _cartRepo.CreateOrderAsync(user, checkoutDto);
             return Ok(orderDto);
+        }
+
+        /// <summary>
+        /// 清除整個購物車
+        /// </summary>
+        /// <returns></returns>
+        [HttpDelete]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteCart()
+        {
+            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
+            var deletedCart = await _cartRepo.DeleteAllCartAsync(user);
+            if (deletedCart == null) return NotFound("No item in cart.");
+            return NoContent();
         }
     }
 }

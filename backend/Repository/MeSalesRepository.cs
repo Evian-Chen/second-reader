@@ -54,7 +54,7 @@ namespace backend.Repository
 
         public async Task<OrderItemDto?> CompleteSaleItemByIdAsync(AppUser user, Guid id)
         {
-            // 更改orderItem狀態、userbook狀態、發送站內通知、更改排隊狀態
+            // 賣家的功能，發送站內通知、更改排隊狀態
             var item = await _context.OrderItems.Include(o => o.UserBook).Include(o => o.Order).ThenInclude(o => o.Buyer).FirstOrDefaultAsync(o => o.Id == id && o.SellerAccountIdSnapshot == user.AccountId);
             if (item == null) return null;
 
@@ -62,11 +62,10 @@ namespace backend.Repository
 
             try
             {
-                item.OrderItemStatus = OrderItemStatus.Completed;
-                item.UserBook!.UserBookStatus = UserBookStatus.Completed;
-
+                if (item.OrderItemStatus != OrderItemStatus.Accepted) throw new InvalidOperationException("Seller should accept the orderItem first.");
+                item.OrderItemStatus = OrderItemStatus.SellerSent;  // 賣家確認寄出書本
                 var buyer = item.Order!.Buyer;
-                await _notiRepo.CreateOrderCompletedAsync(buyer!, item.UserBookId);  // 發送訊息給買家，已成功訂購
+                await _notiRepo.CompleteOrderItemFromSellerAsync(buyer!, item.UserBookId);  // 發送訊息給買家，已成功訂購
                 await _waitRepo.RemoveWaitlistAsync(item.UserBookId);  // 發送訊息給等待這本書的使用者，取消排隊
                 await _context.SaveChangesAsync();
                 await tx.CommitAsync();
@@ -82,7 +81,7 @@ namespace backend.Repository
         public async Task<OrderItemDto?> GetSaleItemByIdAsync(AppUser user, Guid id)
         {
             // return 特定一筆訂購書的資訊，做為顯示用
-            var item = await _context.OrderItems.FirstOrDefaultAsync(i => i.Id == id && i.SellerAccountIdSnapshot == user.AccountId);
+            var item = await _context.OrderItems.Include(oi => oi.UserBook).ThenInclude(ub => ub.AppUser).FirstOrDefaultAsync(i => i.Id == id && i.SellerAccountIdSnapshot == user.AccountId);
             if (item == null) return null;
             return item.ToOrderItemDtoFromOrderItem();
         }
@@ -90,7 +89,7 @@ namespace backend.Repository
         public async Task<List<OrderItemDto>?> GetSaleItemsByStatusAsync(AppUser user, OrderItemStatus? status)
         {
             // 賣家查看別人訂購自己的書訂單，status 篩選狀態
-            var items = _context.OrderItems.Where(oi => oi.SellerAccountIdSnapshot == user.AccountId).AsQueryable();
+            var items = _context.OrderItems.Include(oi => oi.UserBook).ThenInclude(ub => ub.AppUser).Where(oi => oi.SellerAccountIdSnapshot == user.AccountId).AsQueryable();
             if (status != null && Enum.IsDefined(typeof(OrderItemStatus), status))
             {
                 items = items.Where(i => i.OrderItemStatus == status);
@@ -102,7 +101,7 @@ namespace backend.Repository
         public async Task<OrderItemDto?> RejectSaleItemByIdAsync(AppUser user, Guid id)
         {
             // 更改orderItem狀態、userbook狀態、發送站內通知、更改排隊狀態
-            var item = await _context.OrderItems.Include(o => o.UserBook).Include(o => o.Order).ThenInclude(o => o.Buyer).FirstOrDefaultAsync(o => o.Id == id && o.SellerAccountIdSnapshot == user.AccountId);
+            var item = await _context.OrderItems.Include(o => o.UserBook).ThenInclude(oi => oi.AppUser).Include(o => o.Order).ThenInclude(o => o.Buyer).FirstOrDefaultAsync(o => o.Id == id && o.SellerAccountIdSnapshot == user.AccountId);
             if (item == null) return null;
 
             using var tx = await _context.Database.BeginTransactionAsync();

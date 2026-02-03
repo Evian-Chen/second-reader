@@ -19,7 +19,6 @@ namespace backend.Model
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-        public Guid UserId { get; set; }  // FK
         public AppUser? AppUser { get; set; }
         public Guid BookId { get; set; }  // FK
         public Book? Book { get; set; }

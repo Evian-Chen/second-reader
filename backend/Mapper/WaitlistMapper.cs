@@ -14,7 +14,7 @@ namespace backend.Mapper
             return new WaitlistDto
             {
                 UserBookId = list.UserBookId,
-                WaiterAccountId = list.WaiterAccountId,
+                WaiterAccountId = list.AppUser!.AccountId,
                 WaitlistStatus = list.WaitlistStatus,
                 CreatedAt = list.CreatedAt
             };

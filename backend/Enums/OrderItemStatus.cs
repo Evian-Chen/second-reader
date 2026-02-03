@@ -5,6 +5,7 @@ namespace backend.Enums
         Pending = 0,
         Accepted,
         Rejected,
+        SellerSent,
         Completed
     }
 }

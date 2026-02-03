@@ -42,17 +42,9 @@ namespace backend.Mapper
             {
                 Id = cart.Id,
                 CreatedAt = cart.CreatedAt,
-                AccountId = cart.AccountId,
+                AccountId = cart.AppUser!.AccountId,
                 CartItems = cart.CartItems
                             .Select(c => c.ToCartItemListingFromCartItem()).ToList()
-            };
-        }
-
-        public static CartItem ToCartItemFromItemDto(this CartItemDto dto)
-        {
-            return new CartItem
-            {
-                UserBookId = dto.UserBookId
             };
         }
 
