@@ -28,21 +28,29 @@ namespace backend.Repository
 
         public async Task<Waitlist?> AddOrRemoveWaitlistAsync(Guid userBookId, bool addToWaitlist, AppUser user)
         {
-            var existing = await _context.Waitlists.FirstOrDefaultAsync(w => w.UserBookId == userBookId && w.WaiterAccountId == user.AccountId);
+            Waitlist? existing;
+            existing = await _context.Waitlists.FirstOrDefaultAsync(w => w.UserBookId == userBookId && w.AppUser!.AccountId == user.AccountId);
             if (addToWaitlist)
             {
                 // 加入等待清單 
-                if (existing != null) throw new InvalidOperationException("Waitlist exist or the user is already waiting");
-
-                var waitlist = new Waitlist
+                if (existing != null && existing.WaitlistStatus == Enums.WaitlistStatus.Waiting) throw new InvalidOperationException("User is already waiting");
+                else if (existing != null && existing.WaitlistStatus == Enums.WaitlistStatus.Rejected) throw new InvalidOperationException("User is rejected");
+                else if (existing != null && existing.WaitlistStatus == Enums.WaitlistStatus.Canceled) existing.WaitlistStatus = Enums.WaitlistStatus.Waiting;
+                else
                 {
-                    UserBookId = userBookId,
-                    WaiterAccountId = user.AccountId,
-                    WaitlistStatus = Enums.WaitlistStatus.Waiting
-                };
-                var saved = await _context.Waitlists.AddAsync(waitlist);
+                    var waitlist = new Waitlist
+                    {
+                        UserBookId = userBookId,
+                        WaiterId = user.Id,
+                        AppUser = user,
+                        WaitlistStatus = Enums.WaitlistStatus.Waiting
+                    };
+                    var saved = await _context.Waitlists.AddAsync(waitlist);
+                    existing = saved.Entity;
+                }
+
                 await _context.SaveChangesAsync();
-                return saved.Entity;
+                return existing;
             }
             else
             {
@@ -55,13 +63,13 @@ namespace backend.Repository
 
         public async Task<List<Waitlist>> GetAllByBookIdAsync(Guid userBookId)
         {
-            var waitlist = await _context.Waitlists.Where(w => w.UserBookId == userBookId).ToListAsync();
+            var waitlist = await _context.Waitlists.Include(w => w.AppUser).Where(w => w.UserBookId == userBookId).ToListAsync();
             return waitlist;
         }
 
         public async Task<CartItemListingDto?> ProcessNextInWaitlistAsync(AppUser formerBuyer, AppUser seller, Guid userBookId)
         {
-            var waitlist = await _context.Waitlists.Include(w => w.AppUser).OrderBy(w => w.CreatedAt).FirstOrDefaultAsync();
+            var waitlist = await _context.Waitlists.Include(w => w.AppUser).Where(w => w.UserBookId == userBookId && w.WaitlistStatus == Enums.WaitlistStatus.Waiting).OrderBy(w => w.CreatedAt).FirstOrDefaultAsync();
             if (waitlist == null) return null;
 
             // 書本從別人的 cartItem 或者 orderItem 中移除，加入自己的購物車
@@ -71,7 +79,7 @@ namespace backend.Repository
             try
             {
                 var nextBuyer = waitlist.AppUser;
-                var cartItemListing = await _cartRepo.AddItemToCartByIdAsync(nextBuyer!, new CartItemDto { UserBookId = waitlist.UserBookId });
+                var cartItemListing = await _cartRepo.AddItemToCartByIdAsync(nextBuyer!, waitlist.UserBookId);
                 await _notiRepo.CreateWaitlistAcceptedAsync(nextBuyer!, userBookId);  // 買家
                 waitlist.WaitlistStatus = Enums.WaitlistStatus.Accepted;
                 await _context.SaveChangesAsync();

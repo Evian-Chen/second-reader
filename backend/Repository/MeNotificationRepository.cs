@@ -20,6 +20,24 @@ namespace backend.Repository
             _context = context;
         }
 
+        public async Task<NotificationDto> CompleteOrderItemFromBuyerAsync(AppUser user, Guid? userBookId)
+        {
+            // 買家按確認收到，發送訊息給賣家
+            var book = await _context.UserBooks.Include(b => b.Book).Include(b => b.AppUser).FirstOrDefaultAsync(b => b.Id == userBookId);
+            var content = $"買家已確認收到書籍《{book!.Book!.Title}》。";
+
+            var notification = new Notification
+            {
+                Title = Util.Literals.OrderCompletedByBuyerTitle,
+                Content = content,
+                ReceiverAccountId = book.AppUser!.AccountId,
+                ActorAccountId = Util.Accounts.System,
+                NotificationType = NotificationType.OrderCompletedByBuyer
+            };
+            var created = await _context.Notifications.AddAsync(notification);
+            return created.Entity.ToDtoFromModel();
+        }
+
         public async Task<NotificationDto> CreateCartItemExpiredAsync(AppUser user, Guid? userBookId)
         {
             var book = await _context.UserBooks.Include(b => b.Book).Include(b => b.AppUser).FirstOrDefaultAsync(b => b.Id == userBookId);
@@ -54,18 +72,18 @@ namespace backend.Repository
             return created.Entity.ToDtoFromModel();
         }
 
-        public async Task<NotificationDto> CreateOrderCompletedAsync(AppUser user, Guid? userBookId)
+        public async Task<NotificationDto> CompleteOrderItemFromSellerAsync(AppUser user, Guid? userBookId)
         {
             var book = await _context.UserBooks.Include(b => b.Book).Include(b => b.AppUser).FirstOrDefaultAsync(b => b.Id == userBookId);
-            var content = $"您向 {book.AppUser!.AccountId} 訂購的書《{book!.Book!.Title}》已交付成功！";
+            var content = $"您向 {book!.AppUser!.AccountId} 訂購的書《{book!.Book!.Title}》賣家已出貨。";
 
             var notification = new Notification
             {
-                Title = Util.Literals.OrderCompletedTitle,
+                Title = Util.Literals.OrderCompletedBySellerTitle,
                 Content = content,
                 ReceiverAccountId = user.AccountId,
                 ActorAccountId = Util.Accounts.System,
-                NotificationType = NotificationType.OrderCompleted
+                NotificationType = NotificationType.OrderCompletedBySeller
             };
             var created = await _context.Notifications.AddAsync(notification);
             return created.Entity.ToDtoFromModel();
@@ -133,7 +151,7 @@ namespace backend.Repository
             {
                 Title = Util.Literals.WaitlistAccepted,
                 Content = content,
-                ReceiverAccountId = book.AppUser!.AccountId,
+                ReceiverAccountId = user.AccountId,
                 ActorAccountId = Util.Accounts.System,
                 NotificationType = NotificationType.WaitlistAccepted
             };
@@ -173,6 +191,7 @@ namespace backend.Repository
             if (notification == null) return null;
             notification.UnRead = false;
             notification.ReadAt = DateTime.Now;
+            await _context.SaveChangesAsync();
             return notification.ToDtoFromModel();
         }
     }

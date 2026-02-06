@@ -66,10 +66,12 @@ namespace backend.Repository
             return userBook;
         }
 
-        public async Task<List<UserBook?>> GetAllAsync()
+        public async Task<List<UserBook>?> GetAllAsync(int pageNum, int pageSize)
         {
-            var bookModels = await _context.UserBooks.Include(ub => ub.AppUser).Include(ub => ub.Book).ToListAsync();
-            return bookModels;
+            var bookModels = _context.UserBooks.Include(ub => ub.AppUser).Include(ub => ub.Book);
+            if (bookModels == null) return null;
+            var skipNum = (pageNum - 1) * pageSize;
+            return await bookModels.Skip(skipNum).Take(pageSize).ToListAsync();
         }
 
         public async Task<UserBook?> GetBookByIdAsync(Guid id)
@@ -97,35 +99,39 @@ namespace backend.Repository
             return await books.ToListAsync();
         }
 
-        public async Task<List<UserBook>?> GetBookSearchResult(BookSearchQueryDto queryDto)
+        public async Task<List<UserBook>?> GetBookSearchResult(string? title, string? author, string? sellerAccount, string? sellerDisplayName, BookCategory? bookCategory, string? isbn)
         {
-            var userBooks = _context.UserBooks.Include(ub => ub.Book).AsQueryable();
-            if (!string.IsNullOrWhiteSpace(queryDto.Title))
+            var userBooks = _context.UserBooks
+                .Include(ub => ub.Book)
+                .Include(ub => ub.AppUser)
+                    .ThenInclude(au => au!.UserProfile)
+                .AsQueryable();
+            if (!string.IsNullOrWhiteSpace(title))
             {
-                userBooks = userBooks.Where(b => b.Book!.Title.Contains(queryDto.Title));
+                userBooks = userBooks.Where(b => b.Book!.Title.Contains(title));
             }
-            if (!string.IsNullOrWhiteSpace(queryDto.Author))
+            if (!string.IsNullOrWhiteSpace(author))
             {
-                userBooks = userBooks.Where(ub => ub.Book!.Author.Contains(queryDto.Author));
+                userBooks = userBooks.Where(ub => ub.Book!.Author.Contains(author));
             }
-            if (!string.IsNullOrWhiteSpace(queryDto.SellerAccountId))
+            if (!string.IsNullOrWhiteSpace(sellerAccount))
             {
-                userBooks = userBooks.Where(ub => ub.AppUser!.AccountId.Contains(queryDto.SellerAccountId));
+                userBooks = userBooks.Where(ub => ub.AppUser!.AccountId.Contains(sellerAccount));
             }
-            if (!string.IsNullOrWhiteSpace(queryDto.SellerDisplayName))
+            if (!string.IsNullOrWhiteSpace(sellerDisplayName))
             {
-                userBooks = userBooks.Where(ub => ub.AppUser!.UserProfile!.DisplayName.Contains(queryDto.SellerDisplayName));
+                userBooks = userBooks.Where(ub => ub.AppUser!.UserProfile!.DisplayName.Contains(sellerDisplayName));
             }
-            if (!string.IsNullOrWhiteSpace(queryDto.Isbn))
+            if (!string.IsNullOrWhiteSpace(isbn))
             {
-                userBooks = userBooks.Where(ub => ub.Book!.ISBN == queryDto.Isbn);
+                userBooks = userBooks.Where(ub => ub.Book!.ISBN == isbn);
             }
-            if (queryDto.BookCategory.HasValue)
+            if (bookCategory.HasValue)
             {
-                userBooks = userBooks.Where(ub => ub.Book!.BookCategory == queryDto.BookCategory.Value);
+                userBooks = userBooks.Where(ub => ub.Book!.BookCategory == bookCategory);
             }
 
-            return userBooks.ToList();
+            return await userBooks.ToListAsync();
         }
 
     }

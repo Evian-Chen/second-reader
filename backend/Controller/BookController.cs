@@ -38,9 +38,11 @@ namespace backend.Controller
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<UserBookSummaryDto>>> GetAllBooks()
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<List<UserBookSummaryDto>>> GetAllBooks([FromQuery] int pageNum = 1, int pageSize = 10)
         {
-            var books = await _booksRepo.GetAllAsync();
+            var books = await _booksRepo.GetAllAsync(pageNum, pageSize);
+            if (books == null) return NotFound("No books listed.");
             return Ok(books.Select(b => b!.ToUserBookSummaryDto()).ToList());
         }
 
@@ -108,18 +110,23 @@ namespace backend.Controller
         }
 
         /// <summary>
-        /// 搜尋書籍
+        /// 用關鍵字查詢書籍
         /// </summary>
-        /// <param name="bookSearchQueryDto">可搜尋的欄位（必須完全匹配）</param>
+        /// <param name="title"></param>
+        /// <param name="author"></param>
+        /// <param name="sellerAccount"></param>
+        /// <param name="sellerDisplayName"></param>
+        /// <param name="BookCategory"></param>
+        /// <param name="isbn"></param>
         /// <returns></returns>
         [HttpPost("search")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<UserBookSummaryDto>> GetBookSearchResult([FromBody] BookSearchQueryDto bookSearchQueryDto)
+        public async Task<ActionResult<UserBookSummaryDto>> GetBookSearchResult([FromQuery] string? title, string? author, string? sellerAccount, string? sellerDisplayName, BookCategory? BookCategory, string? isbn)
         {
             if (!ModelState.IsValid) return BadRequest();
-            var resultList = await _booksRepo.GetBookSearchResult(bookSearchQueryDto);
+            var resultList = await _booksRepo.GetBookSearchResult(title, author, sellerAccount, sellerDisplayName, BookCategory, isbn);
             if (resultList == null) return NotFound("No book satisfied the search query.");
             return Ok(resultList.Select(b => b.ToUserBookSummaryDto()));
         }

@@ -9,7 +9,7 @@ namespace backend.Interface
 {
     public interface IAppUserService
     {
-        Task<AppUser> EnsureLocalUserAsync(string ClerkUserId, string Email);
+        Task<AppUser> EnsureLocalUserAsync(string ClerkUserId, string Email, string accountIdTemp);
         Task<List<UserBook>> CreateUserBookAsync(List<UploadUserBooksDto> uploadDtos, AppUser appUser);
     }
 }

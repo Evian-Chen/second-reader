@@ -19,7 +19,6 @@ namespace backend.Model
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-        public string AccountId { get; set; } = string.Empty;  // FK
         public AppUser? AppUser { get; set; }
     }
 }

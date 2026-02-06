@@ -21,7 +21,7 @@ namespace backend.Mapper
                 BookCondition = item.BookConditionSnapshot,
                 BuyerPayMethod = item.BuyerPayMethodSnapshot,
                 BuyerDeliveryMethod = item.BuyerDeliveryMethodSnapshot,
-                SellerAccountId = item.SellerAccountIdSnapshot,
+                SellerAccountId = item.UserBook.AppUser.AccountId,
 
                 BookTitle = item.BookTitleSnapshot,
                 BookISBN = item.BookIsbnSnapshot,

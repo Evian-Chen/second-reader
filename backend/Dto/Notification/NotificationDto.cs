@@ -8,6 +8,7 @@ namespace backend.Dto.Notification
 {
     public class NotificationDto
     {
+        public Guid Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public string ReceiverAccountId { get; set; } = string.Empty;

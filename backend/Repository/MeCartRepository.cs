@@ -48,32 +48,33 @@ namespace backend.Repository
                 .Include(ci => ci.UserBook).ThenInclude(ub => ub!.SellerDeliveryMethods);
         }
 
-        public async Task<CartItemListingDto?> AddItemToCartByIdAsync(AppUser user, CartItemDto itemDto)
+        public async Task<CartItemListingDto?> AddItemToCartByIdAsync(AppUser user, Guid userBookId)
         {
             // 確認要加入購物車的書籍存在
-            var bookExists = await _context.UserBooks.Include(ub => ub.Book).FirstOrDefaultAsync(ub => ub.Id == itemDto.UserBookId)
+            var bookExists = await _context.UserBooks.Include(ub => ub.Book).Include(c => c.AppUser).FirstOrDefaultAsync(ub => ub.Id == userBookId)
                                     ?? throw new InvalidOperationException("Can not add book that does not exists in databse to cart.");
-            if (bookExists.UserId == user.Id) throw new InvalidOperationException("User can not add their listed book to their own carts.");
+            if (bookExists.AppUser!.Id == user.Id) throw new InvalidOperationException("User can not add their listed book to their own carts.");
+            if (bookExists.UserBookStatus != Enums.UserBookStatus.Listed) throw new InvalidOperationException("Can not add book that is not listed.");
 
             // abort: 已經有背景 worker 定期檢查所有購物車裡的item是否過期
             // 如果在其他購物車找到，代表此書在其他購物車尚未過期
             var inOtherCart = await _context.CartItems.Include(c => c.UserBook).FirstOrDefaultAsync(c => c.UserBookId == bookExists.Id);
             if (inOtherCart != null) throw new InvalidOperationException("Book is reserved by others");
 
-            var cartModel = await _context.Carts.FirstOrDefaultAsync(c => c.AccountId == user.AccountId);
+            var cartModel = await _context.Carts.FirstOrDefaultAsync(c => c.AppUser!.AccountId == user.AccountId);
             if (cartModel == null)  // 此使用者沒有建立購物車
             {
                 var newCart = new Cart
                 {
-                    AccountId = user.AccountId
+                    AppUser = user
                 };
                 await _context.Carts.AddAsync(newCart);
                 await _context.SaveChangesAsync();
-                cartModel = await _context.Carts.FirstOrDefaultAsync(c => c.AccountId == user.AccountId);
+                cartModel = await _context.Carts.FirstOrDefaultAsync(c => c.AppUser!.AccountId == user.AccountId);
             }
 
             // 防重複加入（idempotent）
-            var existing = await CartItemForDisplay().FirstOrDefaultAsync(ci => ci.CartId == cartModel!.Id && ci.UserBookId == itemDto.UserBookId);
+            var existing = await CartItemForDisplay().FirstOrDefaultAsync(ci => ci.CartId == cartModel!.Id && ci.UserBookId == userBookId);
 
             if (existing != null)  // 如果已經存在就直接回傳已經存在的
                 return existing.ToCartItemListingFromCartItem();
@@ -90,59 +91,62 @@ namespace backend.Repository
             await _context.SaveChangesAsync();
 
             // 回傳 listing dto（再查一次把 navigation 載齊）
-            var created = await CartItemForDisplay().FirstOrDefaultAsync(ci => ci.CartId == cartModel.Id && ci.UserBookId == itemDto.UserBookId);
+            var created = await CartItemForDisplay().FirstOrDefaultAsync(ci => ci.CartId == cartModel.Id && ci.UserBookId == userBookId);
 
             return created!.ToCartItemListingFromCartItem();
         }
 
         public async Task<CartItemListingDto?> DeleteItemFromCartByIdAsync(AppUser user, Guid userBookId)
         {
-            var cartModel = await _context.Carts.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.AccountId == user.AccountId);
+            var cartModel = await _context.Carts.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.AppUser!.AccountId == user.AccountId);
             if (cartModel == null) return null;
+
             var item = await CartItemForDisplay().FirstOrDefaultAsync(i => i.UserBookId == userBookId && i.CartId == cartModel.Id);
             if (item == null) return null;
+
             item.UserBook!.UserBookStatus = Enums.UserBookStatus.Listed;
             _context.CartItems.Remove(item);
 
+            // 檢查要移除的這本書是否是排隊排來的
+            var waiter = await _context.Waitlists.FirstOrDefaultAsync(w => w.UserBookId == userBookId && w.AppUser!.Id == user.Id);
+            waiter?.WaitlistStatus = Enums.WaitlistStatus.Canceled;
+            await _context.SaveChangesAsync();  // 先存，後面 AddItemToCartByIdAsync 才抓得到
+
             // 檢查移出後，有沒有人在排隊，可能如果有排隊的話要用通知
-            var waitlist = await _context.Waitlists.Include(w => w.AppUser).OrderBy(w => w.CreatedAt).FirstOrDefaultAsync();
+            var waitlist = await _context.Waitlists.Include(w => w.AppUser).Where(w => w.UserBookId == userBookId && w.WaitlistStatus == Enums.WaitlistStatus.Waiting).OrderBy(w => w.CreatedAt).FirstOrDefaultAsync();
             if (waitlist != null)
             {
                 // 1. 加入等待者的 cart 中
                 // 2. 通知買家
-                using var tx = await _context.Database.BeginTransactionAsync();
                 try
                 {
                     var nextBuyer = waitlist.AppUser;
-                    var cartItemListing = await AddItemToCartByIdAsync(nextBuyer!, new CartItemDto { UserBookId = waitlist.UserBookId });
+                    var cartItemListing = await AddItemToCartByIdAsync(nextBuyer!, waitlist.UserBookId);
                     await _notiRepo.CreateWaitlistAcceptedAsync(nextBuyer!, userBookId);  // 買家
                     waitlist.WaitlistStatus = Enums.WaitlistStatus.Accepted;
-                    await tx.CommitAsync();
+                    await _context.SaveChangesAsync();
                 }
                 catch
                 {
-                    await tx.RollbackAsync();
                     throw;
                 }
             }
-
-            await _context.SaveChangesAsync();
             return item.ToCartItemListingFromCartItem();
         }
 
         public async Task<CartDto> GetCartAsync(AppUser user)
         {
-            var cart = await _context.Carts.FirstOrDefaultAsync(c => c.AccountId == user.AccountId);
+            var cart = await _context.Carts.Include(c => c.AppUser).FirstOrDefaultAsync(c => c.AppUser!.AccountId == user.AccountId);
             if (cart == null)  // 此使用者沒有建立購物車
             {
                 var newCart = new Cart
                 {
-                    AccountId = user.AccountId
+                    AppUser = user
                 };
                 await _context.Carts.AddAsync(newCart);
                 await _context.SaveChangesAsync();
             }
-            var cartModel = await CartQueryForDisplay().FirstOrDefaultAsync(c => c.AccountId == user.AccountId);
+            var cartModel = await CartQueryForDisplay().FirstOrDefaultAsync(c => c.AppUser!.AccountId == user.AccountId);
             return cartModel!.ToCartDtoFromCart();
         }
 
@@ -152,7 +156,7 @@ namespace backend.Repository
 
             try
             {
-                var cart = await CartQueryForDisplay().FirstOrDefaultAsync(c => c.AccountId == user.AccountId);
+                var cart = await CartQueryForDisplay().FirstOrDefaultAsync(c => c.AppUser!.Id == user.Id);
 
                 if (cart == null || cart.CartItems.Count == 0) throw new InvalidOperationException("cart is empty.");
                 if (cart.CartItems.Any(c => c.ExpiredAt < DateTime.Now)) throw new InvalidOperationException("Book(s) is expired.");
@@ -160,14 +164,16 @@ namespace backend.Repository
                 // 建立 order
                 var order = new Order
                 {
+                    Buyer = user,
                     BuyerId = user.Id,
-                    OrderItems = new List<OrderItem>()
+                    OrderItems = []
                 };
                 var orderItems = new List<OrderItem>();
                 foreach (var item in cart.CartItems)
                 {
                     // 建立 order item
                     var orderItem = item.ToOrderItemFromCartItem();
+                    orderItem.OrderItemStatus = Enums.OrderItemStatus.Pending;
 
                     // 買家選擇付款與收費方式
                     var paymethod = checkoutDto.BookMethodsPair[item.UserBookId].PaymentMethod;
@@ -181,6 +187,7 @@ namespace backend.Repository
                     orderItem.BuyerDeliveryMethodSnapshot = deliveryMethod;
 
                     order.OrderItems.Add(orderItem);
+                    orderItems.Add(orderItem);
                     order.TotalAmount += orderItem.Price;
 
                     item.UserBook.UserBookStatus = Enums.UserBookStatus.WaitForConfirmation;
@@ -188,8 +195,15 @@ namespace backend.Repository
 
                 // 將 order 加入資料庫並移除目前的購物車
                 await _context.Orders.AddAsync(order);
+                await _context.SaveChangesAsync(); // 先存，這樣才能發送通知
+
+                // 明確刪除所有購物車項目
+                foreach (var cartItem in cart.CartItems)
+                {
+                    _context.CartItems.Remove(cartItem);
+                }
+
                 _context.Carts.Remove(cart);
-                await _context.SaveChangesAsync();
 
                 // 寄送通知給買家和賣家
                 await _notiRepo.CreateOrderCreatedAsync(user, order.Id);
@@ -198,7 +212,7 @@ namespace backend.Repository
                     await _notiRepo.CreateOrderRequestAsync(user, book.UserBookId);
                     // 前端賣家打開通知 => 導到 /sales/items/{orderItemId} 或 /sales?status=Reserved
                 }
-
+                await _context.SaveChangesAsync();
                 await tx.CommitAsync();
                 return order.ToOrderDtoFromOrder();
             }
@@ -207,6 +221,34 @@ namespace backend.Repository
                 await tx.RollbackAsync();
                 throw;
             }
+        }
+
+        public async Task<CartDto?> DeleteAllCartAsync(AppUser user)
+        {
+            var cart = await _context.Carts.Include(c => c.CartItems).ThenInclude(ci => ci.UserBook).FirstOrDefaultAsync(c => c.AppUser!.AccountId == user.AccountId);
+            if (cart == null) return null;
+
+            List<Guid> bookIds = [];
+            foreach (var item in cart.CartItems)
+            {
+                item.UserBook!.UserBookStatus = Enums.UserBookStatus.Listed;
+                _context.CartItems.Remove(item);
+                bookIds.Add(item.UserBookId);
+            }
+            cart.CartItems = [];
+
+            foreach (var id in bookIds)
+            { // 檢查是否有人在等待這些書，有的話發送通知並直接加入那人的購物車
+                var nextWaiter = await _context.Waitlists.Include(w => w.AppUser).FirstOrDefaultAsync(w => w.UserBookId == id);
+                if (nextWaiter != null)
+                {
+                    await _notiRepo.CreateWaitlistAcceptedAsync(nextWaiter.AppUser!, id);
+                    await AddItemToCartByIdAsync(nextWaiter.AppUser!, id);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return cart.ToCartDtoFromCart();
         }
     }
 }

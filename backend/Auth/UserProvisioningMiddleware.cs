@@ -32,8 +32,9 @@ namespace backend.Auth
                 return;
             }
 
-            var email = context.User.FindFirstValue("email");
-            var appUser = await userService.EnsureLocalUserAsync(clerkUserId, email);
+            var accountIdTemp = Util.Random.RandomStringGenerator(15);
+            var email = $"{Util.Random.RandomStringGenerator(15)}@gmail.com";
+            var appUser = await userService.EnsureLocalUserAsync(clerkUserId, email, accountIdTemp);
 
             // 給 controller 拿
             context.Items["AppUser"] = appUser;

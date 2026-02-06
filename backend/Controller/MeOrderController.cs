@@ -54,5 +54,29 @@ namespace backend.Controller
             if (orderDto == null) return NotFound();
             return Ok(orderDto);
         }
+
+        [HttpPost("{orderItemId:guid}/complete")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<OrderItemDto>> CompleteOrderItemById([FromRoute] Guid orderItemId)
+        {
+            // 已經拿到麥加出貨的書了
+            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
+            var item = await _orderRepo.CompleteOrderItemByIdAsync(user, orderItemId);
+            if (item == null) return NotFound();
+            return Ok(item);
+        }
+
+        [HttpGet("/item/{orderItemId:guid}")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<OrderItemDto>> GetOrderItemById([FromRoute] Guid orderItemId)
+        {
+            var item = await _orderRepo.GetOrderItemByIdAsync(orderItemId);
+            if (item == null) return NotFound();
+            return Ok(item);
+        }
     }
 }
