@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using backend.Dto.Cart;
+using backend.Dto.Error;
 using backend.Dto.Order;
 using backend.Interface;
 using backend.Mapper;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Controller
 {
     [Route("/api/me/cart")]
+    [ProducesErrorResponseType(typeof(ApiErrorResponse))]
     [ApiController]
     public class MeCartController : ControllerBase
     {

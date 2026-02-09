@@ -27,9 +27,10 @@ namespace backend.Auth
             var clerkUserId = context.User.FindFirstValue("sub");
             if (string.IsNullOrWhiteSpace(clerkUserId))
             {
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                await context.Response.WriteAsync("Missing sub claim.");
-                return;
+                throw new UnauthorizedAccessException("Missing sub claim.");
+                // context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                // await context.Response.WriteAsync("Missing sub claim.");
+                // return;
             }
 
             var accountIdTemp = Util.Random.RandomStringGenerator(15);

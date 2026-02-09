@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using backend.Dto.Error;
 using backend.Dto.Me;
 using backend.Interface;
 using backend.Mapper;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Controller
 {
     [Route("api/me")]
+    [ProducesErrorResponseType(typeof(ApiErrorResponse))]
     [ApiController]
     public class MeController : ControllerBase
     {
@@ -29,6 +31,7 @@ namespace backend.Controller
         [HttpGet]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<UserDto>> GetMe()
         {
             // UserProvisioningMiddleware 已經把 AppUser 放到 HttpContext.Items["AppUser"] 裡面了
@@ -48,6 +51,7 @@ namespace backend.Controller
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<UserDto>> UpdateMe([FromBody] UpdateUserDto updateUserDto)
         {
             if (!ModelState.IsValid) return BadRequest();

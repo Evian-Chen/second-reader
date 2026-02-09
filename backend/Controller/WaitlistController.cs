@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using backend.Dto.Error;
 using backend.Dto.Me;
 using backend.Dto.Waitlist;
 using backend.Interface;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Controller
 {
     [Route("/api/waitlist")]
+    [ProducesErrorResponseType(typeof(ApiErrorResponse))]
     [ApiController]
     public class WaitlistController : ControllerBase
     {

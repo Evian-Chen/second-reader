@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using backend.Dto.Error;
 using backend.Dto.ReadingPost;
 using backend.Interface;
 using backend.Mapper;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Controller
 {
     [Route("/api/reading-posts")]
+    [ProducesErrorResponseType(typeof(ApiErrorResponse))]
     [ApiController]
     public class ReadingPostController : ControllerBase
     {
@@ -20,6 +22,20 @@ namespace backend.Controller
         public ReadingPostController(IReadingPostRepository postRepo)
         {
             _postRepo = postRepo;
+        }
+
+        /// <summary>
+        /// 取得所有的閱讀貼文
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<List<ReadingPostDto>?>> GetAll()
+        {
+            var posts = await _postRepo.GetAllAsync();
+            if (posts == null) return NotFound();
+            return posts;
         }
 
         /// <summary>
