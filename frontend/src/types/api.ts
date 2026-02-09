@@ -1,7 +1,7 @@
 /**
  * API 回應類型定義
  */
-export type APIResponse<T> = Promise<T | ErrorResponse>
+export type APIResponse<T> = Promise<T>
 
 /**
  * 錯誤回應介面
@@ -13,8 +13,10 @@ export type APIResponse<T> = Promise<T | ErrorResponse>
     "code": "InvalidOperationException",
     "errors": null
   }
+  code 在 Response.StatusCodes
  */
 export interface ErrorResponse {
   error: string
-  code?: number
+  code: string
+  errors?: Record<string, (string[] | null)> | null
 }

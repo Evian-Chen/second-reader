@@ -31,7 +31,7 @@ namespace backend.Controller
         [Authorize]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<OrderDto>> GetAll()
+        public async Task<ActionResult<List<OrderDto>?>> GetAll()
         {
             var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var orderDtos = await _orderRepo.GetAllOrderAsync(user);
@@ -70,7 +70,7 @@ namespace backend.Controller
             return Ok(item);
         }
 
-        [HttpGet("/item/{orderItemId:guid}")]
+        [HttpGet("item/{orderItemId:guid}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
