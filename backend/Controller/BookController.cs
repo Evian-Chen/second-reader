@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using backend.Dto.Book;
+using backend.Dto.Error;
 using backend.Dto.GoogleBook;
 using backend.Dto.UserBook;
 using backend.Enums;
@@ -17,6 +18,7 @@ using Microsoft.Identity.Client;
 namespace backend.Controller
 {
     [Route("/api/books")]
+    [ProducesErrorResponseType(typeof(ApiErrorResponse))]
     [ApiController]
     public class BookController : ControllerBase
     {

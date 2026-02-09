@@ -15,5 +15,6 @@ namespace backend.Interface
         Task<ReadingPost?> DeletePostByIdAsync(Guid id);
         Task<ReadingPost?> UpdatePostByIdAsync(Guid id, createReadingPostDto dto, AppUser appUser);
         Task<ReadingPost?> LikePosyByIdAsync(Guid id, LikePostDto likePostDto);
+        Task<List<ReadingPostDto>?> GetAllAsync();
     }
 }

@@ -33,7 +33,15 @@ namespace backend.Repository
             var model = await _context.ReadingPosts.Include(p => p.AppUser).FirstOrDefaultAsync(p => p.Id == id);
             if (model == null) return null;
             _context.ReadingPosts.Remove(model);
+            await _context.SaveChangesAsync();
             return model;
+        }
+
+        public async Task<List<ReadingPostDto>?> GetAllAsync()
+        {
+            var posts = await _context.ReadingPosts.Include(p => p.AppUser).ToListAsync();
+            if (posts == null) return null;
+            return [.. posts.Select(p => p.ToReadingPostDto())];
         }
 
         public async Task<List<ReadingPostDto>?> GetAllByAccountIdAsync(string accountId)

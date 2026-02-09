@@ -1,63 +1,126 @@
-/**
- * 書籍分類 enum（對應後端的 BookCategory）
- */
-export enum BookCategory {
-  Undefined = 0,
-  Mandarin = 1,
-  World = 2,
-  GenreFic = 3, // 類型文學
-  LightNovel = 4,
-  Manga = 5,
-  Bl = 6,
-  Gl = 7,
-  History = 8,
-  Poem = 9,
-  Art = 10,
-  Philisophy = 11,
-  Religion = 12,
-  Biography = 13,
+// src/types/book.ts
+// Generated from swagger (OpenAPI) schemas & /api/books parameters
+
+import type { BookCategory, BookCondition, PayMethod, DeliveryMethod, UserBookStatus } from "./Enums";
+
+/* ===========================
+ * OpenAPI Schemas (DTOs)
+ * =========================== */
+
+/** OpenAPI: UserBookSummaryDto */
+export interface UserBookSummaryDto {
+  userBookId?: string; // uuid
+  isbn?: string | null;
+  title?: string | null;
+  author?: string | null;
+  description?: string | null;
+  bookCategory?: BookCategory;
+  userBookStatus?: UserBookStatus;
+  sellerAccountId?: string | null;
 }
 
-/**
- * 書籍搜尋查詢 DTO
- */
-export interface BookSearchQueryDto {
-  title?: string
-  author?: string
-  sellerAccountId?: string
-  sellerDisplayName?: string
-  bookCategory?: BookCategory
+/** OpenAPI: UserBookListinDetailDto */
+export interface UserBookListinDetailDto {
+  userBookId?: string; // uuid
+  bookCondition?: BookCondition;
+  sellerPayMethods?: PayMethod[] | null;
+  sellerDeliveryMethods?: DeliveryMethod[] | null;
+  price?: number; // int32
+  userBookStatus?: UserBookStatus;
+  createdAt?: string; // date-time (ISO string)
+  sellerAccountId?: string | null;
+  book?: UserBookSummaryDto;
 }
 
-/**
- * 書籍資料介面（對應後端的 UserBookSummaryDto）
- */
-export interface Book {
-  userBookId: number
-  isbn: string
-  title: string
-  author: string
-  description: string
-  bookCategory: BookCategory
-  // userBookStatus: UserBookStatus => TODO: 新增此 enum
-  // 以下欄位可能不存在於後端回傳的資料中，需要額外處理
-  price?: number
-  originalPrice?: number
-  image?: string
-  condition?: string
-  rating?: number
+/** OpenAPI: UploadUserBooksDto */
+export interface UploadUserBooksDto {
+  bookCondition?: BookCondition;
+  sellerPayMethods?: PayMethod[] | null;
+  sellerDeliveryMethods?: DeliveryMethod[] | null;
+  price?: number; // int32
+  userBookStatus?: UserBookStatus;
+  createdAt?: string; // date-time (ISO string)
+  book?: UserBookSummaryDto;
 }
 
-/**
- * TODO:
- * 點進去查看書的詳細資訊（對應後端 UserBookListingDto）
- */
-
-export interface BookResponse {
-  userBookId: number
-  isbn: string
-  title: string
-  author: string
-  description: string
-  bookCategory: BookCategory
+/** OpenAPI: UpdateUserBookDto */
+export interface UpdateUserBookDto {
+  bookCondition?: BookCondition;
+  sellerPayMethods?: PayMethod[] | null;
+  sellerDeliveryMethods?: DeliveryMethod[] | null;
+  price?: number; // int32
+  userBookStatus?: UserBookStatus;
+  createdAt?: string; // date-time (ISO string)
 }
+
+/** OpenAPI: GoogleBookResultDto */
+export interface GoogleBookResultDto {
+  title?: string | null;
+  authors?: string[] | null;
+  isbn?: string | null;
+  previewLink?: string | null;
+}
+
+/* ===========================
+ * /api/books Endpoints Types (params / body / response)
+ * =========================== */
+
+/** GET /api/books?pageNum=&pageSize= -> 200 UserBookSummaryDto[] */
+export interface GetBooksQuery {
+  pageNum?: number; // int32 (default 1 in swagger)
+  pageSize?: number; // int32 (default 10 in swagger)
+}
+export type GetBooksResponse = UserBookSummaryDto[];
+
+/** POST /api/books (body: UploadUserBooksDto[]) -> 200 UserBookSummaryDto[] */
+export type CreateBooksRequest = UploadUserBooksDto[];
+export type CreateBooksResponse = UserBookSummaryDto[];
+
+/** GET /api/books/{accountId}?Status= -> 200 UserBookSummaryDto */
+export interface GetBooksByAccountIdPath {
+  accountId: string;
+}
+export interface GetBooksByAccountIdQuery {
+  Status?: UserBookStatus;
+}
+export type GetBooksByAccountIdResponse = UserBookSummaryDto;
+
+/** GET /api/books/{id} -> 200 UserBookListinDetailDto */
+export interface GetBookByIdPath {
+  id: string; // uuid
+}
+export type GetBookByIdResponse = UserBookListinDetailDto;
+
+/** PUT /api/books/{id} (body: UpdateUserBookDto) -> 200 UserBookListinDetailDto */
+export interface UpdateBookByIdPath {
+  id: string; // uuid
+}
+export type UpdateBookByIdRequest = UpdateUserBookDto;
+export type UpdateBookByIdResponse = UserBookListinDetailDto;
+
+/** DELETE /api/books/{id}?hard= -> 200 UserBookSummaryDto */
+export interface DeleteBookByIdPath {
+  id: string; // uuid
+}
+export interface DeleteBookByIdQuery {
+  hard?: boolean;
+}
+export type DeleteBookByIdResponse = UserBookSummaryDto;
+
+/** POST /api/books/search?title=&author=&sellerAccount=&sellerDisplayName=&BookCategory=&isbn= -> 200 UserBookSummaryDto */
+export interface SearchBooksQuery {
+  title?: string;
+  author?: string;
+  sellerAccount?: string;
+  sellerDisplayName?: string;
+  /** 注意 swagger 的參數名就是 BookCategory（B 大寫） */
+  BookCategory?: BookCategory;
+  isbn?: string;
+}
+export type SearchBooksResponse = UserBookSummaryDto;
+
+/** POST /api/books/isbn (multipart/form-data, field: Img) -> 200 GoogleBookResultDto */
+export interface IsbnLookupForm {
+  Img?: File;
+}
+export type IsbnLookupResponse = GoogleBookResultDto;

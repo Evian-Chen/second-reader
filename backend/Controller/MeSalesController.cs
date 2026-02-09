@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using backend.Dto.Error;
 using backend.Dto.Order;
 using backend.Enums;
 using backend.Interface;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Controller
 {
     [Route("/api/me/sales")]
+    [ProducesErrorResponseType(typeof(ApiErrorResponse))]
     [ApiController]
     public class MeSalesController : ControllerBase
     {
@@ -31,6 +33,7 @@ namespace backend.Controller
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<OrderItemDto>>> GetSaleItemsByStatus([FromQuery] OrderItemStatus? status)
         {
             // /api/me/sales?status=Pending
@@ -52,6 +55,7 @@ namespace backend.Controller
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<OrderItemDto>> GetSaleItemById([FromRoute] Guid orderItemId)
         {
             if (!ModelState.IsValid) return BadRequest();

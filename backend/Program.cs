@@ -14,8 +14,33 @@ using Newtonsoft.Json.Converters;
 using Microsoft.OpenApi.Models;
 using TesseractOCR;
 using TesseractOCR.Enums;
+using Microsoft.AspNetCore.Mvc;
+using backend.Dto.Error;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        // 如果是 modelState validation 的問題，需要轉通用格式
+        var errors = context.ModelState
+            .Where(kvp => kvp.Value?.Errors.Count > 0)
+            .ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+            );
+
+        var payload = new ApiErrorResponse(
+            Error: "Validation failed.",
+            Code: "VALIDATION_ERROR",
+            Errors: errors
+        );
+
+        return new BadRequestObjectResult(payload); // StatusCodes.Status400BadRequest
+    };
+});
+
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
@@ -66,6 +91,11 @@ builder.Services.AddControllers()
     {
         options.SerializerSettings.Converters.Add(new StringEnumConverter());
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+    })
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // ✅ 關掉自動把 4xx 映射成 ProblemDetails
+        options.SuppressMapClientErrors = true;
     });
 
 // add DBContext
@@ -129,6 +159,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ApiExceptionMiddleware>();
 app.UseAuthentication();
 // 應用程式啟動時建立一次，對每個 request 都會做，但裡面有檢查該 API 是否是 [Authorize]
 app.UseMiddleware<UserProvisioningMiddleware>();

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using backend.Dto.Error;
 using backend.Dto.Order;
 using backend.Interface;
 using backend.Model;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Controller
 {
     [Route("/api/me/order")]
+    [ProducesErrorResponseType(typeof(ApiErrorResponse))]
     [ApiController]
     public class MeOrderController : ControllerBase
     {
@@ -29,7 +31,7 @@ namespace backend.Controller
         [Authorize]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<OrderDto>> GetAll()
+        public async Task<ActionResult<List<OrderDto>?>> GetAll()
         {
             var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var orderDtos = await _orderRepo.GetAllOrderAsync(user);
@@ -68,7 +70,7 @@ namespace backend.Controller
             return Ok(item);
         }
 
-        [HttpGet("/item/{orderItemId:guid}")]
+        [HttpGet("item/{orderItemId:guid}")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]

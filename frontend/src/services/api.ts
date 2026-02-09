@@ -1,4 +1,4 @@
-import axios, { type AxiosResponse, type AxiosError } from 'axios'
+import axios, { type AxiosError, type AxiosResponse } from 'axios';
 
 // JSON 資料型別定義
 type AnyJson =
@@ -43,12 +43,12 @@ instance.interceptors.request.use(
       // 如果無法取得 token，繼續發送請求（允許未登入的使用者呼叫公開 API）
       // 這通常發生在 Pinia 尚未初始化時
     }
-    
+
     // 如果是 FormData，移除 Content-Type 讓瀏覽器自動設定（包含 boundary）
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type']
     }
-    
+
     return config
   },
   (error) => {
@@ -79,7 +79,7 @@ instance.interceptors.response.use(
 export default function api<T>(
   method: string,
   url: string,
-  data: AnyJson | FormData = null,
+  data: AnyJson | FormData | object | null | undefined,
   headers?: Record<string, string>
 ): Promise<T> {
   const requestType = method.toLowerCase()
