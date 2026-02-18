@@ -19,8 +19,8 @@ namespace backend.Model
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
         public bool IsSuspicious { get; set; } = false;
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         // 暫時，在有聊天室之前，先讓使用者提供自己的聯繫方式
         public string InstagramAccount { get; set; } = string.Empty;

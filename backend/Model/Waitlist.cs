@@ -12,7 +12,7 @@ namespace backend.Model
         public Guid UserBookId { get; set; }
         public Guid WaiterId { get; set; }  // FK
         public AppUser? AppUser { get; set; }  // navigation
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public WaitlistStatus WaitlistStatus { get; set; }
     }
 }

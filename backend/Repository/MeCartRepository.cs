@@ -83,8 +83,8 @@ namespace backend.Repository
             {
                 CartId = cartModel!.Id,
                 UserBookId = bookExists.Id,
-                LockedAt = DateTime.Now,
-                ExpiredAt = DateTime.Now.AddSeconds(Util.Constants.ExpiredTime)  // 對商品上鎖
+                LockedAt = DateTime.UtcNow,
+                ExpiredAt = DateTime.UtcNow.AddSeconds(Util.Constants.ExpiredTime)  // 對商品上鎖
             };
             bookExists.UserBookStatus = Enums.UserBookStatus.Reserved;
             _context.CartItems.Add(cartItem);
@@ -159,7 +159,7 @@ namespace backend.Repository
                 var cart = await CartQueryForDisplay().FirstOrDefaultAsync(c => c.AppUser!.Id == user.Id);
 
                 if (cart == null || cart.CartItems.Count == 0) throw new InvalidOperationException("cart is empty.");
-                if (cart.CartItems.Any(c => c.ExpiredAt < DateTime.Now)) throw new InvalidOperationException("Book(s) is expired.");
+                if (cart.CartItems.Any(c => c.ExpiredAt < DateTime.UtcNow)) throw new InvalidOperationException("Book(s) is expired.");
 
                 // 建立 order
                 var order = new Order

@@ -34,7 +34,7 @@ namespace backend.Service
 
                     using var tx = await _context.Database.BeginTransactionAsync(stoppingToken);
 
-                    var now = DateTime.Now;
+                    var now = DateTime.UtcNow;
 
                     var expiredItems = await _context.CartItems.Include(c => c.UserBook)
                                                                 .Include(c => c.Cart).ThenInclude(ci => ci.AppUser)

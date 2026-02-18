@@ -94,15 +94,13 @@ builder.Services.AddControllers()
     })
     .ConfigureApiBehaviorOptions(options =>
     {
-        // ✅ 關掉自動把 4xx 映射成 ProblemDetails
         options.SuppressMapClientErrors = true;
     });
 
-// add DBContext
+// 使用 PostgreSQL
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+    options.UseNpgsql(connectionString));
 
 // add scope，每個 request 一個 scope
 builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();

@@ -14,7 +14,7 @@ namespace backend.Dto.Notification
         public string ReceiverAccountId { get; set; } = string.Empty;
         public string ActorAccountId { get; set; } = string.Empty;
         public NotificationType NotificationType { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? ReadAt { get; set; }
         public bool UnRead { get; set; }
     }

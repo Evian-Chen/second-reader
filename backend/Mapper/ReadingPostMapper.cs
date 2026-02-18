@@ -30,7 +30,7 @@ namespace backend.Mapper
                 Title = dto.Title,
                 Content = dto.Content,
                 Rating = dto.Rating,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
                 UpdatedAt = dto.UpdatedAt,
             };
         }

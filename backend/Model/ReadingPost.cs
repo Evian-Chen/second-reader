@@ -16,8 +16,8 @@ namespace backend.Model
         [Range(1, 5)]
         public int Rating { get; set; }
         public int Likes { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public AppUser? AppUser { get; set; }
     }

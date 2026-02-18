@@ -15,7 +15,7 @@ namespace backend.Model
         public Cart? Cart { get; set; }
         public Guid UserBookId { get; set; }  // FK
         public UserBook? UserBook { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;  // 用來檢查排隊的次序
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;  // 用來檢查排隊的次序
 
         // 過期，防止有人佔用商品
         public DateTime ExpiredAt { get; set; }
