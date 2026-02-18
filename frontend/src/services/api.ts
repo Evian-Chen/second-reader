@@ -1,4 +1,5 @@
 import axios, { type AxiosError, type AxiosResponse } from 'axios';
+import type { UUID } from 'crypto';
 
 // JSON 資料型別定義
 type AnyJson =
@@ -79,7 +80,7 @@ instance.interceptors.response.use(
 export default function api<T>(
   method: string,
   url: string,
-  data: AnyJson | FormData | object | null | undefined,
+  data: AnyJson | FormData | object | null | undefined = null,
   headers?: Record<string, string>
 ): Promise<T> {
   const requestType = method.toLowerCase()

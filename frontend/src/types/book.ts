@@ -1,7 +1,7 @@
 // src/types/book.ts
 // Generated from swagger (OpenAPI) schemas & /api/books parameters
 
-import type { BookCategory, BookCondition, PayMethod, DeliveryMethod, UserBookStatus } from "./Enums";
+import type { BookCategory, BookCondition, DeliveryMethod, PayMethod, UserBookStatus } from "./Enums";
 
 /* ===========================
  * OpenAPI Schemas (DTOs)
@@ -81,7 +81,7 @@ export interface GetBooksByAccountIdPath {
   accountId: string;
 }
 export interface GetBooksByAccountIdQuery {
-  Status?: UserBookStatus;
+  status?: UserBookStatus;
 }
 export type GetBooksByAccountIdResponse = UserBookSummaryDto;
 
