@@ -16,8 +16,8 @@ namespace backend.Model
         public ICollection<UserBookDeliveryMethod> SellerDeliveryMethods { get; set; } = new List<UserBookDeliveryMethod>();
         public int Price { get; set; } = 0;
         public UserBookStatus UserBookStatus { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public AppUser? AppUser { get; set; }
         public Guid BookId { get; set; }  // FK

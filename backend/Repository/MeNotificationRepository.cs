@@ -190,7 +190,7 @@ namespace backend.Repository
             var notification = await _context.Notifications.FirstOrDefaultAsync(c => c.Id == id && c.ReceiverAccountId == user.AccountId);
             if (notification == null) return null;
             notification.UnRead = false;
-            notification.ReadAt = DateTime.Now;
+            notification.ReadAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return notification.ToDtoFromModel();
         }

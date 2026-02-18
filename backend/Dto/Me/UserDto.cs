@@ -16,7 +16,7 @@ namespace backend.Dto.Me
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
         public bool IsSuspicious { get; set; } = false;
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string InstagramAccount { get; set; } = string.Empty;
         public string ThreadsAccount { get; set; } = string.Empty;
         public UserProfileDto? UserProfile { get; set; }

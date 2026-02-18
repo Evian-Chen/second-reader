@@ -14,8 +14,8 @@ namespace backend.Model
         public OrderStatus OrderStatus { get; set; }
         public int TotalAmount { get; set; } = 0;
         public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public Guid BuyerId { get; set; }
         public AppUser? Buyer { get; set; }

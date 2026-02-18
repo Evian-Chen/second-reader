@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using backend.Dto.Error;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Service
 {
@@ -39,10 +40,17 @@ namespace backend.Service
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unhandled exception.");
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                await WriteJson(context, new ApiErrorResponse(ex.Message, "Internal Server Error!"));
+                _logger.LogError(ex, "Unhandled exception");
+
+                if (ex.InnerException != null)
+                    _logger.LogError(ex.InnerException, "Inner exception");
+
+                // 如果是 EF 的 DbUpdateException，印出更詳細
+                if (ex is DbUpdateException dbEx && dbEx.InnerException != null)
+                    _logger.LogError(dbEx.InnerException, "DbUpdateException inner");
+
             }
+
         }
 
         private static Task WriteJson(HttpContext context, ApiErrorResponse payload)

@@ -18,7 +18,7 @@ interface JsonMap {
 type JsonArray = Array<AnyJson>
 
 // API 基礎 URL（從環境變數讀取，如果沒有則使用預設值）
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://second-reader.onrender.com/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://second-reader.onrender.com/'
 
 // 創建 axios instance
 export const instance = axios.create({
