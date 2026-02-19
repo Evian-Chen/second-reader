@@ -2,9 +2,13 @@
 
 import Image from "next/image";
 import { SignedIn, SignedOut, SignInButton, SignOutButton, useUser } from '@clerk/nextjs';
+import { useAppSelector, useAppDispatch } from '@/lib/hooks';
+import { increment, decrement } from '@/features/counter/counterSlice';
 
 export default function Home() {
   const { user, isLoaded } = useUser();
+  const count = useAppSelector((state) => state.counter.value);
+  const dispatch = useAppDispatch();
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
@@ -64,6 +68,35 @@ export default function Home() {
               </SignedIn>
             </>
           )}
+        </div>
+
+        {/* Redux 測試區塊 */}
+        <div className="w-full mb-8 p-6 bg-gray-100 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-700">
+          <h2 className="text-xl font-semibold mb-4 text-black dark:text-zinc-50">
+            Redux 測試
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            計數器來自 Redux store（counter slice）。點按鈕確認 state 會更新。
+          </p>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => dispatch(decrement())}
+              className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-black dark:text-zinc-100 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium"
+            >
+              -1
+            </button>
+            <span className="text-xl font-mono font-semibold min-w-[2rem] text-center text-black dark:text-zinc-50">
+              {count}
+            </span>
+            <button
+              type="button"
+              onClick={() => dispatch(increment())}
+              className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-black dark:text-zinc-100 hover:bg-gray-300 dark:hover:bg-gray-600 font-medium"
+            >
+              +1
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
