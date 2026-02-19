@@ -1,6 +1,11 @@
+'use client'
+
 import Image from "next/image";
+import { SignedIn, SignedOut, SignInButton, SignOutButton, useUser } from '@clerk/nextjs';
 
 export default function Home() {
+  const { user, isLoaded } = useUser();
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
@@ -12,6 +17,55 @@ export default function Home() {
           height={20}
           priority
         />
+        
+        {/* Clerk 認證測試區塊 */}
+        <div className="w-full mb-8 p-6 bg-gray-100 dark:bg-gray-900 rounded-lg border border-gray-300 dark:border-gray-700">
+          <h2 className="text-xl font-semibold mb-4 text-black dark:text-zinc-50">
+            Clerk 認證測試
+          </h2>
+          
+          {!isLoaded ? (
+            <p className="text-gray-600 dark:text-gray-400">載入中...</p>
+          ) : (
+            <>
+              <SignedOut>
+                <div className="flex flex-col gap-4">
+                  <p className="text-gray-600 dark:text-gray-400 mb-2">
+                    目前未登入，請點擊下方按鈕登入：
+                  </p>
+                  <SignInButton mode="modal">
+                    <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                      登入 / 註冊
+                    </button>
+                  </SignInButton>
+                </div>
+              </SignedOut>
+              
+              <SignedIn>
+                <div className="flex flex-col gap-4">
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <p className="text-green-800 dark:text-green-200 font-medium mb-2">
+                      ✓ 已成功登入！
+                    </p>
+                    {user && (
+                      <div className="text-sm text-green-700 dark:text-green-300">
+                        <p><strong>使用者 ID:</strong> {user.id}</p>
+                        <p><strong>姓名:</strong> {user.firstName || user.fullName || '未設定'}</p>
+                        <p><strong>Email:</strong> {user.emailAddresses[0]?.emailAddress || '未設定'}</p>
+                      </div>
+                    )}
+                  </div>
+                  <SignOutButton>
+                    <button className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+                      登出
+                    </button>
+                  </SignOutButton>
+                </div>
+              </SignedIn>
+            </>
+          )}
+        </div>
+
         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
             To get started, edit the page.tsx file.
