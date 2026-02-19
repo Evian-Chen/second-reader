@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ClerkProvider } from '@clerk/nextjs';
-import StoreProvider from '@/components/StoreProvider';
+import { ClerkProvider } from "@clerk/nextjs";
+import StoreProvider from "@/components/StoreProvider";
+import ApiAuthSetter from "@/components/ApiAuthSetter";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,6 +32,7 @@ export default function RootLayout({
           <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
           >
+            <ApiAuthSetter />
             {children}
           </body>
         </html>
