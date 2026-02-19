@@ -1,0 +1,90 @@
+---
+description: Vue 3 + TypeScript 開發標準與最佳實踐
+globs: **/*.vue,**/*.ts
+alwaysApply: true
+---
+
+# Vue 3 + TypeScript 開發標準
+
+## Composition API 優先
+
+所有新組件必須使用 Composition API：
+
+```typescript
+// GOOD
+<script setup lang="ts">
+interface Props {
+  title: string
+  count?: number
+}
+const props = defineProps<Props>()
+</script>
+
+// BAD - 禁止使用 Options API
+<script>
+export default {
+  props: { title: String }
+}
+</script>
+```
+
+## TypeScript 嚴格模式
+
+- 禁止使用 `any` 型別（除非有明確理由並加上註解）
+- 所有函數參數和返回值必須有明確型別
+- API 回應資料必須定義型別（放在 `src/types/api.ts`）
+
+```typescript
+// GOOD
+interface Book {
+  id: string
+  title: string
+}
+const getBook = async (id: string): Promise<Book> => { ... }
+
+// BAD
+const getBook = async (id: any): Promise<any> => { ... }
+```
+
+## 組件設計原則
+
+- 組件檔案大小不超過 300 行
+- Props 使用 `defineProps<T>()` 定義
+- Emits 使用 `defineEmits<T>()` 定義
+- 複雜邏輯抽取到 composables
+
+## Pinia Store 規範
+
+- Store 使用 `defineStore()` 並提供明確的 store ID
+- State 使用函數形式定義
+- Actions 處理所有異步操作
+- 使用 `storeToRefs()` 解構 store 以保持響應性
+
+```typescript
+// GOOD
+export const useBookStore = defineStore('book', {
+  state: (): BookState => ({ books: [] }),
+  actions: {
+    async fetchBooks() { ... }
+  }
+})
+```
+
+## API 整合標準
+
+- 所有 API 呼叫透過 `src/services/` 中的 service 函數
+- Service 函數必須定義明確的請求/回應型別
+- 使用 `useApi` composable 處理 loading 和錯誤狀態
+
+## UX 一致性
+
+- 所有異步操作必須顯示 loading 狀態
+- 錯誤訊息必須使用者友善
+- 使用統一的 Tailwind CSS 設計系統
+- 動畫過渡時間統一（200ms 基礎，300ms 複雜）
+
+## 測試標準
+
+- Composables: 80%+ 覆蓋率
+- Store actions/getters: 80%+ 覆蓋率
+- 組件核心邏輯: 70%+ 覆蓋率
