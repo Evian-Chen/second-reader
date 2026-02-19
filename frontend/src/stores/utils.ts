@@ -1,5 +1,5 @@
 import type { APIResponse } from '@/types/api'
-import { useBase } from '@/stores'
+import { useBaseStore } from './base'
 
 /**
  * 統一的 API 請求處理函數
@@ -8,7 +8,7 @@ import { useBase } from '@/stores'
  * @returns Promise<T | null> 成功時回傳資料，失敗時回傳 null
  */
 export async function useApi<T>(api: () => APIResponse<T>): Promise<T | null> {
-  const { isLoading, setIsLoading, handleError } = useBase()
+  const { isLoading, setIsLoading, handleError } = useBaseStore()
   
   // 如果正在載入中，直接返回 null 避免重複請求
   if (isLoading) return null

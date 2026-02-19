@@ -34,11 +34,17 @@
     "eslint": "^9.39.2",
     "eslint-plugin-vue": "~10.6.2",
     "jiti": "^2.6.1",
+    "msw": "^2.12.9",
     "npm-run-all2": "^8.0.4",
     "prettier": "3.7.4",
     "typescript": "~5.9.3",
     "vite": "^7.3.0",
     "vite-plugin-vue-devtools": "^8.0.5",
     "vue-tsc": "^3.2.2"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

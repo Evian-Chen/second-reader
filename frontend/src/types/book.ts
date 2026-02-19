@@ -20,13 +20,14 @@ export enum BookCategory {
 
 /**
  * 書籍搜尋查詢 DTO
+ * 注意：bookCategory 在 API 請求中應該是字串形式（如 "GenreFic"），而不是數字
  */
 export interface BookSearchQueryDto {
   title?: string
   author?: string
   sellerAccountId?: string
   sellerDisplayName?: string
-  bookCategory?: BookCategory
+  bookCategory?: BookCategory | string // 可以是 enum 或字串
 }
 
 /**

@@ -7,6 +7,16 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 
+// MSW 設定（僅在開發環境）
+if (import.meta.env.DEV) {
+  const { worker } = await import('./mocks/browser')
+  await worker.start({
+    quiet: true,
+    onUnhandledRequest: 'bypass', // 未處理的請求直接通過
+  })
+  console.log('🔶 MSW: Mock API enabled')
+}
+
 const app = createApp(App)
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 

@@ -1,0 +1,188 @@
+openapi: 3.0.1
+info:
+  title: Book Search API
+  version: v1
+  description: API contract for book search and filter functionality
+
+paths:
+  /api/books/search:
+    post:
+      summary: Search books by keyword and filter by category
+      description: |
+        Search for books using title, author keywords, and optionally filter by category.
+        Returns a list of books matching the search criteria.
+      tags:
+        - Book
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookSearchQueryDto'
+            examples:
+              searchByTitle:
+                summary: Search by title
+                value:
+                  title: "原子習慣"
+              searchByAuthor:
+                summary: Search by author
+                value:
+                  author: "詹姆斯・克利爾"
+              filterByCategory:
+                summary: Filter by category
+                value:
+                  bookCategory: "GenreFic"
+              combinedSearch:
+                summary: Combined search and filter
+                value:
+                  title: "習慣"
+                  bookCategory: "GenreFic"
+      responses:
+        '200':
+          description: Successfully retrieved books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserBookSummaryDto'
+              examples:
+                success:
+                  summary: Successful search results
+                  value:
+                    - userBookId: 1
+                      isbn: "9789861755267"
+                      title: "原子習慣"
+                      author: "詹姆斯・克利爾"
+                      description: "細微改變帶來巨大成就的實證法則"
+                      bookCategory: "GenreFic"
+                    - userBookId: 2
+                      isbn: "9789861755268"
+                      title: "深度工作力"
+                      author: "卡爾・紐波特"
+                      description: "淺薄時代，個人成功的關鍵能力"
+                      bookCategory: "GenreFic"
+                empty:
+                  summary: No results found
+                  value: []
+        '400':
+          description: Bad request - invalid search parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    BookSearchQueryDto:
+      type: object
+      description: Book search query parameters
+      properties:
+        title:
+          type: string
+          nullable: true
+          description: Book title keyword
+          example: "原子習慣"
+        author:
+          type: string
+          nullable: true
+          description: Author name keyword
+          example: "詹姆斯・克利爾"
+        sellerAccountId:
+          type: string
+          nullable: true
+          description: Seller account ID (not used in this feature)
+        sellerDisplayName:
+          type: string
+          nullable: true
+          description: Seller display name (not used in this feature)
+        bookCategory:
+          $ref: '#/components/schemas/BookCategory'
+          nullable: true
+          description: Book category filter
+      additionalProperties: false
+
+    BookCategory:
+      type: string
+      enum:
+        - Undefined
+        - Mandarin
+        - World
+        - GenreFic
+        - LightNovel
+        - Manga
+        - Bl
+        - Gl
+        - History
+        - Poem
+        - Art
+        - Philisophy
+        - Religion
+        - Biography
+      description: Book category enumeration
+
+    UserBookSummaryDto:
+      type: object
+      description: Book summary information returned from API
+      required:
+        - userBookId
+        - bookCategory
+      properties:
+        userBookId:
+          type: integer
+          format: int32
+          description: Unique identifier for user's book listing
+          example: 1
+        isbn:
+          type: string
+          nullable: true
+          description: International Standard Book Number
+          example: "9789861755267"
+        title:
+          type: string
+          nullable: true
+          description: Book title
+          example: "原子習慣"
+        author:
+          type: string
+          nullable: true
+          description: Book author
+          example: "詹姆斯・克利爾"
+        description:
+          type: string
+          nullable: true
+          description: Book description
+          example: "細微改變帶來巨大成就的實證法則"
+        bookCategory:
+          $ref: '#/components/schemas/BookCategory'
+          description: Book category
+      additionalProperties: false
+
+    ErrorResponse:
+      type: object
+      description: Error response structure
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          format: int32
+          description: Error code
+          nullable: true
+
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from Clerk authentication
+
+security:
+  - Bearer: []

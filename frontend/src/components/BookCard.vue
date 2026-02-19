@@ -1,18 +1,27 @@
 <script setup lang="ts">
-interface Book {
-  id: string
-  title: string
-  author: string
-  price: number
-  originalPrice?: number
-  image: string
-  condition: string
-  rating?: number
+import { computed } from 'vue'
+import type { Book, BookResponse } from '@/types/book'
+
+interface BookCardProps {
+  book: Book | BookResponse
 }
 
-defineProps<{
-  book: Book
-}>()
+const props = defineProps<BookCardProps>()
+
+// 適配 BookResponse 到 BookCard 顯示格式
+const displayBook = computed(() => {
+  const book = props.book
+  return {
+    id: String(book.userBookId),
+    title: book.title || '未知書名',
+    author: book.author || '未知作者',
+    price: (book as Book).price ?? 0,
+    originalPrice: (book as Book).originalPrice,
+    image: (book as Book).image || 'https://via.placeholder.com/400x600?text=No+Image',
+    condition: (book as Book).condition || '良好',
+    rating: (book as Book).rating,
+  }
+})
 </script>
 
 <template>
@@ -20,16 +29,16 @@ defineProps<{
     <!-- 書籍圖片 -->
     <div class="aspect-3/4 bg-background-secondary relative overflow-hidden">
       <img
-        :src="book.image"
-        :alt="book.title"
+        :src="displayBook.image"
+        :alt="displayBook.title"
         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
       />
       <!-- 書籍狀態標籤 -->
-      <div class="absolute top-2 left-2">
+      <div v-if="displayBook.condition" class="absolute top-2 left-2">
         <span
           class="px-2 py-1 text-xs font-medium bg-white/90 backdrop-blur-sm rounded text-text-primary"
         >
-          {{ book.condition }}
+          {{ displayBook.condition }}
         </span>
       </div>
     </div>
@@ -37,20 +46,20 @@ defineProps<{
     <!-- 書籍資訊 -->
     <div class="p-4">
       <h3 class="text-sm font-medium text-text-primary line-clamp-2 mb-1 group-hover:text-accent transition-colors">
-        {{ book.title }}
+        {{ displayBook.title }}
       </h3>
       <p class="text-xs text-text-secondary mb-2">
-        {{ book.author }}
+        {{ displayBook.author }}
       </p>
 
       <!-- 評分（可選） -->
-      <div v-if="book.rating" class="flex items-center mb-2">
+      <div v-if="displayBook.rating" class="flex items-center mb-2">
         <div class="flex items-center">
           <svg
             v-for="i in 5"
             :key="i"
             class="w-3 h-3"
-            :class="i <= book.rating! ? 'text-yellow-400' : 'text-gray-300'"
+            :class="i <= displayBook.rating! ? 'text-yellow-400' : 'text-gray-300'"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -60,21 +69,21 @@ defineProps<{
           </svg>
         </div>
         <span class="text-xs text-text-tertiary ml-1">
-          {{ book.rating }}
+          {{ displayBook.rating }}
         </span>
       </div>
 
       <!-- 價格 -->
-      <div class="flex items-baseline justify-between">
+      <div v-if="displayBook.price > 0" class="flex items-baseline justify-between">
         <div>
           <span class="text-lg font-semibold text-text-primary">
-            NT$ {{ book.price.toLocaleString() }}
+            NT$ {{ displayBook.price.toLocaleString() }}
           </span>
           <span
-            v-if="book.originalPrice"
+            v-if="displayBook.originalPrice"
             class="text-xs text-text-tertiary line-through ml-2"
           >
-            NT$ {{ book.originalPrice.toLocaleString() }}
+            NT$ {{ displayBook.originalPrice.toLocaleString() }}
           </span>
         </div>
       </div>

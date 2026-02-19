@@ -1,0 +1,134 @@
+---
+alwaysApply: true
+---
+
+swagger: https://second-reader.onrender.com/swagger/index.html
+
+swagger json: https://second-reader.onrender.com/swagger/v1/swagger.json
+
+
+[In Progress]
+
+帳號
+
+登入
+frontend: 帶 Authorization: Bearer <Clerk JWT session token>
+登入方式: google, 一般email/password
+建立流程by GPT:
+（前端）
+Clerk UI 登入（Google / Email / Password）
+↓
+Clerk 建立 session + JWT
+↓
+前端帶 Authorization: Bearer <JWT>
+↓
+後端「只驗 token」
+=> /api/login, /api/logout 不存在
+
+如果使用者存在，回傳使用者的資料
+如果使用者不存在，回傳的使用者資料的 accountId 會是空字串，先 redirect 到使用者設定
+
+
+登出
+前端刪除 token
+
+
+刪除帳號
+DELETE /api/me
+這邊應該會帶使用者的 token，不需要 AccountId
+
+
+使用者
+
+首頁
+/api/user/:AccountId -> 看別人的頁面
+
+上架書籍列表
+/api/user/:AccountId/books => 用 ownerUserId 去篩選 UserBook
+
+[Authorization]
+GET /api/me
+只有本人能看到的資訊
+
+sidebar:
+Home
+我的收藏 GET /api/me/favorite
+我的商店 => 上架中的書（包含已售出、未售出） -> 使用 /api/books/:AccountId/books?scope={status}，書的狀態看UserBookStatus Enum
+我的訂單 GET /api/me/order => 下單別人的書的訂單
+我的閱讀筆記 GET /api/user/:UserId/reading-posts
+
+[Authorization]
+更新自己的頁面（個人資料）
+PUT /api/me
+初次登入的話 UserProfile 會是 null，強制導向初次登入時的使用者設定
+若是登入後，可以在使用者頁面編輯
+注意：若要更新，傳入資料必須保持原本的內容，因為預設更新的內容會是空的，如果沒有戴上原本的資料會導致沒有更新的部分被刪掉
+
+
+
+書籍
+
+[Authorization]
+新增多本書上架
+POST /api/books
+[FromBody] => list of UserBook
+先建立 Book 放到資料庫，再創建 UserBook 讓使用者連到資料庫剛創立的 Book
+
+[Authorization]
+編輯某本書的內容
+PUT /api/books/:BookId
+[FromBody] => Book 的內容，更新到 UserBook 裡面（已經是登入狀態 自帶 UserId/token）
+刪除某本書的內容
+注意：若要更新，傳入資料必須保持原本的內容，因為預設更新的內容會是空的，如果沒有戴上原本的資料會導致沒有更新的部分被刪掉
+DELETE /api/books/:BookId
+POST /api/books/isbn
+上傳照片便是isbn然後用google books去查，但建議拍內頁的(最後一頁)ISBN，旁邊最好有ISBN字樣，如果是條碼的話會不太清楚
+
+取得某本書的內容
+GET /api/books/:UserBookId
+
+訂單 [Autorization]
+
+GET /api/me/order -> 回傳這個使用者（篩選ownerId）的所有訂單
+filter query: paymethod, orderstatus
+
+取得特定的一筆 order
+GET /api/me/order/:OrderId
+如果沒有 OrderId，要先 GET /api/order/:UserId 拿到訂單後再去看訂單的 OrderId
+
+
+購物車 [Autorization]
+
+將一本書加入購物車
+POST /api/cart/:BookId
+這個動作會建立一個 CartItem, 這個 CartItem 的 FK 會跟 Cart 本身和 UserBook.Id 該本書的 Id 做綁定，直接追蹤該賣家的書
+
+將一本書移除購物車
+DELETE /api/cart/:BookId
+
+送出訂單
+POST /api/cart
+這個動作會生成對應 Cart 裡面的所有 CartItem 的 OrderItem，並且建立一個 Order，放到DB
+return OrderId, 以及成功建立的購物車內容
+這時候會把購物車內的書籍上鎖，別人無法再下單，也會同時發送通知給所有書籍的賣家
+
+
+閱讀心得貼文
+
+[Authorization]
+建立某一使用者的一筆貼文
+POST /api/reading-post/:AccountId
+更新某一使用者的一筆貼文
+PUT /api/reading-post/:AccountId/:ReadingPostId
+DELETE /api/reading-post/:AccountId/:ReadingPostId
+
+取得某個使用者的所有貼文
+GET /api/user/:UserId/reading-posts
+
+按讚或取消按讚某一貼文
+PUT /api/reading-post/:AccountId/like
+[FromBody] like+1/-1
+前端檢查此使用者是否有先按過讚，先按過才可取消
+
+
+
