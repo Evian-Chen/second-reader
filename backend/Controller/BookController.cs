@@ -56,7 +56,7 @@ namespace backend.Controller
         /// <returns></returns>
         [HttpGet("{accountId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<UserBookSummaryDto>> GetBooksByAccountId([FromRoute] string accountId, [FromQuery] UserBookStatusFilterDto query)
+        public async Task<ActionResult<List<UserBookSummaryDto>>> GetBooksByAccountId([FromRoute] string accountId, [FromQuery] UserBookStatusFilterDto query)
         {
             var books = await _booksRepo.GetBooksByAccountIdAsync(accountId, query);
             return Ok(books!.Select(b => b.ToUserBookSummaryDto()).ToList());
