@@ -32,10 +32,10 @@ export default function AppHeader() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
               <Image
-                src="/logo-dark.png"
+                src="/logoDark.png"
                 alt="Second Reader Logo"
-                width={96}
-                height={64}
+                width={192}
+                height={128}
                 className="object-contain"
               />
             </Link>
