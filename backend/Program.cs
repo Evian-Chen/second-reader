@@ -125,6 +125,7 @@ builder.Services.AddScoped<IWaitlistRepository, WaitlistRepository>();
 builder.Services.AddScoped<IMeOrderReporitory, MeOrderRepository>();
 builder.Services.AddScoped<IMeSalesRepository, MeSalesRepository>();
 builder.Services.AddScoped<IMeSavedRepository, MeSavedRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 // builder.Services.AddHostedService<CartReservationCleanUpWorker>();
 
 // Auth switch

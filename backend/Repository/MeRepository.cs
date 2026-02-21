@@ -45,6 +45,46 @@ namespace backend.Repository
             return user;
         }
 
+        public async Task<UserFollowDto> FollowByUserIdAsync(AppUser user, string accountId)
+        {
+            var follwed = await _context.AppUsers.Include(u => u.UserProfile).FirstOrDefaultAsync(u => u.AccountId == accountId) ?? throw new InvalidOperationException("No such account id exists.");
+            var existing = await _context.UserFollows.FirstOrDefaultAsync(uf => uf.FollowerId == user.Id && uf.FollowedId == follwed.Id);
+            if (existing == null)
+            {
+                user.UserProfile!.FollowingCount++;
+
+                follwed.UserProfile!.FollowerCount++;
+
+                var userFollow = new UserFollow
+                {
+                    FollowerId = user.Id,
+                    FollowedId = follwed.Id,
+                    FollowerAccountId = user.AccountId,
+                    FollowedAccountId = follwed.AccountId,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _context.UserFollows.AddAsync(userFollow);
+
+                await _context.SaveChangesAsync();
+                return userFollow.ToUserFollowDto();
+            }
+            return existing.ToUserFollowDto();
+        }
+
+        public async Task UnfollowByUserIdAsync(AppUser user, string accountId)
+        {
+            var following = await _context.AppUsers.Include(u => u.UserProfile).FirstOrDefaultAsync(u => u.AccountId == accountId) ?? throw new InvalidOperationException("No such account id exists.");
+            var existing = await _context.UserFollows.FirstOrDefaultAsync(uf => uf.FollowerId == user.Id && uf.FollowedId == following.Id)
+                            ?? throw new InvalidOperationException("Following or follower not exists.");
+
+            user.UserProfile!.FollowingCount--;
+
+            following.UserProfile!.FollowerCount--;
+
+            _context.UserFollows.Remove(existing);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<AppUser?> UpdateUserInfoAsync(AppUser user, UpdateUserDto updateUserDto)
         {
             var existing = await _context.AppUsers.FirstOrDefaultAsync(x => x.AccountId == updateUserDto.AccountId && x.Id != user.Id);

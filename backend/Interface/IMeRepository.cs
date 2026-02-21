@@ -11,5 +11,7 @@ namespace backend.Interface
     {
         Task<AppUser?> FirstTimeUpdateUserInfoAsync(AppUser user, UpdateUserDto updateUserDto);
         Task<AppUser?> UpdateUserInfoAsync(AppUser user, UpdateUserDto updateUserDto);
+        Task<UserFollowDto> FollowByUserIdAsync(AppUser user, string accountId);
+        Task UnfollowByUserIdAsync(AppUser user,string accountId);
     }
 }

@@ -27,6 +27,7 @@ namespace backend.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<SavedBooks> SavedBooks { get; set; }
         public DbSet<SavedPosts> SavedPosts { get; set; }
+        public DbSet<UserFollow> UserFollows { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -110,6 +111,9 @@ namespace backend.Data
                 .HasOne(s => s.ReadingPost)
                 .WithMany()
                 .HasForeignKey(s => s.PostId);
+
+            builder.Entity<UserFollow>()
+                .HasKey(uf => new { uf.FollowerId, uf.FollowedId});
 
             // TODO: 可用 HasIndex 建立複合索引，加速查詢
             // example:
