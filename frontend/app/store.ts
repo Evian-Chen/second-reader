@@ -1,10 +1,14 @@
-import { configureStore } from '@reduxjs/toolkit';
-import counterReducer from '@/features/counter/counterSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import counterReducer from "@/features/counter/counterSlice";
+import bookReducer from "@/features/books/bookSlice";
+import userReducer from "@/features/user/userSlice";
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       counter: counterReducer,
+      books: bookReducer,
+      user: userReducer,
     },
   });
 };
