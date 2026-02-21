@@ -1,18 +1,13 @@
 /**
- * API Client - 以 fetch 為基礎，符合 Next.js 使用情境
+ * API Client - 以 fetch 為基礎
  * - 支援 Bearer token（可注入 getToken，例如 Clerk getToken()）
- * - 基礎 URL 來自 NEXT_PUBLIC_API_BASE_URL
- * - 在瀏覽器內改走同源 /api-proxy，由 Next.js rewrites 轉發到後端，避免 CORS
+ * - 一律依 NEXT_PUBLIC_API_BASE_URL 打後端 /api（瀏覽器與 SSR 相同）
  */
 
-const isBrowser = typeof window !== "undefined";
 const DEFAULT_API_BASE = "https://second-reader.onrender.com";
 
-const BASE_URL = isBrowser
-  ? window.location.origin
-  : process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_API_BASE;
-
-const API_PREFIX = isBrowser ? "/api-proxy" : "/api";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE;
+const API_PREFIX = "/api";
 
 export type GetToken = () => Promise<string | null>;
 

@@ -14,10 +14,21 @@ const initialState: UserState = {
   error: null,
 };
 
-export const fetchMe = createAsyncThunk("user/fetchMe", async () => {
-  const data = await meApi.getMe();
-  return data;
-});
+export const fetchMe = createAsyncThunk(
+  "user/fetchMe",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await meApi.getMe();
+      return data;
+    } catch (e: unknown) {
+      const err = e as { status?: number; message?: string };
+      return rejectWithValue({
+        status: err?.status,
+        message: err?.message ?? "取得使用者資料失敗",
+      });
+    }
+  }
+);
 
 export const updateMe = createAsyncThunk(
   "user/updateMe",
@@ -49,8 +60,19 @@ const userSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchMe.rejected, (state, action) => {
+        const status = (action.payload as { status?: number } | undefined)?.status;
+        // 登出後或未授權時後端可能回 401/404，視為未登入即可，不顯示錯誤
+        if (status === 401 || status === 404) {
+          state.me = null;
+          state.status = "idle";
+          state.error = null;
+          return;
+        }
         state.status = "failed";
-        state.error = action.error.message ?? "取得使用者資料失敗";
+        state.error =
+          (action.payload as { message?: string } | undefined)?.message ??
+          action.error.message ??
+          "取得使用者資料失敗";
       })
       .addCase(updateMe.pending, (state) => {
         state.status = "loading";

@@ -38,28 +38,40 @@ export function useCurrentUser(): {
     return { user: null, isLoaded: true, isSignedIn: false };
   }
 
-  const display = me
-    ? toUserDisplay(me, {
-        imageUrl: clerk.user.imageUrl,
-        firstName: clerk.user.firstName,
-        username: clerk.user.username,
-      })
-    : toUserDisplay(
-        {
-          accountId: clerk.user.id,
-          email: clerk.user.primaryEmailAddress?.emailAddress ?? "",
-          userProfile: {
-            displayName: clerk.user.fullName ?? clerk.user.firstName ?? undefined,
-            bio: null,
-            updatedAt: undefined,
-          },
-        },
-        {
+  try {
+    const display = me
+      ? toUserDisplay(me, {
           imageUrl: clerk.user.imageUrl,
           firstName: clerk.user.firstName,
           username: clerk.user.username,
-        }
-      );
-
-  return { user: display, isLoaded: true, isSignedIn: true };
+        })
+      : toUserDisplay(
+          {
+            accountId: clerk.user.id,
+            email: clerk.user.primaryEmailAddress?.emailAddress ?? "",
+            userProfile: {
+              displayName: clerk.user.fullName ?? clerk.user.firstName ?? undefined,
+              bio: null,
+              updatedAt: undefined,
+            },
+          },
+          {
+            imageUrl: clerk.user.imageUrl,
+            firstName: clerk.user.firstName,
+            username: clerk.user.username,
+          }
+        );
+    return { user: display, isLoaded: true, isSignedIn: true };
+  } catch {
+    // API 回傳格式異常或 toUserDisplay 拋錯時，用 Clerk 組成最小 fallback，避免整頁崩潰
+    const name =
+      clerk.user.fullName ?? clerk.user.firstName ?? clerk.user.primaryEmailAddress?.emailAddress?.split("@")[0] ?? "使用者";
+    const username = clerk.user.username ?? clerk.user.id ?? "user";
+    const avatar = clerk.user.imageUrl ?? "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop";
+    return {
+      user: { id: clerk.user.id, name, username, avatar },
+      isLoaded: true,
+      isSignedIn: true,
+    };
+  }
 }

@@ -1,9 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-// 定義需要保護的路由
+// 定義需要保護的路由（暫時關閉 /profile、/orders 以避免登入後導向迴圈，頁面改由 SignedIn/SignedOut 處理）
 const isProtectedRoute = createRouteMatcher([
-  '/profile(.*)',
-  '/orders(.*)',
+  // '/profile(.*)',
+  // '/orders(.*)',
   '/my-books(.*)',
   '/checkout(.*)',
 ])
