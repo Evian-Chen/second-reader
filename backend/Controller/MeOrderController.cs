@@ -21,6 +21,7 @@ namespace backend.Controller
         {
             _orderRepo = orderRepo;
         }
+        private AppUser user => HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
 
         /// <summary>
         /// 取得所有歷史訂單
@@ -33,7 +34,6 @@ namespace backend.Controller
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<OrderDto>?>> GetAll()
         {
-            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var orderDtos = await _orderRepo.GetAllOrderAsync(user);
             if (orderDtos == null) return NotFound();
             return Ok(orderDtos);
@@ -51,7 +51,6 @@ namespace backend.Controller
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<OrderDto>> GetOrderById([FromRoute] Guid id)
         {
-            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var orderDto = await _orderRepo.GetOrderByIdAsync(user, id);
             if (orderDto == null) return NotFound();
             return Ok(orderDto);
@@ -64,7 +63,6 @@ namespace backend.Controller
         public async Task<ActionResult<OrderItemDto>> CompleteOrderItemById([FromRoute] Guid orderItemId)
         {
             // 已經拿到麥加出貨的書了
-            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var item = await _orderRepo.CompleteOrderItemByIdAsync(user, orderItemId);
             if (item == null) return NotFound();
             return Ok(item);

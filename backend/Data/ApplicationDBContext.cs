@@ -25,6 +25,8 @@ namespace backend.Data
         public DbSet<ReadingPost> ReadingPosts { get; set; }
         public DbSet<Waitlist> Waitlists { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<SavedBooks> SavedBooks { get; set; }
+        public DbSet<SavedPosts> SavedPosts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -86,6 +88,28 @@ namespace backend.Data
                 .HasOne(w => w.AppUser)
                 .WithMany()
                 .HasForeignKey(w => w.WaiterId);
+
+            builder.Entity<SavedBooks>()  // 複合主鍵
+                .HasKey(s => new { s.UserId, s.UserBookId });
+            builder.Entity<SavedBooks>()
+                .HasOne(s => s.User)
+                .WithMany()
+                .HasForeignKey(s => s.UserId);
+            builder.Entity<SavedBooks>()
+                .HasOne(s => s.UserBook)
+                .WithMany()
+                .HasForeignKey(s => s.UserBookId);
+
+            builder.Entity<SavedPosts>()  // 複合主鍵
+                .HasKey(s => new { s.UserId, s.PostId });
+            builder.Entity<SavedPosts>()
+                .HasOne(s => s.User)
+                .WithMany()
+                .HasForeignKey(s => s.UserId);
+            builder.Entity<SavedPosts>()
+                .HasOne(s => s.ReadingPost)
+                .WithMany()
+                .HasForeignKey(s => s.PostId);
 
             // TODO: 可用 HasIndex 建立複合索引，加速查詢
             // example:

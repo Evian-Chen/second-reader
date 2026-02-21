@@ -97,6 +97,15 @@ builder.Services.AddControllers()
         options.SuppressMapClientErrors = true;
     });
 
+// 設定CORS
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy("RenderCorsPolicy", policy =>
+//     {
+//         policy.WithOrigins("frontend service url").AllowAnyHeader().AllowAnyMethod();
+//     });
+// });
+
 // 使用 PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
@@ -115,6 +124,7 @@ builder.Services.AddScoped<IMeNotificationRepository, MeNotificationRepository>(
 builder.Services.AddScoped<IWaitlistRepository, WaitlistRepository>();
 builder.Services.AddScoped<IMeOrderReporitory, MeOrderRepository>();
 builder.Services.AddScoped<IMeSalesRepository, MeSalesRepository>();
+builder.Services.AddScoped<IMeSavedRepository, MeSavedRepository>();
 // builder.Services.AddHostedService<CartReservationCleanUpWorker>();
 
 // Auth switch

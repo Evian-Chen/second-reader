@@ -8,6 +8,7 @@ using backend.Enums;
 using backend.Interface;
 using backend.Model;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controller
@@ -22,6 +23,7 @@ namespace backend.Controller
         {
             _notiRepo = notiRepo;
         }
+        private AppUser user => HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
 
         /// <summary>
         /// 取得所有站內通知
@@ -39,7 +41,6 @@ namespace backend.Controller
             // 取得通知（篩選未讀或不篩選拿全部）
             if (!ModelState.IsValid) return BadRequest();
 
-            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var notifications = await _notiRepo.GetNotificationAsync(UnReadOnly, user);
             if (notifications == null) return NotFound();
             return Ok(notifications);
@@ -60,10 +61,24 @@ namespace backend.Controller
         {
             if (!ModelState.IsValid) return BadRequest();
             // 取得特定一筆通知，並且將其改成已讀 
-            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var notification = await _notiRepo.GetNotificationByIdAsync(user, id);
             if (notification == null) return NotFound();
             return Ok(notification);
+        }
+
+        /// <summary>
+        /// 將所有通知已讀
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        [HttpGet("read-all")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> ReadAllNotifications()
+        {
+            await _notiRepo.ReadAllAsync(user);
+            return Ok();
         }
     }
 }

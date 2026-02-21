@@ -10,6 +10,7 @@ using backend.Mapper;
 using backend.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace backend.Controller
 {
@@ -141,6 +142,23 @@ namespace backend.Controller
             var appUser = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var updated = await _postRepo.UpdatePostByIdAsync(id, postDto, appUser!);
             return Ok(updated!.ToReadingPostDto());
+        }
+
+        /// <summary>
+        /// 用關鍵字尋找貼文
+        /// </summary>
+        /// <param name="keyword"></param>
+        /// <returns></returns>
+        [HttpGet("search")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<ReadingPostDto>>> SearchPostsByKeyWords([FromQuery] string keyword)
+        {
+            if (!ModelState.IsValid) return BadRequest();
+            var posts = await _postRepo.SearchByKeyWordsAsync(keyword);
+            if (posts == null) return NotFound();
+            return Ok(posts);
         }
     }
 }
