@@ -15,7 +15,7 @@ function OrderCard({ order }: { order: OrderDisplay }) {
           <img
             src={order.bookCover}
             alt={order.bookTitle}
-            className="w-full aspect-[2/3] object-cover rounded"
+            className="w-full aspect-2/3 object-cover rounded"
           />
         </div>
         <div className="flex-1 min-w-0">

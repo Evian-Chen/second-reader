@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { ProfileErrorBoundary } from "@/components/ProfileErrorBoundary";
 
 export default function ProfilePage() {
   const { user, isSignedIn } = useCurrentUser();
@@ -34,8 +35,9 @@ export default function ProfilePage() {
     : [];
 
   return (
-    <div className="min-h-screen">
-      <SignedOut>
+    <ProfileErrorBoundary>
+      <div className="min-h-screen">
+        <SignedOut>
         <div className="mx-auto max-w-4xl px-6 py-12 text-center">
           <p className="text-muted-foreground mb-4">請先登入以查看個人頁面</p>
           <Link href="/">
@@ -129,6 +131,7 @@ export default function ProfilePage() {
           </div>
         )}
       </SignedIn>
-    </div>
+      </div>
+    </ProfileErrorBoundary>
   );
 }
