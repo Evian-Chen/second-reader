@@ -229,5 +229,41 @@ namespace backend.Repository
             var created = await _context.Notifications.AddAsync(notification);
             return created.Entity.ToDtoFromModel();
         }
+
+        public async Task<NotificationDto> InformPostCreaterNewCommentAsync(AppUser user, Guid postId)
+        {
+            var post = await _context.ReadingPosts.Include(c => c.AppUser).FirstOrDefaultAsync(c => c.Id == postId)
+                            ?? throw new InvalidOperationException("No such root comment.");
+            var content = $"{user.AccountId} 在您的貼文底下留言囉！";
+
+            var notification = new Notification
+            {
+                Title = Util.Literals.InformPostCreaterNewCommentTitle,
+                Content = content,
+                ReceiverAccountId = post.AppUser!.AccountId,
+                ActorAccountId = Util.Accounts.System,
+                NotificationType = NotificationType.InformPostCreaterNewComment
+            };
+            var created = await _context.Notifications.AddAsync(notification);
+            return created.Entity.ToDtoFromModel();
+        }
+
+        public async Task<NotificationDto> InformCommentCreaterNewCommentAsync(AppUser user, Guid rootCommentId)
+        {
+            var comment = await _context.Comments.Include(c => c.Author).FirstOrDefaultAsync(c => c.Id == rootCommentId)
+                            ?? throw new InvalidOperationException("No such root comment.");
+            var content = $"{user.AccountId} 回覆您的留言！";
+
+            var notification = new Notification
+            {
+                Title = Util.Literals.InformRootCommentCreaterNewCommentTitle,
+                Content = content,
+                ReceiverAccountId = comment.Author.AccountId,
+                ActorAccountId = Util.Accounts.System,
+                NotificationType = NotificationType.InformRootCommentCreaterNewComment
+            };
+            var created = await _context.Notifications.AddAsync(notification);
+            return created.Entity.ToDtoFromModel();
+        }
     }
 }

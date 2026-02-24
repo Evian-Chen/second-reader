@@ -23,6 +23,8 @@ namespace backend.Interface
         Task<NotificationDto> CreateCartItemExpiredAsync(AppUser user, Guid? userBookId);
         Task<NotificationDto> CompleteOrderItemFromBuyerAsync(AppUser user, Guid? userBookId);
         Task<NotificationDto> CreateWelcomeMessageAsync(AppUser user);
+        Task<NotificationDto> InformPostCreaterNewCommentAsync(AppUser user, Guid postId);
+        Task<NotificationDto> InformCommentCreaterNewCommentAsync(AppUser user, Guid rootCommentId);
         Task ReadAllAsync(AppUser user);
     }
 }

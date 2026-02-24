@@ -19,6 +19,8 @@ namespace backend.Model
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+        public int CommentCount { get; set; } = 0;
+
         public AppUser? AppUser { get; set; }
     }
 }

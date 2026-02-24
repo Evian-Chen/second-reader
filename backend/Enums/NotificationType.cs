@@ -11,6 +11,8 @@ namespace backend.Enums
         WaitlistAccepted,  // 排隊遞補成功，以書本為單位
         WaitlistCanceled,  // 正在排隊的書已經被下架（被賣出/賣家下架），以書本為單位
         CartItemExpired,
+        InformPostCreaterNewComment,
+        InformRootCommentCreaterNewComment,
         WelcomeMsg
     }
 }

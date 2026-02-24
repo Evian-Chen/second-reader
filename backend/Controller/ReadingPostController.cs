@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using backend.Dto.Comment;
 using backend.Dto.Error;
 using backend.Dto.ReadingPost;
 using backend.Interface;
@@ -20,9 +21,11 @@ namespace backend.Controller
     public class ReadingPostController : ControllerBase
     {
         private readonly IReadingPostRepository _postRepo;
-        public ReadingPostController(IReadingPostRepository postRepo)
+        private readonly ICommentRepository _commentRepo;
+        public ReadingPostController(IReadingPostRepository postRepo, ICommentRepository commentRepo)
         {
             _postRepo = postRepo;
+            _commentRepo = commentRepo;
         }
 
         /// <summary>
@@ -159,6 +162,20 @@ namespace backend.Controller
             var posts = await _postRepo.SearchByKeyWordsAsync(keyword);
             if (posts == null) return NotFound();
             return Ok(posts);
+        }
+
+        /// <summary>
+        /// 取得某篇 post 的所有 root comments
+        /// </summary>
+        /// <param name="postId"></param>
+        /// <returns></returns>
+        [HttpGet("{postId}/comments")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<CommentDto>>> GetRootCommentsByPostId([FromRoute] Guid postId)
+        {
+            var comments = await _commentRepo.GetRootCommentsByPostIdAsync(postId);
+            return Ok(comments);
         }
     }
 }

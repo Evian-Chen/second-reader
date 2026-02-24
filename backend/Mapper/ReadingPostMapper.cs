@@ -18,6 +18,7 @@ namespace backend.Mapper
                 Content = model.Content,
                 Rating = model.Rating,
                 Likes = model.Likes,
+                CommentCount = model.CommentCount,
                 UpdatedAt = model.UpdatedAt,
                 AccountId = model.AppUser!.AccountId
             };
@@ -30,6 +31,7 @@ namespace backend.Mapper
                 Title = dto.Title,
                 Content = dto.Content,
                 Rating = dto.Rating,
+                CommentCount = 0,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = dto.UpdatedAt,
             };

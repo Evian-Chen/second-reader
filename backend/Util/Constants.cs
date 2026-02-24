@@ -21,6 +21,8 @@ namespace backend.Util
         public const string WaitlistCanceled = "您排隊的書已被取消！";
         public const string WaitlistAccepted = "您排隊的書已成功遞補！";
         public const string CartItemExpiredTitle = "您的購物車商品逾期！";
+        public const string InformPostCreaterNewCommentTitle = "有人在您的貼文底下留言哦！";
+        public const string InformRootCommentCreaterNewCommentTitle = "有人回覆您的留言哦！";
         public const string WelcomeMsg = "歡迎來到黑白冊！";
     }
 
