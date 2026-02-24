@@ -10,5 +10,7 @@ namespace backend.Dto.Me
         public string Bio { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public int FollowerCount { get; set; }
+        public int FollowingCount { get; set; }
     }
 }

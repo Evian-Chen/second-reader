@@ -15,10 +15,12 @@ namespace backend.Service
     {
         private readonly ApplicationDBContext _context;
         private readonly IAppUserRepository _userRepo;
-        public AppUserService(ApplicationDBContext context, IAppUserRepository userRepo)
+        private readonly IMeNotificationRepository _notiRepo;
+        public AppUserService(ApplicationDBContext context, IAppUserRepository userRepo, IMeNotificationRepository notiRepo)
         {
             _context = context;
             _userRepo = userRepo;
+            _notiRepo = notiRepo;
         }
 
         public async Task<List<UserBook>> CreateUserBookAsync(List<UploadUserBooksDto> uploadDtos, AppUser appUser)
@@ -27,7 +29,7 @@ namespace backend.Service
             foreach (var dto in uploadDtos)
             {
                 // 同一個使用者不允許上傳同本書兩次
-                var existing = await _context.UserBooks.Include(u => u.AppUser).Where(u => u.AppUser.AccountId == appUser.AccountId && u.Book.ISBN == dto.Book.ISBN).FirstOrDefaultAsync();
+                var existing = await _context.UserBooks.Include(u => u.AppUser).Where(u => u.AppUser!.AccountId == appUser.AccountId && u.Book!.ISBN == dto.Book.ISBN).FirstOrDefaultAsync();
                 if (existing != null) continue;
 
                 // 確認所有要新增的書都存在 Books 資料表
@@ -56,6 +58,7 @@ namespace backend.Service
             var user = await _context.AppUsers.Include(u => u.UserProfile).FirstOrDefaultAsync(x => x.ClerkUserId == ClerkUserId);
             if (user != null) return user;
 
+            // 建立使用者
             var newUser = new AppUser
             {
                 ClerkUserId = ClerkUserId,
@@ -63,8 +66,8 @@ namespace backend.Service
                 AccountId = accountIdTemp,
                 Email = Email,
             };
+            await _notiRepo.CreateWelcomeMessageAsync(newUser);  // 傳送歡迎訊息給使用者
             return await _userRepo.CreateAsync(newUser);
-
         }
     }
 }

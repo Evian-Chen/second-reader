@@ -16,5 +16,6 @@ namespace backend.Interface
         Task<ReadingPost?> UpdatePostByIdAsync(Guid id, createReadingPostDto dto, AppUser appUser);
         Task<ReadingPost?> LikePosyByIdAsync(Guid id, LikePostDto likePostDto);
         Task<List<ReadingPostDto>?> GetAllAsync();
+        Task<List<ReadingPostDto>?> SearchByKeyWordsAsync(string keyword);
     }
 }

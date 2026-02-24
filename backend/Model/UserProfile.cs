@@ -14,6 +14,8 @@ namespace backend.Model
         public string DisplayName { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public int FollowerCount { get; set; } = 0;
+        public int FollowingCount { get; set; } = 0;
 
         public Guid UserId { get; set; }  // FK
         public AppUser? AppUser { get; set; } = null;

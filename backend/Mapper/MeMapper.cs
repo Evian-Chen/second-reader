@@ -23,7 +23,9 @@ namespace backend.Mapper
                 {
                     Bio = appUser.UserProfile.Bio,
                     DisplayName = appUser.UserProfile.DisplayName,
-                    UpdatedAt = appUser.UserProfile.UpdatedAt
+                    UpdatedAt = appUser.UserProfile.UpdatedAt,
+                    FollowerCount = appUser.UserProfile.FollowerCount,
+                    FollowingCount = appUser.UserProfile.FollowingCount
                 }
             };
         }

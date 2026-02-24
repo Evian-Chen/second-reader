@@ -99,7 +99,7 @@ namespace backend.Repository
             return await books.ToListAsync();
         }
 
-        public async Task<List<UserBook>?> GetBookSearchResult(string? title, string? author, string? sellerAccount, string? sellerDisplayName, BookCategory? bookCategory, string? isbn)
+        public async Task<List<UserBook>?> GetBookSearchResult(string? title, string? author, string? sellerAccount, string? sellerDisplayName, BookCategory? bookCategory, string? isbn, string? keyword)
         {
             var userBooks = _context.UserBooks
                 .Include(ub => ub.Book)
@@ -129,6 +129,10 @@ namespace backend.Repository
             if (bookCategory.HasValue)
             {
                 userBooks = userBooks.Where(ub => ub.Book!.BookCategory == bookCategory);
+            }
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                userBooks = userBooks.Where(ub => ub.Book!.Description.Contains(keyword) || ub.Book.Title.Contains(keyword));
             }
 
             return await userBooks.ToListAsync();

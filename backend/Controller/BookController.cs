@@ -125,10 +125,10 @@ namespace backend.Controller
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<UserBookSummaryDto>> GetBookSearchResult([FromQuery] string? title, string? author, string? sellerAccount, string? sellerDisplayName, BookCategory? BookCategory, string? isbn)
+        public async Task<ActionResult<List<UserBookSummaryDto>>> GetBookSearchResult([FromQuery] string? title, string? author, string? sellerAccount, string? sellerDisplayName, BookCategory? BookCategory, string? isbn, string? keyword)
         {
             if (!ModelState.IsValid) return BadRequest();
-            var resultList = await _booksRepo.GetBookSearchResult(title, author, sellerAccount, sellerDisplayName, BookCategory, isbn);
+            var resultList = await _booksRepo.GetBookSearchResult(title, author, sellerAccount, sellerDisplayName, BookCategory, isbn, keyword);
             if (resultList == null) return NotFound("No book satisfied the search query.");
             return Ok(resultList.Select(b => b.ToUserBookSummaryDto()));
         }

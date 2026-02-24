@@ -7,9 +7,10 @@ namespace backend.Enums
         OrderRejected,  // 賣家取消該出貨請求，以書本為單位
         OrderAccepted,  // 賣家接受買家請求，以書本為單位
         OrderCompletedBySeller,
-        OrderCompletedByBuyer,  
+        OrderCompletedByBuyer,
         WaitlistAccepted,  // 排隊遞補成功，以書本為單位
         WaitlistCanceled,  // 正在排隊的書已經被下架（被賣出/賣家下架），以書本為單位
-        CartItemExpired
+        CartItemExpired,
+        WelcomeMsg
     }
 }

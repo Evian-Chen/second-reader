@@ -34,7 +34,8 @@ namespace backend.Mapper
                     Description = userBook.Book.Description,
                     BookCategory = userBook.Book.BookCategory,
                     UserBookStatus = userBook.UserBookStatus,
-                    SellerAccountId = userBook.AppUser!.AccountId
+                    SellerAccountId = userBook.AppUser!.AccountId,
+                    Price = userBook.Price
                 }
             };
         }
@@ -51,7 +52,8 @@ namespace backend.Mapper
                 Description = userBook.Book.Description,
                 BookCategory = userBook.Book.BookCategory,
                 UserBookStatus = userBook.UserBookStatus,
-                SellerAccountId = userBook.AppUser!.AccountId
+                SellerAccountId = userBook.AppUser!.AccountId,
+                Price = userBook.Price
             };
         }
 

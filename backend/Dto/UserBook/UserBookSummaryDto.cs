@@ -20,5 +20,6 @@ namespace backend.Dto.UserBook
         public BookCategory BookCategory { get; set; }
         public UserBookStatus UserBookStatus { get; set; }
         public string SellerAccountId { get; set; } = string.Empty;
+        public int Price { get; set; }
     }
 }

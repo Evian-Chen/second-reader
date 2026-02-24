@@ -15,9 +15,11 @@ namespace backend.Repository
     public class MeNotificationRepository : IMeNotificationRepository
     {
         private readonly ApplicationDBContext _context;
-        public MeNotificationRepository(ApplicationDBContext context)
+        private readonly ILogger<MeNotificationRepository> _logger;
+        public MeNotificationRepository(ApplicationDBContext context, ILogger<MeNotificationRepository> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<NotificationDto> CompleteOrderItemFromBuyerAsync(AppUser user, Guid? userBookId)
@@ -193,6 +195,39 @@ namespace backend.Repository
             notification.ReadAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return notification.ToDtoFromModel();
+        }
+
+        public async Task ReadAllAsync(AppUser user)
+        {
+            try
+            {
+                var models = _context.Notifications.Where(n => n.ReceiverAccountId == user.AccountId).AsQueryable();
+                foreach (var m in models)
+                {
+                    m.UnRead = false;
+                    m.ReadAt = DateTime.UtcNow;
+                }
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<NotificationDto> CreateWelcomeMessageAsync(AppUser user)
+        {
+            var notification = new Notification
+            {
+                Title = Util.Literals.WelcomeMsg,
+                Content = "歡迎您加入黑白冊，一起來分享您對書本的想法，以及買賣書籍吧！",
+                ReceiverAccountId = user.AccountId,
+                ActorAccountId = Util.Accounts.System,
+                NotificationType = NotificationType.WelcomeMsg
+            };
+            var created = await _context.Notifications.AddAsync(notification);
+            return created.Entity.ToDtoFromModel();
         }
     }
 }

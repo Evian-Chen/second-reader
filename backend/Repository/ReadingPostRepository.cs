@@ -65,6 +65,13 @@ namespace backend.Repository
             return model;
         }
 
+        public async Task<List<ReadingPostDto>?> SearchByKeyWordsAsync(string keyword)
+        {
+            var model = await _context.ReadingPosts.Include(p => p.AppUser).Where(p => p.Content.Contains(keyword)).ToListAsync();
+            if (model == null) return null;
+            return [.. model.Select(m => m.ToReadingPostDto())];
+        }
+
         public async Task<ReadingPost?> UpdatePostByIdAsync(Guid id, createReadingPostDto dto, AppUser appUser)
         {
             var model = await _context.ReadingPosts.Include(p => p.AppUser).FirstOrDefaultAsync(p => p.Id == id);
@@ -76,7 +83,5 @@ namespace backend.Repository
             await _context.SaveChangesAsync();
             return model;
         }
-
-
     }
 }

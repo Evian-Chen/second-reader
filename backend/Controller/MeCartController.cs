@@ -24,6 +24,7 @@ namespace backend.Controller
         {
             _cartRepo = cartRepo;
         }
+        private AppUser user => HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
 
         /// <summary>
         /// 取得使用者購物車中所有商品
@@ -35,7 +36,6 @@ namespace backend.Controller
         public async Task<ActionResult<CartDto>> GetCart()
         {
             // 取得這個使用者目前購物車的所有商品，以 CartItemListingDto 做顯示
-            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var cart = await _cartRepo.GetCartAsync(user);
             return Ok(cart);
         }
@@ -53,7 +53,6 @@ namespace backend.Controller
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<CartItemListingDto>> AddItemToCartById([FromQuery] Guid userBookId)
         {
-            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var item = await _cartRepo.AddItemToCartByIdAsync(user, userBookId);
             if (item == null) return NotFound();
             return Ok(item);
@@ -73,7 +72,6 @@ namespace backend.Controller
         public async Task<IActionResult> DeleteItemFromCartById([FromRoute] Guid userBookId)
         {
             if (!ModelState.IsValid) return BadRequest();
-            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var item = await _cartRepo.DeleteItemFromCartByIdAsync(user!, userBookId);
             if (item == null) return NotFound();
             return NoContent();
@@ -93,7 +91,6 @@ namespace backend.Controller
         {
             if (!ModelState.IsValid) return BadRequest();
             // 每個使用者只會有一個購物車，建立訂單後刪除購物車
-            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var orderDto = await _cartRepo.CreateOrderAsync(user, checkoutDto);
             return Ok(orderDto);
         }
@@ -108,7 +105,6 @@ namespace backend.Controller
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteCart()
         {
-            var user = HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
             var deletedCart = await _cartRepo.DeleteAllCartAsync(user);
             if (deletedCart == null) return NotFound("No item in cart.");
             return NoContent();
