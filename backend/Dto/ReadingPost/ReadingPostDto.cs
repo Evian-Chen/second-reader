@@ -14,6 +14,7 @@ namespace backend.Dto.ReadingPost
         public string Content { get; set; } = string.Empty;
         public int Rating { get; set; }
         public int Likes { get; set; }
+        public int CommentCount { get; set; }
         public DateTime UpdatedAt { get; set; }
         public string AccountId { get; set; } = string.Empty;
     }

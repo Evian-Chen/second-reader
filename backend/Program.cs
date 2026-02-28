@@ -126,6 +126,7 @@ builder.Services.AddScoped<IMeOrderReporitory, MeOrderRepository>();
 builder.Services.AddScoped<IMeSalesRepository, MeSalesRepository>();
 builder.Services.AddScoped<IMeSavedRepository, MeSavedRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 // builder.Services.AddHostedService<CartReservationCleanUpWorker>();
 
 // Auth switch
