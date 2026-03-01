@@ -1,0 +1,95 @@
+列出磁碟區 Acer 的資料夾 PATH
+磁碟區序號為 8ABC-5881
+C:.
+|   main.tsx
+|   project_structure.txt
+|   
++---app
+|   |   App.tsx
+|   |   routes.ts
+|   |   
+|   +---components
+|   |   |   BookCard.tsx
+|   |   |   CreateBookDialog.tsx
+|   |   |   CreatePostDialog.tsx
+|   |   |   EditProfileDialog.tsx
+|   |   |   LoginDialog.tsx
+|   |   |   Navbar.tsx
+|   |   |   NotificationPanel.tsx
+|   |   |   PostCard.tsx
+|   |   |   
+|   |   +---figma
+|   |   |       ImageWithFallback.tsx
+|   |   |       
+|   |   \---ui
+|   |           accordion.tsx
+|   |           alert-dialog.tsx
+|   |           alert.tsx
+|   |           aspect-ratio.tsx
+|   |           avatar.tsx
+|   |           badge.tsx
+|   |           breadcrumb.tsx
+|   |           button.tsx
+|   |           calendar.tsx
+|   |           card.tsx
+|   |           carousel.tsx
+|   |           chart.tsx
+|   |           checkbox.tsx
+|   |           collapsible.tsx
+|   |           command.tsx
+|   |           context-menu.tsx
+|   |           dialog.tsx
+|   |           drawer.tsx
+|   |           dropdown-menu.tsx
+|   |           form.tsx
+|   |           hover-card.tsx
+|   |           input-otp.tsx
+|   |           input.tsx
+|   |           label.tsx
+|   |           menubar.tsx
+|   |           navigation-menu.tsx
+|   |           pagination.tsx
+|   |           popover.tsx
+|   |           progress.tsx
+|   |           radio-group.tsx
+|   |           resizable.tsx
+|   |           scroll-area.tsx
+|   |           select.tsx
+|   |           separator.tsx
+|   |           sheet.tsx
+|   |           sidebar.tsx
+|   |           skeleton.tsx
+|   |           slider.tsx
+|   |           sonner.tsx
+|   |           switch.tsx
+|   |           table.tsx
+|   |           tabs.tsx
+|   |           textarea.tsx
+|   |           toggle-group.tsx
+|   |           toggle.tsx
+|   |           tooltip.tsx
+|   |           use-mobile.ts
+|   |           utils.ts
+|   |           
+|   +---data
+|   |       mockData.ts
+|   |       
+|   \---pages
+|           BookDetail.tsx
+|           Cart.tsx
+|           Home.tsx
+|           MyShop.tsx
+|           Orders.tsx
+|           PostDetail.tsx
+|           Profile.tsx
+|           Root.tsx
+|           
++---assets
+|       logo.png
+|       
+\---styles
+        fonts.css
+        index.css
+        tailwind.css
+        theme.css
+        
