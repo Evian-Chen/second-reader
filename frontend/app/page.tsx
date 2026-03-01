@@ -130,18 +130,18 @@ export default function Home() {
         defaultValue={urlSearch ? "marketplace" : "posts"}
         className="w-full gap-0"
       >
-        <div className="sticky top-14 z-40 bg-background border-b border-border">
+        <div className="sticky top-14 z-50 -mt-px pt-px bg-background border-t border-b border-border">
           <div className="mx-auto max-w-7xl">
             <TabsList className="h-11.5 bg-transparent w-auto p-0">
               <TabsTrigger
                 value="posts"
-                className="h-11 rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent px-0 text-[13px] data-[state=active]:shadow-none"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent px-0 text-[13px] data-[state=active]:shadow-none"
               >
                 閱讀分享
               </TabsTrigger>
               <TabsTrigger
                 value="marketplace"
-                className="h-11 rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent px-0 text-[13px] data-[state=active]:shadow-none"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent px-0 text-[13px] data-[state=active]:shadow-none"
               >
                 二手書市集
               </TabsTrigger>
