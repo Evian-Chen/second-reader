@@ -1,2 +1,6 @@
-export { api, setApiAuth } from "./client";
-export type { GetToken, RequestOptions } from "./client";
+export {
+  getApiBaseUrl,
+  getAuthHeaders,
+  setApiAuth,
+} from "./client";
+export type { GetToken, ClientConfig } from "./client";

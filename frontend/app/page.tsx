@@ -7,8 +7,7 @@ import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { Button } from "@/components/ui/button";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
-import { CreateBookDialog } from "@/components/CreateBookDialog";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +21,7 @@ import { useGetBooksQuery } from "@/redux/services/api";
 import type { UserBookSummary, UserBookDetail } from "@/types";
 import { mapCategory, mapCondition } from "@/types/constants";
 import { mockPosts } from "@/lib/mock/posts";
-import { bookCategories } from "@/lib/mock/bookCategories";
+import { bookCategories } from "@/types/constants";
 import { useCurrentUser } from "@/clerk/useCurrentUser";
 
 type SortBy = "latest" | "price-low" | "price-high" | "queue";

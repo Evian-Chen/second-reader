@@ -34,6 +34,11 @@ export const BOOK_CATEGORY_LABELS: Record<BookCategory, string> = {
   Biography: "傳記",
 };
 
+/** 書籍分類標籤（排除未分類），供篩選 chips 使用 */
+export const bookCategories = Object.values(BOOK_CATEGORY_LABELS).filter(
+  (label) => label !== "未分類"
+);
+
 export const DEFAULT_COVER = "/placeholder-book.svg";
 
 export function mapCondition(c?: BookCondition): BookConditionLabel {
