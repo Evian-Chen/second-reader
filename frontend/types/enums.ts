@@ -39,3 +39,26 @@ export type UserBookStatus =
   | "InProgress"
   | "Completed"
   | "Delisted";
+
+export type OrderItemStatus =
+  | "Pending"
+  | "Accepted"
+  | "Rejected"
+  | "SellerSent"
+  | "Completed";
+
+export type NotificationType =
+  | "OrderCreated"
+  | "OrderRequest"
+  | "OrderRejected"
+  | "OrderAccepted"
+  | "OrderCompletedBySeller"
+  | "OrderCompletedByBuyer"
+  | "WaitlistAccepted"
+  | "WaitlistCanceled"
+  | "CartItemExpired"
+  | "InformPostCreaterNewComment"
+  | "InformRootCommentCreaterNewComment"
+  | "WelcomeMsg";
+
+export type WaitlistStatus = "Waiting" | "Accepted" | "Rejected" | "Canceled";

@@ -1,20 +1,20 @@
 "use client";
 
 import { Heart, MessageCircle, Bookmark, Share2 } from "lucide-react";
-import type { Post } from "@/types";
+import type { ReadingPost } from "@/types";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 interface PostCardProps {
-  post: Post;
+  post: ReadingPost;
 }
 
 export function PostCard({ post }: PostCardProps) {
   const router = useRouter();
   const [isLiked, setIsLiked] = useState(post.isLiked ?? false);
   const [isSaved, setIsSaved] = useState(post.isSaved ?? false);
-  const [likes, setLikes] = useState(post.likes);
+  const [likes, setLikes] = useState(post.likes ?? 0);
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -46,28 +46,32 @@ export function PostCard({ post }: PostCardProps) {
     >
       <div className="flex items-start gap-3 mb-3">
         <Link
-          href={`/profile/${post.userId}`}
+          href={`/profile/${post.accountId ?? ""}`}
           onClick={(e) => e.stopPropagation()}
           className="shrink-0"
         >
           <img
-            src={post.userAvatar}
-            alt={post.userName}
+            src={post.userAvatar ?? ""}
+            alt={post.userName ?? post.accountId ?? ""}
             className="h-10 w-10 rounded-full object-cover ring-1 ring-border hover:opacity-80 transition-opacity"
           />
         </Link>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <Link
-              href={`/profile/${post.userId}`}
+              href={`/profile/${post.accountId ?? ""}`}
               onClick={(e) => e.stopPropagation()}
               className="text-sm font-medium hover:underline"
             >
-              {post.userName}
+              {post.userName ?? post.accountId ?? "使用者"}
             </Link>
-            <p className="text-xs text-muted-foreground">@{post.username}</p>
+            {post.username ? (
+              <p className="text-xs text-muted-foreground">@{post.username}</p>
+            ) : null}
             <span className="text-xs text-muted-foreground">·</span>
-            <p className="text-xs text-muted-foreground">{post.createdAt}</p>
+            <p className="text-xs text-muted-foreground">
+              {post.createdAt ?? post.updatedAt ?? ""}
+            </p>
           </div>
         </div>
       </div>
@@ -130,7 +134,7 @@ export function PostCard({ post }: PostCardProps) {
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
         >
           <MessageCircle className="h-4 w-4" />
-          <span className="text-xs">{post.comments}</span>
+          <span className="text-xs">{post.commentCount ?? 0}</span>
         </button>
         <button
           type="button"

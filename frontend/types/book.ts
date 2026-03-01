@@ -4,6 +4,7 @@ import type {
   DeliveryMethod,
   PayMethod,
   UserBookStatus,
+  WaitlistStatus,
 } from "./enums";
 
 export interface UserBookSummary {
@@ -15,6 +16,7 @@ export interface UserBookSummary {
   bookCategory?: BookCategory;
   userBookStatus?: UserBookStatus;
   sellerAccountId?: string | null;
+  price?: number;
 }
 
 export interface UserBookDetail {
@@ -94,7 +96,16 @@ export interface SearchBooksParams {
   sellerDisplayName?: string;
   BookCategory?: BookCategory;
   isbn?: string;
+  keyword?: string;
 }
 export type SearchBooksResponse = UserBookSummary[];
 
 export type IsbnLookupResponse = GoogleBookResult;
+
+// --- Waitlist ---
+export interface Waitlist {
+  userBookId: string;
+  waiterAccountId?: string | null;
+  createdAt?: string;
+  waitlistStatus?: WaitlistStatus;
+}

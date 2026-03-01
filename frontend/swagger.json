@@ -1,0 +1,4177 @@
+{
+ "openapi": "3.0.1",
+ "info": {
+ "title": "SecondReader API",
+ "version": "v1"
+ },
+ "paths": {
+ "/api/books": {
+ "get": {
+ "tags": [
+ "Book"
+ ],
+ "summary": "取得所有書籍",
+ "parameters": [
+ {
+ "name": "pageNum",
+ "in": "query",
+ "schema": {
+ "type": "integer",
+ "format": "int32",
+ "default": 1
+ }
+ },
+ {
+ "name": "pageSize",
+ "in": "query",
+ "schema": {
+ "type": "integer",
+ "format": "int32",
+ "default": 10
+ }
+ }
+ ],
+ "responses": {
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ }
+ }
+ },
+ "post": {
+ "tags": [
+ "Book"
+ ],
+ "summary": "上架一或多本書",
+ "requestBody": {
+ "description": "書籍資訊，UserBookId 不需填寫",
+ "content": {
+ "application/json-patch+json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UploadUserBooksDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UploadUserBooksDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UploadUserBooksDto"
+ }
+ }
+ },
+ "application/*+json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UploadUserBooksDto"
+ }
+ }
+ }
+ }
+ },
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/books/{accountId}": {
+ "get": {
+ "tags": [
+ "Book"
+ ],
+ "summary": "取得特定使用者的上架書籍",
+ "parameters": [
+ {
+ "name": "accountId",
+ "in": "path",
+ "description": "使用者帳號",
+ "required": true,
+ "schema": {
+ "type": "string"
+ }
+ },
+ {
+ "name": "Status",
+ "in": "query",
+ "schema": {
+ "$ref": "#/components/schemas/UserBookStatus"
+ }
+ }
+ ],
+ "responses": {
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/books/{id}": {
+ "get": {
+ "tags": [
+ "Book"
+ ],
+ "summary": "使用 ID 取得書",
+ "parameters": [
+ {
+ "name": "id",
+ "in": "path",
+ "description": "書本 ID",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/UserBookListinDetailDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UserBookListinDetailDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UserBookListinDetailDto"
+ }
+ }
+ }
+ }
+ }
+ },
+ "put": {
+ "tags": [
+ "Book"
+ ],
+ "summary": "用 ID 更新一本已上架書籍",
+ "parameters": [
+ {
+ "name": "id",
+ "in": "path",
+ "description": "書的 ID",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "requestBody": {
+ "description": "書的更新內容（全覆蓋）",
+ "content": {
+ "application/json-patch+json": {
+ "schema": {
+ "$ref": "#/components/schemas/UpdateUserBookDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UpdateUserBookDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UpdateUserBookDto"
+ }
+ },
+ "application/*+json": {
+ "schema": {
+ "$ref": "#/components/schemas/UpdateUserBookDto"
+ }
+ }
+ }
+ },
+ "responses": {
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/UserBookListinDetailDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UserBookListinDetailDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UserBookListinDetailDto"
+ }
+ }
+ }
+ }
+ }
+ },
+ "delete": {
+ "tags": [
+ "Book"
+ ],
+ "summary": "用 ID 下架一本書",
+ "parameters": [
+ {
+ "name": "id",
+ "in": "path",
+ "description": "書的 ID",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ },
+ {
+ "name": "hard",
+ "in": "query",
+ "description": "是否連帶刪除資料庫的書籍資料",
+ "schema": {
+ "type": "boolean"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/books/search": {
+ "post": {
+ "tags": [
+ "Book"
+ ],
+ "summary": "用關鍵字查詢書籍",
+ "parameters": [
+ {
+ "name": "title",
+ "in": "query",
+ "description": "",
+ "schema": {
+ "type": "string"
+ }
+ },
+ {
+ "name": "author",
+ "in": "query",
+ "description": "",
+ "schema": {
+ "type": "string"
+ }
+ },
+ {
+ "name": "sellerAccount",
+ "in": "query",
+ "description": "",
+ "schema": {
+ "type": "string"
+ }
+ },
+ {
+ "name": "sellerDisplayName",
+ "in": "query",
+ "description": "",
+ "schema": {
+ "type": "string"
+ }
+ },
+ {
+ "name": "BookCategory",
+ "in": "query",
+ "description": "",
+ "schema": {
+ "$ref": "#/components/schemas/BookCategory"
+ }
+ },
+ {
+ "name": "isbn",
+ "in": "query",
+ "description": "",
+ "schema": {
+ "type": "string"
+ }
+ },
+ {
+ "name": "keyword",
+ "in": "query",
+ "schema": {
+ "type": "string"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/books/isbn": {
+ "post": {
+ "tags": [
+ "Book"
+ ],
+ "summary": "透過照片自動填寫書籍資訊",
+ "requestBody": {
+ "content": {
+ "multipart/form-data": {
+ "schema": {
+ "type": "object",
+ "properties": {
+ "Img": {
+ "type": "string",
+ "format": "binary"
+ }
+ }
+ },
+ "encoding": {
+ "Img": {
+ "style": "form"
+ }
+ }
+ }
+ }
+ },
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/GoogleBookResultDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/GoogleBookResultDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/GoogleBookResultDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/comments": {
+ "post": {
+ "tags": [
+ "Comment"
+ ],
+ "summary": "新增一筆留言",
+ "requestBody": {
+ "content": {
+ "application/json-patch+json": {
+ "schema": {
+ "$ref": "#/components/schemas/CreateCommentDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/CreateCommentDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/CreateCommentDto"
+ }
+ },
+ "application/*+json": {
+ "schema": {
+ "$ref": "#/components/schemas/CreateCommentDto"
+ }
+ }
+ }
+ },
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/CommentDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/CommentDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/CommentDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/comments/{commentId}": {
+ "delete": {
+ "tags": [
+ "Comment"
+ ],
+ "summary": "刪除一筆留言(soft delete)",
+ "parameters": [
+ {
+ "name": "commentId",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "204": {
+ "description": "No Content"
+ }
+ }
+ }
+ },
+ "/api/comments/{rootId}/child-comments": {
+ "get": {
+ "tags": [
+ "Comment"
+ ],
+ "parameters": [
+ {
+ "name": "rootId",
+ "in": "path",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/CommentDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/CommentDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/CommentDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me": {
+ "get": {
+ "tags": [
+ "Me"
+ ],
+ "summary": "取得此使用者的個人資料",
+ "responses": {
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/UserDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UserDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UserDto"
+ }
+ }
+ }
+ },
+ "401": {
+ "description": "Unauthorized",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ }
+ }
+ },
+ "put": {
+ "tags": [
+ "Me"
+ ],
+ "summary": "更改此使用者的個人資料",
+ "requestBody": {
+ "description": "",
+ "content": {
+ "application/json-patch+json": {
+ "schema": {
+ "$ref": "#/components/schemas/UpdateUserDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UpdateUserDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UpdateUserDto"
+ }
+ },
+ "application/*+json": {
+ "schema": {
+ "$ref": "#/components/schemas/UpdateUserDto"
+ }
+ }
+ }
+ },
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "409": {
+ "description": "Conflict",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/UserDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UserDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UserDto"
+ }
+ }
+ }
+ },
+ "401": {
+ "description": "Unauthorized",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/saved/posts": {
+ "get": {
+ "tags": [
+ "Me"
+ ],
+ "summary": "獲取當前使用者收藏的所有貼文列表",
+ "responses": {
+ "200": {
+ "description": "Success"
+ }
+ }
+ }
+ },
+ "/api/me/saved/posts/{postId}": {
+ "post": {
+ "tags": [
+ "Me"
+ ],
+ "summary": "根據貼文 ID 收藏特定貼文",
+ "parameters": [
+ {
+ "name": "postId",
+ "in": "path",
+ "description": "貼文的唯一識別碼 (Guid)",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "201": {
+ "description": "Created"
+ }
+ }
+ },
+ "delete": {
+ "tags": [
+ "Me"
+ ],
+ "summary": "根據貼文 ID 取消收藏特定貼文",
+ "parameters": [
+ {
+ "name": "postId",
+ "in": "path",
+ "description": "貼文的唯一識別碼 (Guid)",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "200": {
+ "description": "Success"
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "204": {
+ "description": "No Content"
+ }
+ }
+ }
+ },
+ "/api/me/saved/books": {
+ "get": {
+ "tags": [
+ "Me"
+ ],
+ "summary": "獲取當前使用者收藏的所有書籍列表",
+ "responses": {
+ "200": {
+ "description": "Success"
+ }
+ }
+ }
+ },
+ "/api/me/saved/books/{bookId}": {
+ "post": {
+ "tags": [
+ "Me"
+ ],
+ "summary": "根據書籍 ID 收藏特定書籍",
+ "parameters": [
+ {
+ "name": "bookId",
+ "in": "path",
+ "description": "書籍的唯一識別碼 (Guid)",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "201": {
+ "description": "Created"
+ }
+ }
+ },
+ "delete": {
+ "tags": [
+ "Me"
+ ],
+ "summary": "根據書籍 ID 取消收藏特定書籍",
+ "parameters": [
+ {
+ "name": "bookId",
+ "in": "path",
+ "description": "書籍的唯一識別碼 (Guid)",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "204": {
+ "description": "No Content"
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/{accountId}/follow": {
+ "post": {
+ "tags": [
+ "Me"
+ ],
+ "parameters": [
+ {
+ "name": "accountId",
+ "in": "path",
+ "required": true,
+ "schema": {
+ "type": "string"
+ }
+ }
+ ],
+ "responses": {
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/UserFollowDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UserFollowDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UserFollowDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/{followedId}/follow": {
+ "delete": {
+ "tags": [
+ "Me"
+ ],
+ "parameters": [
+ {
+ "name": "accountId",
+ "in": "path",
+ "required": true,
+ "schema": {
+ "type": "string"
+ }
+ },
+ {
+ "name": "followedId",
+ "in": "path",
+ "required": true,
+ "schema": {
+ "type": "string"
+ }
+ }
+ ],
+ "responses": {
+ "204": {
+ "description": "No Content"
+ }
+ }
+ }
+ },
+ "/api/me/cart": {
+ "get": {
+ "tags": [
+ "MeCart"
+ ],
+ "summary": "取得使用者購物車中所有商品",
+ "responses": {
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/CartDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/CartDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/CartDto"
+ }
+ }
+ }
+ }
+ }
+ },
+ "delete": {
+ "tags": [
+ "MeCart"
+ ],
+ "summary": "清除整個購物車",
+ "responses": {
+ "204": {
+ "description": "No Content"
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/cart/items": {
+ "post": {
+ "tags": [
+ "MeCart"
+ ],
+ "summary": "將一商品加入購物車",
+ "parameters": [
+ {
+ "name": "userBookId",
+ "in": "query",
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/CartItemListingDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/CartItemListingDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/CartItemListingDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/cart/items/{userBookId}": {
+ "delete": {
+ "tags": [
+ "MeCart"
+ ],
+ "summary": "將一商品移除購物車",
+ "parameters": [
+ {
+ "name": "userBookId",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "204": {
+ "description": "No Content"
+ }
+ }
+ }
+ },
+ "/api/me/cart/checkout": {
+ "post": {
+ "tags": [
+ "MeCart"
+ ],
+ "summary": "將購物車的商品結帳",
+ "requestBody": {
+ "description": "",
+ "content": {
+ "application/json-patch+json": {
+ "schema": {
+ "$ref": "#/components/schemas/CheckoutCartDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/CheckoutCartDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/CheckoutCartDto"
+ }
+ },
+ "application/*+json": {
+ "schema": {
+ "$ref": "#/components/schemas/CheckoutCartDto"
+ }
+ }
+ }
+ },
+ "responses": {
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderDto"
+ }
+ }
+ }
+ },
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/notification": {
+ "get": {
+ "tags": [
+ "MeNotification"
+ ],
+ "summary": "取得所有站內通知",
+ "parameters": [
+ {
+ "name": "UnReadOnly",
+ "in": "query",
+ "description": "是否只取得未讀訊息",
+ "schema": {
+ "type": "boolean"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/NotificationDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/NotificationDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/NotificationDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/notification/{id}": {
+ "get": {
+ "tags": [
+ "MeNotification"
+ ],
+ "summary": "取得特定一筆通知詳細資料",
+ "parameters": [
+ {
+ "name": "id",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/NotificationDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/NotificationDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/NotificationDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/notification/read-all": {
+ "get": {
+ "tags": [
+ "MeNotification"
+ ],
+ "summary": "將所有通知已讀",
+ "responses": {
+ "200": {
+ "description": "Success"
+ },
+ "500": {
+ "description": "Server Error"
+ }
+ }
+ }
+ },
+ "/api/me/order": {
+ "get": {
+ "tags": [
+ "MeOrder"
+ ],
+ "summary": "取得所有歷史訂單",
+ "responses": {
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/OrderDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/OrderDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/OrderDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/order/{id}": {
+ "get": {
+ "tags": [
+ "MeOrder"
+ ],
+ "summary": "取得特定一筆訂單",
+ "parameters": [
+ {
+ "name": "id",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/order/{orderItemId}/complete": {
+ "post": {
+ "tags": [
+ "MeOrder"
+ ],
+ "parameters": [
+ {
+ "name": "orderItemId",
+ "in": "path",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/order/item/{orderItemId}": {
+ "get": {
+ "tags": [
+ "MeOrder"
+ ],
+ "parameters": [
+ {
+ "name": "orderItemId",
+ "in": "path",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/sales": {
+ "get": {
+ "tags": [
+ "MeSales"
+ ],
+ "summary": "取得所有此使用者被下單的紀錄",
+ "parameters": [
+ {
+ "name": "status",
+ "in": "query",
+ "description": "可篩選被下單的狀態",
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemStatus"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/sales/{orderItemId}": {
+ "get": {
+ "tags": [
+ "MeSales"
+ ],
+ "summary": "取得特定一本被下單的書",
+ "parameters": [
+ {
+ "name": "orderItemId",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/sales/{orderItemId}/accept": {
+ "post": {
+ "tags": [
+ "MeSales"
+ ],
+ "summary": "接受特定一本書的下單請求",
+ "parameters": [
+ {
+ "name": "orderItemId",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/sales/{orderItemId}/reject": {
+ "post": {
+ "tags": [
+ "MeSales"
+ ],
+ "summary": "拒絕特定一本書的下單請求",
+ "parameters": [
+ {
+ "name": "orderItemId",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/me/sales/{orderItemId}/complete": {
+ "post": {
+ "tags": [
+ "MeSales"
+ ],
+ "summary": "完成特定一本書的下單請求（賣家已出貨/交付）",
+ "parameters": [
+ {
+ "name": "orderItemId",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/reading-posts": {
+ "get": {
+ "tags": [
+ "ReadingPost"
+ ],
+ "summary": "取得所有的閱讀貼文",
+ "responses": {
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ }
+ }
+ },
+ "post": {
+ "tags": [
+ "ReadingPost"
+ ],
+ "summary": "發布一則貼文",
+ "requestBody": {
+ "description": "",
+ "content": {
+ "application/json-patch+json": {
+ "schema": {
+ "$ref": "#/components/schemas/createReadingPostDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/createReadingPostDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/createReadingPostDto"
+ }
+ },
+ "application/*+json": {
+ "schema": {
+ "$ref": "#/components/schemas/createReadingPostDto"
+ }
+ }
+ }
+ },
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "500": {
+ "description": "Server Error"
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/reading-posts/{accountId}": {
+ "get": {
+ "tags": [
+ "ReadingPost"
+ ],
+ "summary": "取得某使用者的所有貼文",
+ "parameters": [
+ {
+ "name": "accountId",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string"
+ }
+ }
+ ],
+ "responses": {
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/reading-posts/{id}": {
+ "get": {
+ "tags": [
+ "ReadingPost"
+ ],
+ "summary": "取得特定一筆貼文",
+ "parameters": [
+ {
+ "name": "id",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ }
+ }
+ }
+ }
+ },
+ "delete": {
+ "tags": [
+ "ReadingPost"
+ ],
+ "summary": "刪除一則貼文",
+ "parameters": [
+ {
+ "name": "id",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success"
+ }
+ }
+ },
+ "put": {
+ "tags": [
+ "ReadingPost"
+ ],
+ "summary": "更改一則貼文的內容",
+ "parameters": [
+ {
+ "name": "id",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "requestBody": {
+ "description": "",
+ "content": {
+ "application/json-patch+json": {
+ "schema": {
+ "$ref": "#/components/schemas/createReadingPostDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/createReadingPostDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/createReadingPostDto"
+ }
+ },
+ "application/*+json": {
+ "schema": {
+ "$ref": "#/components/schemas/createReadingPostDto"
+ }
+ }
+ }
+ },
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/reading-posts/{id}/like": {
+ "put": {
+ "tags": [
+ "ReadingPost"
+ ],
+ "summary": "按或取消一筆貼文的讚",
+ "parameters": [
+ {
+ "name": "id",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "requestBody": {
+ "description": "",
+ "content": {
+ "application/json-patch+json": {
+ "schema": {
+ "$ref": "#/components/schemas/LikePostDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/LikePostDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/LikePostDto"
+ }
+ },
+ "application/*+json": {
+ "schema": {
+ "$ref": "#/components/schemas/LikePostDto"
+ }
+ }
+ }
+ },
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/reading-posts/search": {
+ "get": {
+ "tags": [
+ "ReadingPost"
+ ],
+ "summary": "用關鍵字尋找貼文",
+ "parameters": [
+ {
+ "name": "keyword",
+ "in": "query",
+ "description": "",
+ "schema": {
+ "type": "string"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/ReadingPostDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/reading-posts/{postId}/comments": {
+ "get": {
+ "tags": [
+ "ReadingPost"
+ ],
+ "summary": "取得某篇 post 的所有 root comments",
+ "parameters": [
+ {
+ "name": "postId",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/CommentDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/CommentDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/CommentDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/{accountId}": {
+ "get": {
+ "tags": [
+ "User"
+ ],
+ "parameters": [
+ {
+ "name": "accountId",
+ "in": "path",
+ "required": true,
+ "schema": {
+ "type": "string"
+ }
+ }
+ ],
+ "responses": {
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/UserDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UserDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/UserDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/{accountId}/followers": {
+ "get": {
+ "tags": [
+ "User"
+ ],
+ "parameters": [
+ {
+ "name": "accountId",
+ "in": "path",
+ "required": true,
+ "schema": {
+ "type": "string"
+ }
+ }
+ ],
+ "responses": {
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserFollowDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserFollowDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserFollowDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/{accountId}/followings": {
+ "get": {
+ "tags": [
+ "User"
+ ],
+ "parameters": [
+ {
+ "name": "accountId",
+ "in": "path",
+ "required": true,
+ "schema": {
+ "type": "string"
+ }
+ }
+ ],
+ "responses": {
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserFollowDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserFollowDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/UserFollowDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "/api/waitlist/{userBookId}": {
+ "get": {
+ "tags": [
+ "Waitlist"
+ ],
+ "summary": "取得特定書籍的排隊狀態",
+ "parameters": [
+ {
+ "name": "userBookId",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ }
+ ],
+ "responses": {
+ "404": {
+ "description": "Not Found",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/WaitlistDto"
+ }
+ }
+ },
+ "application/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/WaitlistDto"
+ }
+ }
+ },
+ "text/json": {
+ "schema": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/WaitlistDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "post": {
+ "tags": [
+ "Waitlist"
+ ],
+ "summary": "加入或取消排隊一本書",
+ "parameters": [
+ {
+ "name": "userBookId",
+ "in": "path",
+ "description": "",
+ "required": true,
+ "schema": {
+ "type": "string",
+ "format": "uuid"
+ }
+ },
+ {
+ "name": "addToWaitlist",
+ "in": "query",
+ "description": "是否加入排隊",
+ "schema": {
+ "type": "boolean"
+ }
+ }
+ ],
+ "responses": {
+ "400": {
+ "description": "Bad Request",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/ApiErrorResponse"
+ }
+ }
+ }
+ },
+ "500": {
+ "description": "Server Error"
+ },
+ "200": {
+ "description": "Success",
+ "content": {
+ "text/plain": {
+ "schema": {
+ "$ref": "#/components/schemas/WaitlistDto"
+ }
+ },
+ "application/json": {
+ "schema": {
+ "$ref": "#/components/schemas/WaitlistDto"
+ }
+ },
+ "text/json": {
+ "schema": {
+ "$ref": "#/components/schemas/WaitlistDto"
+ }
+ }
+ }
+ }
+ }
+ }
+ }
+ },
+ "components": {
+ "schemas": {
+ "ApiErrorResponse": {
+ "type": "object",
+ "properties": {
+ "error": {
+ "type": "string",
+ "nullable": true
+ },
+ "code": {
+ "type": "string",
+ "nullable": true
+ },
+ "errors": {
+ "type": "object",
+ "additionalProperties": {
+ "type": "array",
+ "items": {
+ "type": "string"
+ },
+ "nullable": true
+ },
+ "nullable": true
+ }
+ },
+ "additionalProperties": false
+ },
+ "BookCategory": {
+ "enum": [
+ "Undefined",
+ "Mandarin",
+ "World",
+ "GenreFic",
+ "LightNovel",
+ "Manga",
+ "Bl",
+ "Gl",
+ "History",
+ "Poem",
+ "Art",
+ "Philisophy",
+ "Religion",
+ "Biography"
+ ],
+ "type": "string"
+ },
+ "BookCondition": {
+ "enum": [
+ "New",
+ "LikelyNew",
+ "Good",
+ "Fair",
+ "Poor",
+ "Bad"
+ ],
+ "type": "string"
+ },
+ "CartDto": {
+ "type": "object",
+ "properties": {
+ "id": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "createdAt": {
+ "type": "string",
+ "format": "date-time"
+ },
+ "accountId": {
+ "type": "string",
+ "nullable": true
+ },
+ "cartItems": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/CartItemListingDto"
+ },
+ "nullable": true
+ }
+ },
+ "additionalProperties": false
+ },
+ "CartItemListingDto": {
+ "type": "object",
+ "properties": {
+ "cartId": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "userBookId": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "price": {
+ "type": "integer",
+ "format": "int32"
+ },
+ "bookCondition": {
+ "$ref": "#/components/schemas/BookCondition"
+ },
+ "sellerPayMethods": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/PayMethod"
+ },
+ "nullable": true
+ },
+ "sellerDeliveryMethods": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/DeliveryMethod"
+ },
+ "nullable": true
+ },
+ "buyerPayMethod": {
+ "$ref": "#/components/schemas/PayMethod"
+ },
+ "buyerDeliveryMethod": {
+ "$ref": "#/components/schemas/DeliveryMethod"
+ },
+ "userBookStatus": {
+ "$ref": "#/components/schemas/UserBookStatus"
+ },
+ "sellerAccountId": {
+ "type": "string",
+ "nullable": true
+ },
+ "book": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ },
+ "additionalProperties": false
+ },
+ "CheckoutCartDto": {
+ "type": "object",
+ "properties": {
+ "bookMethodsPair": {
+ "type": "object",
+ "additionalProperties": {
+ "$ref": "#/components/schemas/Methods"
+ },
+ "nullable": true
+ }
+ },
+ "additionalProperties": false
+ },
+ "CommentDto": {
+ "type": "object",
+ "properties": {
+ "id": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "content": {
+ "type": "string",
+ "nullable": true
+ },
+ "isDeleted": {
+ "type": "boolean"
+ },
+ "createdAt": {
+ "type": "string",
+ "format": "date-time"
+ },
+ "postId": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "parentId": {
+ "type": "string",
+ "format": "uuid",
+ "nullable": true
+ },
+ "rootId": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "depth": {
+ "type": "integer",
+ "format": "int32"
+ },
+ "childCommentCount": {
+ "type": "integer",
+ "format": "int32"
+ },
+ "authorId": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "authorAccountId": {
+ "type": "string",
+ "nullable": true
+ }
+ },
+ "additionalProperties": false
+ },
+ "CreateCommentDto": {
+ "type": "object",
+ "properties": {
+ "content": {
+ "type": "string",
+ "nullable": true
+ },
+ "createdAt": {
+ "type": "string",
+ "format": "date-time"
+ },
+ "postId": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "parentId": {
+ "type": "string",
+ "format": "uuid",
+ "nullable": true
+ },
+ "rootId": {
+ "type": "string",
+ "format": "uuid",
+ "nullable": true
+ }
+ },
+ "additionalProperties": false
+ },
+ "DeliveryMethod": {
+ "enum": [
+ "Undefined",
+ "FaceToFace",
+ "Mail",
+ "ConvenienceStore",
+ "Other"
+ ],
+ "type": "string"
+ },
+ "GoogleBookResultDto": {
+ "type": "object",
+ "properties": {
+ "title": {
+ "type": "string",
+ "nullable": true
+ },
+ "authors": {
+ "type": "array",
+ "items": {
+ "type": "string"
+ },
+ "nullable": true
+ },
+ "isbn": {
+ "type": "string",
+ "nullable": true
+ },
+ "previewLink": {
+ "type": "string",
+ "nullable": true
+ }
+ },
+ "additionalProperties": false
+ },
+ "LikePostDto": {
+ "type": "object",
+ "properties": {
+ "likeCount": {
+ "maximum": 1,
+ "minimum": -1,
+ "type": "integer",
+ "format": "int32"
+ }
+ },
+ "additionalProperties": false
+ },
+ "Methods": {
+ "type": "object",
+ "properties": {
+ "paymentMethod": {
+ "$ref": "#/components/schemas/PayMethod"
+ },
+ "deliveryMethod": {
+ "$ref": "#/components/schemas/DeliveryMethod"
+ }
+ },
+ "additionalProperties": false
+ },
+ "NotificationDto": {
+ "type": "object",
+ "properties": {
+ "id": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "title": {
+ "type": "string",
+ "nullable": true
+ },
+ "content": {
+ "type": "string",
+ "nullable": true
+ },
+ "receiverAccountId": {
+ "type": "string",
+ "nullable": true
+ },
+ "actorAccountId": {
+ "type": "string",
+ "nullable": true
+ },
+ "notificationType": {
+ "$ref": "#/components/schemas/NotificationType"
+ },
+ "createdAt": {
+ "type": "string",
+ "format": "date-time"
+ },
+ "readAt": {
+ "type": "string",
+ "format": "date-time",
+ "nullable": true
+ },
+ "unRead": {
+ "type": "boolean"
+ }
+ },
+ "additionalProperties": false
+ },
+ "NotificationType": {
+ "enum": [
+ "OrderCreated",
+ "OrderRequest",
+ "OrderRejected",
+ "OrderAccepted",
+ "OrderCompletedBySeller",
+ "OrderCompletedByBuyer",
+ "WaitlistAccepted",
+ "WaitlistCanceled",
+ "CartItemExpired",
+ "InformPostCreaterNewComment",
+ "InformRootCommentCreaterNewComment",
+ "WelcomeMsg"
+ ],
+ "type": "string"
+ },
+ "OrderDto": {
+ "required": [
+ "orderItems"
+ ],
+ "type": "object",
+ "properties": {
+ "orderId": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "orderItems": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/OrderItemDto"
+ }
+ },
+ "createdAt": {
+ "type": "string",
+ "format": "date-time"
+ }
+ },
+ "additionalProperties": false
+ },
+ "OrderItemDto": {
+ "type": "object",
+ "properties": {
+ "id": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "orderId": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "orderItemStatus": {
+ "$ref": "#/components/schemas/OrderItemStatus"
+ },
+ "price": {
+ "type": "integer",
+ "format": "int32"
+ },
+ "bookCondition": {
+ "$ref": "#/components/schemas/BookCondition"
+ },
+ "buyerPayMethod": {
+ "$ref": "#/components/schemas/PayMethod"
+ },
+ "buyerDeliveryMethod": {
+ "$ref": "#/components/schemas/DeliveryMethod"
+ },
+ "sellerAccountId": {
+ "type": "string",
+ "nullable": true
+ },
+ "bookTitle": {
+ "type": "string",
+ "nullable": true
+ },
+ "bookISBN": {
+ "type": "string",
+ "nullable": true
+ },
+ "bookAuthor": {
+ "type": "string",
+ "nullable": true
+ }
+ },
+ "additionalProperties": false
+ },
+ "OrderItemStatus": {
+ "enum": [
+ "Pending",
+ "Accepted",
+ "Rejected",
+ "SellerSent",
+ "Completed"
+ ],
+ "type": "string"
+ },
+ "PayMethod": {
+ "enum": [
+ "Undefined",
+ "Cash",
+ "BankTransfer",
+ "Other"
+ ],
+ "type": "string"
+ },
+ "ReadingPostDto": {
+ "type": "object",
+ "properties": {
+ "id": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "title": {
+ "type": "string",
+ "nullable": true
+ },
+ "content": {
+ "type": "string",
+ "nullable": true
+ },
+ "rating": {
+ "type": "integer",
+ "format": "int32"
+ },
+ "likes": {
+ "type": "integer",
+ "format": "int32"
+ },
+ "commentCount": {
+ "type": "integer",
+ "format": "int32"
+ },
+ "updatedAt": {
+ "type": "string",
+ "format": "date-time"
+ },
+ "accountId": {
+ "type": "string",
+ "nullable": true
+ }
+ },
+ "additionalProperties": false
+ },
+ "UpdateUserBookDto": {
+ "type": "object",
+ "properties": {
+ "bookCondition": {
+ "$ref": "#/components/schemas/BookCondition"
+ },
+ "sellerPayMethods": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/PayMethod"
+ },
+ "nullable": true
+ },
+ "sellerDeliveryMethods": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/DeliveryMethod"
+ },
+ "nullable": true
+ },
+ "price": {
+ "type": "integer",
+ "format": "int32"
+ },
+ "userBookStatus": {
+ "$ref": "#/components/schemas/UserBookStatus"
+ },
+ "createdAt": {
+ "type": "string",
+ "format": "date-time"
+ }
+ },
+ "additionalProperties": false
+ },
+ "UpdateUserDto": {
+ "required": [
+ "accountId",
+ "email"
+ ],
+ "type": "object",
+ "properties": {
+ "accountId": {
+ "maxLength": 50,
+ "minLength": 1,
+ "type": "string"
+ },
+ "email": {
+ "minLength": 1,
+ "type": "string",
+ "format": "email"
+ },
+ "instagramAccount": {
+ "type": "string",
+ "nullable": true
+ },
+ "threadsAccount": {
+ "type": "string",
+ "nullable": true
+ },
+ "userProfile": {
+ "$ref": "#/components/schemas/UserProfileDto"
+ }
+ },
+ "additionalProperties": false
+ },
+ "UploadUserBooksDto": {
+ "type": "object",
+ "properties": {
+ "bookCondition": {
+ "$ref": "#/components/schemas/BookCondition"
+ },
+ "sellerPayMethods": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/PayMethod"
+ },
+ "nullable": true
+ },
+ "sellerDeliveryMethods": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/DeliveryMethod"
+ },
+ "nullable": true
+ },
+ "price": {
+ "type": "integer",
+ "format": "int32"
+ },
+ "userBookStatus": {
+ "$ref": "#/components/schemas/UserBookStatus"
+ },
+ "createdAt": {
+ "type": "string",
+ "format": "date-time"
+ },
+ "book": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ },
+ "additionalProperties": false
+ },
+ "UserBookListinDetailDto": {
+ "type": "object",
+ "properties": {
+ "userBookId": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "bookCondition": {
+ "$ref": "#/components/schemas/BookCondition"
+ },
+ "sellerPayMethods": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/PayMethod"
+ },
+ "nullable": true
+ },
+ "sellerDeliveryMethods": {
+ "type": "array",
+ "items": {
+ "$ref": "#/components/schemas/DeliveryMethod"
+ },
+ "nullable": true
+ },
+ "price": {
+ "type": "integer",
+ "format": "int32"
+ },
+ "userBookStatus": {
+ "$ref": "#/components/schemas/UserBookStatus"
+ },
+ "createdAt": {
+ "type": "string",
+ "format": "date-time"
+ },
+ "sellerAccountId": {
+ "type": "string",
+ "nullable": true
+ },
+ "book": {
+ "$ref": "#/components/schemas/UserBookSummaryDto"
+ }
+ },
+ "additionalProperties": false
+ },
+ "UserBookStatus": {
+ "enum": [
+ "Drafted",
+ "Listed",
+ "Reserved",
+ "WaitForConfirmation",
+ "InProgress",
+ "Completed",
+ "Delisted"
+ ],
+ "type": "string"
+ },
+ "UserBookSummaryDto": {
+ "type": "object",
+ "properties": {
+ "userBookId": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "isbn": {
+ "type": "string",
+ "nullable": true
+ },
+ "title": {
+ "type": "string",
+ "nullable": true
+ },
+ "author": {
+ "type": "string",
+ "nullable": true
+ },
+ "description": {
+ "type": "string",
+ "nullable": true
+ },
+ "bookCategory": {
+ "$ref": "#/components/schemas/BookCategory"
+ },
+ "userBookStatus": {
+ "$ref": "#/components/schemas/UserBookStatus"
+ },
+ "sellerAccountId": {
+ "type": "string",
+ "nullable": true
+ },
+ "price": {
+ "type": "integer",
+ "format": "int32"
+ }
+ },
+ "additionalProperties": false
+ },
+ "UserDto": {
+ "required": [
+ "accountId",
+ "email"
+ ],
+ "type": "object",
+ "properties": {
+ "accountId": {
+ "maxLength": 50,
+ "minLength": 1,
+ "type": "string"
+ },
+ "email": {
+ "minLength": 1,
+ "type": "string",
+ "format": "email"
+ },
+ "isSuspicious": {
+ "type": "boolean"
+ },
+ "createdAt": {
+ "type": "string",
+ "format": "date-time"
+ },
+ "instagramAccount": {
+ "type": "string",
+ "nullable": true
+ },
+ "threadsAccount": {
+ "type": "string",
+ "nullable": true
+ },
+ "userProfile": {
+ "$ref": "#/components/schemas/UserProfileDto"
+ }
+ },
+ "additionalProperties": false
+ },
+ "UserFollowDto": {
+ "type": "object",
+ "properties": {
+ "followerId": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "followedId": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "followerAccountId": {
+ "type": "string",
+ "nullable": true
+ },
+ "followedAccountId": {
+ "type": "string",
+ "nullable": true
+ },
+ "createdAt": {
+ "type": "string",
+ "format": "date-time"
+ }
+ },
+ "additionalProperties": false
+ },
+ "UserProfileDto": {
+ "type": "object",
+ "properties": {
+ "bio": {
+ "type": "string",
+ "nullable": true
+ },
+ "displayName": {
+ "type": "string",
+ "nullable": true
+ },
+ "updatedAt": {
+ "type": "string",
+ "format": "date-time"
+ },
+ "followerCount": {
+ "type": "integer",
+ "format": "int32"
+ },
+ "followingCount": {
+ "type": "integer",
+ "format": "int32"
+ }
+ },
+ "additionalProperties": false
+ },
+ "WaitlistDto": {
+ "type": "object",
+ "properties": {
+ "userBookId": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "waiterAccountId": {
+ "type": "string",
+ "nullable": true
+ },
+ "createdAt": {
+ "type": "string",
+ "format": "date-time"
+ },
+ "waitlistStatus": {
+ "$ref": "#/components/schemas/WaitlistStatus"
+ }
+ },
+ "additionalProperties": false
+ },
+ "WaitlistStatus": {
+ "enum": [
+ "Waiting",
+ "Accepted",
+ "Rejected",
+ "Canceled"
+ ],
+ "type": "string"
+ },
+ "createReadingPostDto": {
+ "type": "object",
+ "properties": {
+ "id": {
+ "type": "string",
+ "format": "uuid"
+ },
+ "title": {
+ "type": "string",
+ "nullable": true
+ },
+ "content": {
+ "type": "string",
+ "nullable": true
+ },
+ "rating": {
+ "type": "integer",
+ "format": "int32"
+ },
+ "updatedAt": {
+ "type": "string",
+ "format": "date-time"
+ }
+ },
+ "additionalProperties": false
+ }
+ },
+ "securitySchemes": {
+ "Bearer": {
+ "type": "http",
+ "description": "Enter: Bearer {token}",
+ "scheme": "bearer",
+ "bearerFormat": "JWT"
+ }
+ }
+ },
+ "security": [
+ {
+ "Bearer": [ ]
+ }
+ ]
+}

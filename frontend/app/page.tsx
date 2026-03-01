@@ -94,10 +94,12 @@ export default function Home() {
   const filteredPosts = mockPosts.filter(
     (post) =>
       postSearchQuery === "" ||
-      post.content.toLowerCase().includes(postSearchQuery.toLowerCase()) ||
+      (post.content?.toLowerCase().includes(postSearchQuery.toLowerCase()) ??
+        false) ||
       (post.bookTitle?.toLowerCase().includes(postSearchQuery.toLowerCase()) ??
         false) ||
-      post.userName.toLowerCase().includes(postSearchQuery.toLowerCase())
+      (post.userName?.toLowerCase().includes(postSearchQuery.toLowerCase()) ??
+        false)
   );
 
   const setSortBy = (sortBy: SortBy) =>

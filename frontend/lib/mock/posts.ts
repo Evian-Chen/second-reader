@@ -1,10 +1,10 @@
-import type { Post } from "@/types";
+import type { ReadingPost } from "@/types";
 
-/** Mock posts until Post API exists. TODO: 接 Post API */
-export const mockPosts: Post[] = [
+/** Mock posts until 接 Reading Post API */
+export const mockPosts: ReadingPost[] = [
   {
     id: "p1",
-    userId: "2",
+    accountId: "2",
     userName: "讀書小姐",
     userAvatar:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop",
@@ -16,13 +16,13 @@ export const mockPosts: Post[] = [
     bookCover:
       "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop",
     likes: 234,
-    comments: 45,
+    commentCount: 45,
     createdAt: "2小時前",
     isLiked: false,
   },
   {
     id: "p2",
-    userId: "3",
+    accountId: "3",
     userName: "文青阿華",
     userAvatar:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop",
@@ -37,13 +37,13 @@ export const mockPosts: Post[] = [
       "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=400&fit=crop",
     ],
     likes: 567,
-    comments: 89,
+    commentCount: 89,
     createdAt: "5小時前",
     isLiked: true,
   },
   {
     id: "p3",
-    userId: "4",
+    accountId: "4",
     userName: "書海遊俠",
     userAvatar:
       "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150&h=150&fit=crop",
@@ -55,7 +55,7 @@ export const mockPosts: Post[] = [
     bookCover:
       "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop",
     likes: 892,
-    comments: 123,
+    commentCount: 123,
     createdAt: "1天前",
     isLiked: true,
   },

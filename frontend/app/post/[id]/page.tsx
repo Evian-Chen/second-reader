@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Heart, MessageCircle, Share2, Send } from "lucide-react";
 import { useState } from "react";
 import { mockPosts } from "@/lib/mock/posts";
-import type { Post } from "@/types";
+import type { ReadingPost } from "@/types";
 import Link from "next/link";
 
 export default function PostDetailPage() {
@@ -70,17 +70,18 @@ export default function PostDetailPage() {
 
       <div className="bg-card border rounded-lg overflow-hidden mb-6">
         <div className="flex items-center gap-3 p-6 border-b border-border">
-          <Link href={`/profile/${post.userId}`}>
+          <Link href={`/profile/${post.accountId ?? ""}`}>
             <img
-              src={post.userAvatar}
-              alt={post.userName}
+              src={post.userAvatar ?? ""}
+              alt={post.userName ?? post.accountId ?? ""}
               className="h-12 w-12 rounded-full object-cover hover:opacity-80 transition-opacity"
             />
           </Link>
           <div className="flex-1">
             <p className="font-semibold">{post.userName}</p>
             <p className="text-sm text-muted-foreground">
-              @{post.username} · {post.createdAt}
+              {post.username ? `@${post.username} · ` : ""}
+              {post.createdAt ?? post.updatedAt ?? ""}
             </p>
           </div>
         </div>
@@ -119,7 +120,7 @@ export default function PostDetailPage() {
             </button>
             <div className="flex items-center gap-2 text-muted-foreground">
               <MessageCircle className="h-5 w-5" />
-              <span>{post.comments}</span>
+              <span>{post.commentCount ?? 0}</span>
             </div>
             <button
               type="button"

@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const myBooks: UserBookSummary[] = user?.accountId ? booksDto : [];
 
   const myPosts = isSignedIn && user
-    ? mockPosts.filter((post) => post.userId === user.accountId)
+    ? mockPosts.filter((post) => post.accountId === user.accountId)
     : [];
 
   return (

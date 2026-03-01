@@ -3,18 +3,26 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { mockOrders } from "@/lib/mock/orders";
-import type { Order } from "@/types";
+import type { OrderItem } from "@/types";
 import { Package, ShoppingCart, Calendar, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-function OrderCard({ order }: { order: Order }) {
+const statusMap: Record<string, string> = {
+  Pending: "待確認",
+  Accepted: "已確認",
+  Rejected: "已取消",
+  SellerSent: "已出貨",
+  Completed: "已完成",
+};
+
+function OrderCard({ order }: { order: OrderItem }) {
   return (
     <div className="border-b border-border pb-6 last:border-0">
       <div className="flex gap-4">
         <div className="w-16 shrink-0">
           <img
-            src={order.bookCover}
-            alt={order.bookTitle}
+            src={order.bookCover ?? ""}
+            alt={order.bookTitle ?? ""}
             className="w-full aspect-2/3 object-cover rounded"
           />
         </div>
@@ -29,7 +37,7 @@ function OrderCard({ order }: { order: Order }) {
               </p>
             </div>
             <span className="text-xs text-muted-foreground ml-4 shrink-0">
-              {order.status}
+              {statusMap[order.orderItemStatus ?? "Pending"] ?? order.orderItemStatus}
             </span>
           </div>
           <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
@@ -37,10 +45,10 @@ function OrderCard({ order }: { order: Order }) {
               <Calendar className="h-3 w-3" />
               {order.createdAt}
             </div>
-            <div className="font-medium text-foreground">NT$ {order.price}</div>
+            <div className="font-medium text-foreground">NT$ {order.price ?? 0}</div>
           </div>
           <div className="flex gap-2">
-            {order.status === "待確認" && order.type === "sale" ? (
+            {order.orderItemStatus === "Pending" && order.type === "sale" ? (
               <>
                 <Button size="sm" variant="outline">
                   確認訂單
@@ -50,13 +58,13 @@ function OrderCard({ order }: { order: Order }) {
                 </Button>
               </>
             ) : null}
-            {order.status === "已確認" && order.type === "sale" ? (
+            {order.orderItemStatus === "Accepted" && order.type === "sale" ? (
               <Button size="sm">標記為已出貨</Button>
             ) : null}
-            {order.status === "已出貨" && order.type === "purchase" ? (
+            {order.orderItemStatus === "SellerSent" && order.type === "purchase" ? (
               <Button size="sm">確認收貨</Button>
             ) : null}
-            {order.status === "已完成" ? (
+            {order.orderItemStatus === "Completed" ? (
               <Button size="sm" variant="outline">
                 查看詳情
               </Button>
