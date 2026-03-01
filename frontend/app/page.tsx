@@ -117,7 +117,7 @@ export default function Home() {
             <TabsList className="h-12 bg-transparent w-auto p-0">
               <TabsTrigger
                 value="posts"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent px-0 text-[13px] data-[state=active]:shadow-none"
+                className="h-11 rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent px-0 text-[13px] data-[state=active]:shadow-none"
               >
                 閱讀分享
               </TabsTrigger>
