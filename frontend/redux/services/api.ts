@@ -49,10 +49,13 @@ export const api = createApi({
       invalidatesTags: ["Me"],
     }),
     getBooks: builder.query<GetBooksResponse, GetBooksParams | void>({
-      query: (params) => ({
-        url: "/books",
-        params: params ?? {},
-      }),
+      query: (params) => {
+        const hasParams = params && Object.keys(params).length > 0;
+        return {
+          url: "/books",
+          ...(hasParams && { params }),
+        };
+      },
       providesTags: (result) =>
         result
           ? [

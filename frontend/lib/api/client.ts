@@ -10,7 +10,10 @@ const DEFAULT_API_BASE = "https://second-reader.onrender.com";
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE;
 const API_PREFIX = "/api";
 
-export const getApiBaseUrl = () => `${BASE_URL}${API_PREFIX}`;
+/** 移除尾隨斜線，避免組出 //api 雙斜線 */
+const normalizeBase = (url: string) => url.replace(/\/+$/, "");
+
+export const getApiBaseUrl = () => `${normalizeBase(BASE_URL)}${API_PREFIX}`;
 
 export type GetToken = () => Promise<string | null>;
 
