@@ -1,43 +1,44 @@
 {
   "name": "frontend",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build",
+    "lint": "run-s lint:*",
+    "lint:oxlint": "oxlint . --fix",
+    "lint:eslint": "eslint . --fix --cache",
+    "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.38.0",
-    "@radix-ui/react-avatar": "^1.1.11",
-    "@radix-ui/react-dialog": "^1.1.15",
-    "@radix-ui/react-dropdown-menu": "^2.1.16",
-    "@radix-ui/react-label": "^2.1.8",
-    "@radix-ui/react-separator": "^1.1.8",
-    "@radix-ui/react-slot": "^1.2.4",
-    "@radix-ui/react-tabs": "^1.1.13",
-    "@reduxjs/toolkit": "^2.5.0",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.575.0",
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "react-redux": "^9.2.0",
-    "tailwind-merge": "^3.5.0"
+    "pinia": "^3.0.4",
+    "vue": "^3.5.29",
+    "vue-router": "^5.0.3"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^10.0.1",
-    "eslint-config-next": "^0.2.4",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "@tsconfig/node24": "^24.0.4",
+    "@types/node": "^24.11.0",
+    "@vitejs/plugin-vue": "^6.0.4",
+    "@vue/eslint-config-typescript": "^14.7.0",
+    "@vue/tsconfig": "^0.8.1",
+    "eslint": "^10.0.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-oxlint": "~1.50.0",
+    "eslint-plugin-vue": "~10.8.0",
+    "jiti": "^2.6.1",
+    "npm-run-all2": "^8.0.4",
+    "oxlint": "~1.50.0",
+    "prettier": "3.8.1",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-vue-devtools": "^8.0.6",
+    "vue-tsc": "^3.2.5"
   },
-  "overrides": {
-    "minimatch": ">=10.2.1"
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
   }
 }
