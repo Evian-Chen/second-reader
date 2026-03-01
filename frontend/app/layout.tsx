@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
-import StoreProvider from "@/components/StoreProvider";
-import ApiAuthSetter from "@/components/ApiAuthSetter";
+import ReduxProvider from "@/redux/ReduxProvider";
+import ApiAuthSetter from "@/clerk/ApiAuthSetter";
 import { Navbar } from "@/components/Navbar";
 import "./globals.css";
 
@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <StoreProvider>
+      <ReduxProvider>
         <html lang="zh-TW">
           <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -38,7 +38,7 @@ export default function RootLayout({
             <main className="min-h-screen pb-20 md:pb-8">{children}</main>
           </body>
         </html>
-      </StoreProvider>
+      </ReduxProvider>
     </ClerkProvider>
   );
 }

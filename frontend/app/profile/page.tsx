@@ -4,12 +4,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Grid3x3, BookOpen } from "lucide-react";
 import { PostCard } from "@/components/PostCard";
 import { BookCard } from "@/components/BookCard";
-import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
+import { useCurrentUser } from "@/clerk/useCurrentUser";
+import { useGetBooksByAccountIdQuery } from "@/redux/services/api";
 import { mockPosts } from "@/lib/mock/posts";
-import { booksApi } from "@/lib/api/books";
-import { toBookDisplay } from "@/lib/adapters/books";
-import type { BookDisplay } from "@/lib/types/display";
-import { useState, useEffect } from "react";
+import type { UserBookSummary } from "@/types";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -17,21 +15,14 @@ import { ProfileErrorBoundary } from "@/components/ProfileErrorBoundary";
 
 export default function ProfilePage() {
   const { user, isSignedIn } = useCurrentUser();
-  const [myBooks, setMyBooks] = useState<BookDisplay[]>([]);
-
-  useEffect(() => {
-    if (!user?.id) {
-      setMyBooks([]);
-      return;
-    }
-    booksApi
-      .getBooksByAccountId({ accountId: user.id })
-      .then((list) => setMyBooks(list.map(toBookDisplay)))
-      .catch(() => setMyBooks([]));
-  }, [user?.id]);
+  const { data: booksDto = [] } = useGetBooksByAccountIdQuery(
+    { accountId: user?.accountId ?? "" },
+    { skip: !user?.accountId }
+  );
+  const myBooks: UserBookSummary[] = user?.accountId ? booksDto : [];
 
   const myPosts = isSignedIn && user
-    ? mockPosts.filter((post) => post.userId === user.id)
+    ? mockPosts.filter((post) => post.userId === user.accountId)
     : [];
 
   return (
@@ -54,17 +45,17 @@ export default function ProfilePage() {
                 <div className="flex gap-6">
                   <img
                     src={user.avatar}
-                    alt={user.name}
+                    alt={user.userProfile?.displayName ?? user.username ?? "使用者"}
                     className="h-24 w-24 rounded-full object-cover ring-1 ring-border"
                   />
                   <div className="flex-1">
-                    <h1 className="text-xl font-medium mb-1">{user.name}</h1>
+                    <h1 className="text-xl font-medium mb-1">{user.userProfile?.displayName ?? user.username ?? "使用者"}</h1>
                     <p className="text-sm text-muted-foreground">
                       @{user.username}
                     </p>
-                    {user.bio ? (
+                    {user.userProfile?.bio ? (
                       <p className="text-sm text-muted-foreground mt-2">
-                        {user.bio}
+                        {user.userProfile.bio}
                       </p>
                     ) : null}
                   </div>
@@ -111,7 +102,7 @@ export default function ProfilePage() {
                   {myBooks.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
                       {myBooks.map((book) => (
-                        <BookCard key={book.id} book={book} />
+                        <BookCard key={book.userBookId ?? ""} book={book} />
                       ))}
                     </div>
                   ) : (

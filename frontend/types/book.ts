@@ -6,7 +6,7 @@ import type {
   UserBookStatus,
 } from "./enums";
 
-export interface UserBookSummaryDto {
+export interface UserBookSummary {
   userBookId?: string;
   isbn?: string | null;
   title?: string | null;
@@ -17,7 +17,7 @@ export interface UserBookSummaryDto {
   sellerAccountId?: string | null;
 }
 
-export interface UserBookListinDetailDto {
+export interface UserBookDetail {
   userBookId?: string;
   bookCondition?: BookCondition;
   sellerPayMethods?: PayMethod[] | null;
@@ -26,20 +26,20 @@ export interface UserBookListinDetailDto {
   userBookStatus?: UserBookStatus;
   createdAt?: string;
   sellerAccountId?: string | null;
-  book?: UserBookSummaryDto;
+  book?: UserBookSummary;
 }
 
-export interface UploadUserBooksDto {
+export interface UploadUserBook {
   bookCondition?: BookCondition;
   sellerPayMethods?: PayMethod[] | null;
   sellerDeliveryMethods?: DeliveryMethod[] | null;
   price?: number;
   userBookStatus?: UserBookStatus;
   createdAt?: string;
-  book?: UserBookSummaryDto;
+  book?: UserBookSummary;
 }
 
-export interface UpdateUserBookDto {
+export interface UpdateUserBook {
   bookCondition?: BookCondition;
   sellerPayMethods?: PayMethod[] | null;
   sellerDeliveryMethods?: DeliveryMethod[] | null;
@@ -48,52 +48,45 @@ export interface UpdateUserBookDto {
   createdAt?: string;
 }
 
-export interface GoogleBookResultDto {
+export interface GoogleBookResult {
   title?: string | null;
   authors?: string[] | null;
   isbn?: string | null;
   previewLink?: string | null;
 }
 
-/* ========== GET /api/books ========== */
 export interface GetBooksParams {
   pageNum?: number;
   pageSize?: number;
 }
-export type GetBooksResponse = UserBookSummaryDto[];
+export type GetBooksResponse = UserBookSummary[];
 
-/* ========== POST /api/books ========== */
-export type CreateBooksBody = UploadUserBooksDto[];
-export type CreateBooksResponse = UserBookSummaryDto[];
+export type CreateBooksBody = UploadUserBook[];
+export type CreateBooksResponse = UserBookSummary[];
 
-/* ========== GET /api/books/{accountId} ========== */
 export interface GetBooksByAccountIdParams {
   accountId: string;
   Status?: UserBookStatus;
 }
-export type GetBooksByAccountIdResponse = UserBookSummaryDto[];
+export type GetBooksByAccountIdResponse = UserBookSummary[];
 
-/* ========== GET /api/books/{id} ========== */
 export interface GetBookByIdParams {
   id: string;
 }
-export type GetBookByIdResponse = UserBookListinDetailDto;
+export type GetBookByIdResponse = UserBookDetail;
 
-/* ========== PUT /api/books/{id} ========== */
 export interface UpdateBookByIdParams {
   id: string;
 }
-export type UpdateBookByIdBody = UpdateUserBookDto;
-export type UpdateBookByIdResponse = UserBookListinDetailDto;
+export type UpdateBookByIdBody = UpdateUserBook;
+export type UpdateBookByIdResponse = UserBookDetail;
 
-/* ========== DELETE /api/books/{id} ========== */
 export interface DeleteBookByIdParams {
   id: string;
   hard?: boolean;
 }
-export type DeleteBookByIdResponse = UserBookSummaryDto;
+export type DeleteBookByIdResponse = UserBookSummary;
 
-/* ========== POST /api/books/search ========== */
 export interface SearchBooksParams {
   title?: string;
   author?: string;
@@ -102,7 +95,6 @@ export interface SearchBooksParams {
   BookCategory?: BookCategory;
   isbn?: string;
 }
-export type SearchBooksResponse = UserBookSummaryDto[];
+export type SearchBooksResponse = UserBookSummary[];
 
-/* ========== POST /api/books/isbn (multipart) ========== */
-export type IsbnLookupResponse = GoogleBookResultDto;
+export type IsbnLookupResponse = GoogleBookResult;

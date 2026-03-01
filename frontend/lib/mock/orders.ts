@@ -1,7 +1,7 @@
-import type { OrderDisplay } from "@/lib/types/display";
+import type { Order } from "@/types";
 
 /** Mock orders until Order API exists. TODO: 接 Order API */
-export const mockOrders: OrderDisplay[] = [
+export const mockOrders: Order[] = [
   {
     id: "o1",
     bookId: "b1",

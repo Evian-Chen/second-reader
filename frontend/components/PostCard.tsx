@@ -1,13 +1,13 @@
 "use client";
 
 import { Heart, MessageCircle, Bookmark, Share2 } from "lucide-react";
-import type { PostDisplay } from "@/lib/types/display";
+import type { Post } from "@/types";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 interface PostCardProps {
-  post: PostDisplay;
+  post: Post;
 }
 
 export function PostCard({ post }: PostCardProps) {
