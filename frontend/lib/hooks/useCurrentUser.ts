@@ -1,15 +1,13 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { useAppSelector, useAppDispatch } from "@/lib/hooks";
-import { fetchMe } from "@/features/user/userSlice";
+import { useGetMeQuery } from "@/features/api/baseApi";
 import { toUserDisplay } from "@/lib/adapters/me";
 import type { UserDisplay } from "@/lib/types/display";
-import { useEffect } from "react";
 
 /**
- * Returns current user as UserDisplay: from Redux me (after fetchMe) + Clerk fallback.
- * Dispatches fetchMe when signed in and me not loaded.
+ * Returns current user as UserDisplay: from RTK Query getMe（自動去重、快取）+ Clerk fallback.
+ * 登入後多個 component 呼叫也只會打一次 API；需要新資料時可 invalidate Me tag 或 refetch。
  */
 export function useCurrentUser(): {
   user: UserDisplay | null;
@@ -17,18 +15,12 @@ export function useCurrentUser(): {
   isSignedIn: boolean;
 } {
   const clerk = useUser();
-  const dispatch = useAppDispatch();
-  const me = useAppSelector((s) => s.user.me);
-  const meStatus = useAppSelector((s) => s.user.status);
-
-  useEffect(() => {
-    if (clerk.isSignedIn && clerk.user && meStatus === "idle") {
-      void dispatch(fetchMe());
-    }
-  }, [clerk.isSignedIn, clerk.user, meStatus, dispatch]);
+  const isSignedIn = clerk.isSignedIn ?? false;
+  const { data: me } = useGetMeQuery(undefined, {
+    skip: !isSignedIn || !clerk.user,
+  });
 
   const isLoaded = clerk.isLoaded;
-  const isSignedIn = clerk.isSignedIn ?? false;
 
   if (!isLoaded) {
     return { user: null, isLoaded: false, isSignedIn: false };

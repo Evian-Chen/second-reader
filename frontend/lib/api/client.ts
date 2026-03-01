@@ -9,6 +9,8 @@ const DEFAULT_API_BASE = "https://second-reader.onrender.com";
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE;
 const API_PREFIX = "/api";
 
+export const getApiBaseUrl = () => `${BASE_URL}${API_PREFIX}`;
+
 export type GetToken = () => Promise<string | null>;
 
 export interface ClientConfig {
@@ -21,7 +23,8 @@ export function setApiAuth(getToken: GetToken) {
   globalGetToken = getToken;
 }
 
-function getAuthHeaders(config?: ClientConfig): Promise<HeadersInit> {
+/** 取得帶 Bearer 的 headers，供 RTK Query baseQuery 使用 */
+export function getAuthHeaders(config?: ClientConfig): Promise<HeadersInit> {
   const getToken = config?.getToken ?? globalGetToken;
   if (!getToken) return Promise.resolve({} as HeadersInit);
 
