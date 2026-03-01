@@ -61,10 +61,9 @@ const userSlice = createSlice({
       })
       .addCase(fetchMe.rejected, (state, action) => {
         const status = (action.payload as { status?: number } | undefined)?.status;
-        // 登出後或未授權時後端可能回 401/404，視為未登入即可，不顯示錯誤
         if (status === 401 || status === 404) {
           state.me = null;
-          state.status = "idle";
+          state.status = "failed";
           state.error = null;
           return;
         }

@@ -74,7 +74,7 @@ export default function ProfilePage() {
 
             <div className="mx-auto max-w-4xl px-6 py-8">
               <Tabs defaultValue="posts" className="w-full">
-                <TabsList className="w-full justify-start h-12 bg-transparent p-0 gap-8 border-b border-border rounded-none">
+                <TabsList className="w-full justify-start h-12 bg-transparent p-0 border-b border-border rounded-none">
                   <TabsTrigger
                     value="posts"
                     className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent px-0 text-[13px]"

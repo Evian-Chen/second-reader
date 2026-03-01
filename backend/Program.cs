@@ -162,6 +162,18 @@ else  // production
 
 builder.Services.AddAuthorization();
 
+// CORS：允許前端 origin（localhost 開發、正式網域上線時再補）
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
