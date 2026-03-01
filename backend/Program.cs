@@ -98,13 +98,15 @@ builder.Services.AddControllers()
     });
 
 // 設定CORS
-// builder.Services.AddCors(options =>
-// {
-//     options.AddPolicy("RenderCorsPolicy", policy =>
-//     {
-//         policy.WithOrigins("frontend service url").AllowAnyHeader().AllowAnyMethod();
-//     });
-// });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("RenderCorsPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "http://192.168.1.103:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+    });
+});
 
 // 使用 PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -168,6 +170,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("RenderCorsPolicy");
 
 app.UseMiddleware<ApiExceptionMiddleware>();
 app.UseAuthentication();
