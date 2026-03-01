@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Heart, MessageCircle, Share2, Send } from "lucide-react";
 import { useState } from "react";
 import { mockPosts } from "@/lib/mock/posts";
-import type { PostDisplay } from "@/lib/types/display";
+import type { Post } from "@/types";
 import Link from "next/link";
 
 export default function PostDetailPage() {

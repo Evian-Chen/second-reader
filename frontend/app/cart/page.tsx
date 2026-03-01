@@ -4,36 +4,38 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { BookDisplay } from "@/lib/types/display";
-import { toBookDisplay } from "@/lib/adapters/books";
+import type { UserBookDetail } from "@/types";
+import { DEFAULT_COVER } from "@/types/constants";
 
-const mockBooksForCart: BookDisplay[] = [
-  toBookDisplay({
+const mockBooksForCart: UserBookDetail[] = [
+  {
     userBookId: "cart-1",
-    title: "百年孤寂",
-    author: "加西亞·馬奎斯",
-    bookCategory: "World",
+    bookCondition: "Good",
+    price: 280,
     sellerAccountId: "2",
-  }),
-  toBookDisplay({
+    book: {
+      userBookId: "cart-1",
+      title: "百年孤寂",
+      author: "加西亞·馬奎斯",
+      bookCategory: "World",
+    },
+  },
+  {
     userBookId: "cart-2",
-    title: "挪威的森林",
-    author: "村上春樹",
-    bookCategory: "World",
+    bookCondition: "Fair",
+    price: 220,
     sellerAccountId: "3",
-  }),
-].map((b, i) => ({
-  ...b,
-  id: `cart-${i + 1}`,
-  price: [280, 220][i] ?? 0,
-  cover:
-    i === 0
-      ? "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop"
-      : "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=400&h=600&fit=crop",
-}));
+    book: {
+      userBookId: "cart-2",
+      title: "挪威的森林",
+      author: "村上春樹",
+      bookCategory: "World",
+    },
+  },
+];
 
 interface CartItem {
-  book: BookDisplay;
+  book: UserBookDetail;
   quantity: number;
 }
 
@@ -46,7 +48,7 @@ export default function CartPage() {
   const updateQuantity = (bookId: string, delta: number) => {
     setCartItems((items) =>
       items.map((item) =>
-        item.book.id === bookId
+        item.book.userBookId === bookId
           ? { ...item, quantity: Math.max(1, item.quantity + delta) }
           : item
       )
@@ -54,11 +56,13 @@ export default function CartPage() {
   };
 
   const removeItem = (bookId: string) => {
-    setCartItems((items) => items.filter((item) => item.book.id !== bookId));
+    setCartItems((items) =>
+      items.filter((item) => item.book.userBookId !== bookId)
+    );
   };
 
   const totalAmount = cartItems.reduce(
-    (sum, item) => sum + item.book.price * item.quantity,
+    (sum, item) => sum + (item.book.price ?? 0) * item.quantity,
     0
   );
 
@@ -105,27 +109,31 @@ export default function CartPage() {
         <div className="space-y-6 border-b border-border pb-8">
           {cartItems.map((item) => (
             <div
-              key={item.book.id}
+              key={item.book.userBookId}
               className="flex gap-4 border border-border rounded-lg p-4"
             >
               <img
-                src={item.book.cover}
-                alt={item.book.title}
+                src={DEFAULT_COVER}
+                alt={item.book.book?.title ?? ""}
                 className="w-16 aspect-2/3 object-cover rounded shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium line-clamp-2">{item.book.title}</h3>
+                <h3 className="font-medium line-clamp-2">
+                  {item.book.book?.title ?? ""}
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  {item.book.author}
+                  {item.book.book?.author ?? ""}
                 </p>
                 <p className="text-sm font-medium mt-2">
-                  NT$ {item.book.price}
+                  NT$ {item.book.price ?? 0}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => updateQuantity(item.book.id, -1)}
+                    onClick={() =>
+                      updateQuantity(item.book.userBookId ?? "", -1)
+                    }
                   >
                     -
                   </Button>
@@ -135,14 +143,18 @@ export default function CartPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => updateQuantity(item.book.id, 1)}
+                    onClick={() =>
+                      updateQuantity(item.book.userBookId ?? "", 1)
+                    }
                   >
                     +
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => removeItem(item.book.id)}
+                    onClick={() =>
+                      removeItem(item.book.userBookId ?? "")
+                    }
                     className="ml-auto text-muted-foreground"
                   >
                     移除

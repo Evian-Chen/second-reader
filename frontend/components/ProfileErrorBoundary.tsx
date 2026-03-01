@@ -13,7 +13,7 @@ interface State {
 }
 
 /**
- * 個人頁面用 Error Boundary：避免 fetchMe / API 或子元件拋錯時整頁白畫面。
+ * 個人頁面用 Error Boundary：避免 API 或子元件拋錯時整頁白畫面。
  */
 export class ProfileErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
