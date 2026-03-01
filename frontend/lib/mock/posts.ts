@@ -1,7 +1,7 @@
-import type { PostDisplay } from "@/lib/types/display";
+import type { Post } from "@/types";
 
 /** Mock posts until Post API exists. TODO: 接 Post API */
-export const mockPosts: PostDisplay[] = [
+export const mockPosts: Post[] = [
   {
     id: "p1",
     userId: "2",

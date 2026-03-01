@@ -4,34 +4,21 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Users, Share2, Heart, ShoppingCart } from "lucide-react";
-import { useState, useEffect } from "react";
-import { booksApi } from "@/lib/api/books";
-import { toBookDetailDisplay } from "@/lib/adapters/books";
-import type { BookDisplay } from "@/lib/types/display";
+import { useState } from "react";
+import { useGetBookByIdQuery } from "@/redux/services/api";
+import type { UserBookDetail } from "@/types";
+import { mapCategory, mapCondition, DEFAULT_COVER } from "@/types/constants";
 
 export default function BookDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = typeof params.id === "string" ? params.id : "";
-  const [book, setBook] = useState<BookDisplay | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: book, isLoading: loading } = useGetBookByIdQuery(id, {
+    skip: !id,
+  });
   const [isFavorite, setIsFavorite] = useState(false);
   const [isQueued, setIsQueued] = useState(false);
   const [inCart, setInCart] = useState(false);
-
-  useEffect(() => {
-    if (!id) {
-      setLoading(false);
-      return;
-    }
-    booksApi
-      .getBookById({ id })
-      .then((dto) => {
-        setBook(toBookDetailDisplay(dto));
-      })
-      .catch(() => setBook(null))
-      .finally(() => setLoading(false));
-  }, [id]);
 
   if (loading) {
     return (
@@ -63,17 +50,19 @@ export default function BookDetailPage() {
   const handleShare = () => {
     const bookUrl =
       typeof window !== "undefined"
-        ? `${window.location.origin}/book/${book.id}`
+        ? `${window.location.origin}/book/${book.userBookId ?? ""}`
         : "";
     void navigator.clipboard.writeText(bookUrl);
   };
 
+  const conditionLabel = mapCondition(book.bookCondition);
+  const categoryLabel = mapCategory(book.book?.bookCategory);
   const conditionColorClass =
-    book.condition === "全新"
+    conditionLabel === "全新"
       ? "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800"
-      : book.condition === "近全新"
+      : conditionLabel === "近全新"
         ? "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800"
-        : book.condition === "良好"
+        : conditionLabel === "良好"
           ? "bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800"
           : "bg-muted text-muted-foreground border-border";
 
@@ -91,8 +80,8 @@ export default function BookDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-card border rounded-lg p-8">
           <img
-            src={book.cover}
-            alt={book.title}
+            src={DEFAULT_COVER}
+            alt={book.book?.title ?? ""}
             className="w-full max-w-sm mx-auto rounded-lg shadow-lg"
           />
         </div>
@@ -100,7 +89,7 @@ export default function BookDetailPage() {
         <div className="space-y-6">
           <div>
             <div className="flex items-start gap-3 mb-2">
-              <h1 className="text-3xl font-bold flex-1">{book.title}</h1>
+              <h1 className="text-3xl font-bold flex-1">{book.book?.title ?? ""}</h1>
               <Button
                 variant="ghost"
                 size="icon"
@@ -113,33 +102,33 @@ export default function BookDetailPage() {
                 />
               </Button>
             </div>
-            <p className="text-xl text-muted-foreground mb-4">{book.author}</p>
+            <p className="text-xl text-muted-foreground mb-4">{book.book?.author ?? ""}</p>
             <div className="flex items-center gap-3 mb-4">
-              <Badge className={conditionColorClass}>{book.condition}</Badge>
-              <Badge variant="outline">{book.category}</Badge>
+              <Badge className={conditionColorClass}>{conditionLabel}</Badge>
+              <Badge variant="outline">{categoryLabel}</Badge>
             </div>
             <div className="text-4xl font-bold text-primary mb-6">
-              NT$ {book.price}
+              NT$ {book.price ?? 0}
             </div>
           </div>
 
-          {book.userId ? (
+          {book.sellerAccountId ? (
             <div className="border border-border rounded-lg p-4 bg-muted/30">
               <p className="text-xs text-muted-foreground mb-2">賣家資訊</p>
               <div className="flex items-center gap-3">
                 <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-                  {book.userName ? book.userName.charAt(0) : "?"}
+                  ?
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-sm">{book.userName || "賣家"}</p>
+                  <p className="font-medium text-sm">賣家</p>
                   <p className="text-xs text-muted-foreground">
-                    上架於 {book.createdAt || "—"}
+                    上架於 {book.createdAt ?? "—"}
                   </p>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => router.push(`/profile/${book.userId}`)}
+                  onClick={() => router.push(`/profile/${book.sellerAccountId}`)}
                 >
                   查看賣場
                 </Button>
@@ -150,15 +139,15 @@ export default function BookDetailPage() {
           <div>
             <h3 className="font-medium mb-2 text-sm">書籍描述</h3>
             <p className="text-[15px] text-muted-foreground leading-relaxed">
-              {book.description || "暫無描述"}
+              {book.book?.description ?? "暫無描述"}
             </p>
           </div>
 
-          {(book.queueCount ?? 0) > 0 ? (
+          {0 > 0 ? (
             <div className="flex items-center gap-2 text-sm">
               <Users className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">
-                目前 {book.queueCount} 人排隊中
+                目前 0 人排隊中
               </span>
             </div>
           ) : null}
@@ -180,9 +169,7 @@ export default function BookDetailPage() {
               variant={isQueued ? "outline" : "default"}
             >
               <Users className="h-5 w-5" />
-              {isQueued
-                ? `已排隊 (${book.queueCount ?? 0})`
-                : `加入排隊 ${(book.queueCount ?? 0) > 0 ? `(${book.queueCount})` : ""}`}
+              {isQueued ? "已排隊 (0)" : "加入排隊"}
             </Button>
             <Button variant="outline" size="lg" onClick={handleShare}>
               <Share2 className="h-5 w-5" />

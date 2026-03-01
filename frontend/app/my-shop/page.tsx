@@ -4,33 +4,19 @@ import { Button } from "@/components/ui/button";
 import { BookCard } from "@/components/BookCard";
 import { CreateBookDialog } from "@/components/CreateBookDialog";
 import { Package, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { booksApi } from "@/lib/api/books";
-import { toBookDisplay } from "@/lib/adapters/books";
-import type { BookDisplay } from "@/lib/types/display";
-import { useUser } from "@clerk/nextjs";
+import { useGetBooksByAccountIdQuery } from "@/redux/services/api";
+import type { UserBookSummary } from "@/types";
+import { useCurrentUser } from "@/clerk/useCurrentUser";
 
 export default function MyShopPage() {
-  const { user } = useUser();
-  const accountId = user?.id ?? "";
-  const [booksDisplay, setBooksDisplay] = useState<BookDisplay[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!accountId) {
-      setLoading(false);
-      setBooksDisplay([]);
-      return;
-    }
-    booksApi
-      .getBooksByAccountId({ accountId })
-      .then((list) => setBooksDisplay(list.map(toBookDisplay)))
-      .catch(() => setBooksDisplay([]))
-      .finally(() => setLoading(false));
-  }, [accountId]);
-
-  const totalRevenue = booksDisplay.reduce((sum, book) => sum + book.price, 0);
+  const { user } = useCurrentUser();
+  const accountId = user?.accountId ?? "";
+  const { data: booksDto = [], isLoading: loading } =
+    useGetBooksByAccountIdQuery(
+      { accountId },
+      { skip: !accountId }
+    );
+  const totalRevenue = 0;
 
   return (
     <div className="min-h-screen">
@@ -55,7 +41,7 @@ export default function MyShopPage() {
             <div>
               <p className="text-xs text-muted-foreground mb-1">上架書籍</p>
               <p className="text-2xl font-medium">
-                {loading ? "—" : booksDisplay.length}
+                {loading ? "—" : booksDto.length}
               </p>
             </div>
             <div>
@@ -77,10 +63,10 @@ export default function MyShopPage() {
           <div className="text-center py-16">
             <p className="text-sm text-muted-foreground">載入中...</p>
           </div>
-        ) : booksDisplay.length > 0 ? (
+        ) : booksDto.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-            {booksDisplay.map((book) => (
-              <BookCard key={book.id} book={book} />
+            {booksDto.map((book) => (
+              <BookCard key={book.userBookId ?? ""} book={book} />
             ))}
           </div>
         ) : (

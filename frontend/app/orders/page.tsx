@@ -3,11 +3,11 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { mockOrders } from "@/lib/mock/orders";
-import type { OrderDisplay } from "@/lib/types/display";
+import type { Order } from "@/types";
 import { Package, ShoppingCart, Calendar, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-function OrderCard({ order }: { order: OrderDisplay }) {
+function OrderCard({ order }: { order: Order }) {
   return (
     <div className="border-b border-border pb-6 last:border-0">
       <div className="flex gap-4">

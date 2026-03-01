@@ -25,7 +25,7 @@ import { Button } from "@/components/ui/button";
 import { NotificationPanel } from "@/components/NotificationPanel";
 import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { CreateBookDialog } from "@/components/CreateBookDialog";
-import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
+import { useCurrentUser } from "@/clerk/useCurrentUser";
 
 export function Navbar() {
   const router = useRouter();
@@ -102,7 +102,7 @@ export function Navbar() {
                     {user ? (
                       <img
                         src={user.avatar}
-                        alt={user.name}
+                        alt={user.userProfile?.displayName ?? user.username ?? "使用者"}
                         className="h-8 w-8 rounded-full object-cover ring-1 ring-border hover:ring-2 hover:ring-foreground transition-all"
                       />
                     ) : (
@@ -116,7 +116,7 @@ export function Navbar() {
                   {user ? (
                     <>
                       <div className="px-2 py-2">
-                        <p className="text-sm font-medium">{user.name}</p>
+                        <p className="text-sm font-medium">{user.userProfile?.displayName ?? user.username ?? "使用者"}</p>
                         <p className="text-xs text-muted-foreground">
                           @{user.username}
                         </p>

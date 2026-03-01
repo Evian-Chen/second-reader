@@ -7,8 +7,7 @@ import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { Button } from "@/components/ui/button";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
-import { CreateBookDialog } from "@/components/CreateBookDialog";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,21 +17,18 @@ import {
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { fetchBooks } from "@/features/books/bookSlice";
-import { toBookDisplay } from "@/lib/adapters/books";
-import type { BookDisplay } from "@/lib/types/display";
+import { useGetBooksQuery } from "@/redux/services/api";
+import type { UserBookSummary, UserBookDetail } from "@/types";
+import { mapCategory, mapCondition } from "@/types/constants";
 import { mockPosts } from "@/lib/mock/posts";
-import { bookCategories } from "@/lib/mock/bookCategories";
-import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
+import { bookCategories } from "@/types/constants";
+import { useCurrentUser } from "@/clerk/useCurrentUser";
 
 type SortBy = "latest" | "price-low" | "price-high" | "queue";
 
 export default function Home() {
-  const dispatch = useAppDispatch();
   const { user } = useCurrentUser();
-  const booksDto = useAppSelector((s) => s.books.list);
-  const booksStatus = useAppSelector((s) => s.books.status);
+  const { data: booksDto = [], isLoading: booksStatus } = useGetBooksQuery();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [postSearchQuery, setPostSearchQuery] = useState("");
@@ -44,26 +40,28 @@ export default function Home() {
     sortBy: "latest" as SortBy,
   });
 
-  useEffect(() => {
-    void dispatch(fetchBooks());
-  }, [dispatch]);
-
-  const booksDisplay: BookDisplay[] = booksDto.map(toBookDisplay);
-
-  const filteredBooks = booksDisplay
+  const filteredBooks = booksDto
     .filter((book) => {
+      const bookData = book;
+      const title = bookData.title ?? "";
+      const author = bookData.author ?? "";
+      const categoryLabel = mapCategory(bookData.bookCategory);
+      const conditionLabel = mapCondition(
+        "bookCondition" in book
+          ? (book as UserBookDetail).bookCondition
+          : undefined
+      );
       const matchesSearch =
         searchQuery === "" ||
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.category.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesNoQueue = !filters.noQueue || (book.queueCount ?? 0) === 0;
-      const matchesHasQueue =
-        !filters.hasQueue || (book.queueCount ?? 0) > 0;
+        title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        categoryLabel.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesNoQueue = !filters.noQueue || 0 === 0;
+      const matchesHasQueue = !filters.hasQueue || 0 > 0;
       const matchesCondition =
-        !filters.condition || book.condition === filters.condition;
+        !filters.condition || conditionLabel === filters.condition;
       const matchesCategory =
-        !filters.category || book.category === filters.category;
+        !filters.category || categoryLabel === filters.category;
       return (
         matchesSearch &&
         matchesNoQueue &&
@@ -73,13 +71,21 @@ export default function Home() {
       );
     })
     .toSorted((a, b) => {
+      const priceA =
+        "price" in a && typeof (a as UserBookDetail).price === "number"
+          ? (a as UserBookDetail).price ?? 0
+          : 0;
+      const priceB =
+        "price" in b && typeof (b as UserBookDetail).price === "number"
+          ? (b as UserBookDetail).price ?? 0
+          : 0;
       switch (filters.sortBy) {
         case "price-low":
-          return a.price - b.price;
+          return priceA - priceB;
         case "price-high":
-          return b.price - a.price;
+          return priceB - priceA;
         case "queue":
-          return (b.queueCount ?? 0) - (a.queueCount ?? 0);
+          return 0 - 0;
         default:
           return 0;
       }
@@ -154,7 +160,7 @@ export default function Home() {
                   {user ? (
                     <img
                       src={user.avatar}
-                      alt={user.name}
+                      alt={user.userProfile?.displayName ?? user.username ?? "使用者"}
                       className="h-9 w-9 rounded-full object-cover"
                     />
                   ) : (
@@ -296,7 +302,7 @@ export default function Home() {
               </div>
             </div>
 
-            {booksStatus === "loading" ? (
+            {booksStatus ? (
               <div className="text-center py-16">
                 <p className="text-sm text-muted-foreground">載入中...</p>
               </div>
@@ -304,7 +310,7 @@ export default function Home() {
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                   {filteredBooks.map((book) => (
-                    <BookCard key={book.id} book={book} />
+                    <BookCard key={book.userBookId ?? ""} book={book} />
                   ))}
                 </div>
 
