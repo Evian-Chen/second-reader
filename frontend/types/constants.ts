@@ -1,4 +1,9 @@
-import type { BookCondition, BookCategory } from "./enums";
+import type {
+  BookCondition,
+  BookCategory,
+  PayMethod,
+  DeliveryMethod,
+} from "./enums";
 
 export type BookConditionLabel =
   | "全新"
@@ -49,4 +54,29 @@ export function mapCondition(c?: BookCondition): BookConditionLabel {
 export function mapCategory(c?: BookCategory): string {
   if (!c) return "未分類";
   return BOOK_CATEGORY_LABELS[c] ?? c;
+}
+
+export const PAY_METHOD_LABELS: Record<PayMethod, string> = {
+  Undefined: "未選擇",
+  Cash: "現金",
+  BankTransfer: "銀行轉帳",
+  Other: "其他",
+};
+
+export const DELIVERY_METHOD_LABELS: Record<DeliveryMethod, string> = {
+  Undefined: "未選擇",
+  FaceToFace: "面交",
+  Mail: "郵寄",
+  ConvenienceStore: "超商取貨",
+  Other: "其他",
+};
+
+export function mapPayMethod(m?: PayMethod): string {
+  if (!m || m === "Undefined") return "未選擇";
+  return PAY_METHOD_LABELS[m] ?? m;
+}
+
+export function mapDeliveryMethod(m?: DeliveryMethod): string {
+  if (!m || m === "Undefined") return "未選擇";
+  return DELIVERY_METHOD_LABELS[m] ?? m;
 }

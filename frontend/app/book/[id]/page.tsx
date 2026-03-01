@@ -1,13 +1,22 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Users, Share2, Heart, ShoppingCart } from "lucide-react";
 import { useState } from "react";
-import { useGetBookByIdQuery } from "@/redux/services/api";
-import type { UserBookDetail } from "@/types";
+import {
+  useGetBookByIdQuery,
+  useGetBooksByAccountIdQuery,
+  useGetBooksQuery,
+  useAddCartItemMutation,
+  useGetCartQuery,
+} from "@/redux/services/api";
+import { useCurrentUser } from "@/clerk/useCurrentUser";
+import type { UserBookDetail, UserBookSummary } from "@/types";
 import { mapCategory, mapCondition, DEFAULT_COVER } from "@/types/constants";
+import { toast } from "sonner";
 
 export default function BookDetailPage() {
   const params = useParams();
@@ -16,9 +25,25 @@ export default function BookDetailPage() {
   const { data: book, isLoading: loading } = useGetBookByIdQuery(id, {
     skip: !id,
   });
+  const { data: cart } = useGetCartQuery();
+  const [addToCart] = useAddCartItemMutation();
+  const { user } = useCurrentUser();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isQueued, setIsQueued] = useState(false);
-  const [inCart, setInCart] = useState(false);
+
+  const inCart = Boolean(
+    cart?.cartItems?.some((i) => i.userBookId === book?.userBookId)
+  );
+
+  const { data: allBooks = [] } = useGetBooksQuery();
+  const relatedBooks = (allBooks as UserBookSummary[])
+    .filter(
+      (b) =>
+        b.userBookId !== id &&
+        (b.book?.bookCategory === book?.book?.bookCategory ||
+          b.book?.title === book?.book?.title)
+    )
+    .slice(0, 6);
 
   if (loading) {
     return (
@@ -41,10 +66,20 @@ export default function BookDetailPage() {
 
   const handleQueue = () => {
     setIsQueued((prev) => !prev);
+    toast.success(prev ? "已取消排隊" : "已加入排隊！當書籍可用時會通知您");
   };
 
-  const handleAddToCart = () => {
-    setInCart((prev) => !prev);
+  const handleAddToCart = async () => {
+    if (!user) {
+      toast.error("請先登入");
+      return;
+    }
+    try {
+      await addToCart(book.userBookId ?? "").unwrap();
+      toast.success("已加入購物車");
+    } catch {
+      toast.error("加入購物車失敗");
+    }
   };
 
   const handleShare = () => {
@@ -53,6 +88,7 @@ export default function BookDetailPage() {
         ? `${window.location.origin}/book/${book.userBookId ?? ""}`
         : "";
     void navigator.clipboard.writeText(bookUrl);
+    toast.success("已複製連結", { description: bookUrl, duration: 3000 });
   };
 
   const conditionLabel = mapCondition(book.bookCondition);
@@ -78,18 +114,23 @@ export default function BookDetailPage() {
       </Button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-card border rounded-lg p-8">
+        <Link
+          href={`/book/${book.userBookId ?? ""}`}
+          className="bg-card border rounded-lg p-8 block cursor-pointer hover:opacity-95 transition-opacity"
+        >
           <img
             src={DEFAULT_COVER}
             alt={book.book?.title ?? ""}
             className="w-full max-w-sm mx-auto rounded-lg shadow-lg"
           />
-        </div>
+        </Link>
 
         <div className="space-y-6">
           <div>
             <div className="flex items-start gap-3 mb-2">
-              <h1 className="text-3xl font-bold flex-1">{book.book?.title ?? ""}</h1>
+              <h1 className="text-3xl font-bold flex-1">
+                {book.book?.title ?? ""}
+              </h1>
               <Button
                 variant="ghost"
                 size="icon"
@@ -102,7 +143,9 @@ export default function BookDetailPage() {
                 />
               </Button>
             </div>
-            <p className="text-xl text-muted-foreground mb-4">{book.book?.author ?? ""}</p>
+            <p className="text-xl text-muted-foreground mb-4">
+              {book.book?.author ?? ""}
+            </p>
             <div className="flex items-center gap-3 mb-4">
               <Badge className={conditionColorClass}>{conditionLabel}</Badge>
               <Badge variant="outline">{categoryLabel}</Badge>
@@ -116,9 +159,12 @@ export default function BookDetailPage() {
             <div className="border border-border rounded-lg p-4 bg-muted/30">
               <p className="text-xs text-muted-foreground mb-2">賣家資訊</p>
               <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+                <Link
+                  href={`/profile/${book.sellerAccountId}`}
+                  className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:opacity-80 transition-opacity shrink-0"
+                >
                   ?
-                </div>
+                </Link>
                 <div className="flex-1">
                   <p className="font-medium text-sm">賣家</p>
                   <p className="text-xs text-muted-foreground">
@@ -128,7 +174,9 @@ export default function BookDetailPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => router.push(`/profile/${book.sellerAccountId}`)}
+                  onClick={() =>
+                    router.push(`/profile/${book.sellerAccountId}`)
+                  }
                 >
                   查看賣場
                 </Button>
@@ -146,9 +194,7 @@ export default function BookDetailPage() {
           {0 > 0 ? (
             <div className="flex items-center gap-2 text-sm">
               <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">
-                目前 0 人排隊中
-              </span>
+              <span className="text-muted-foreground">目前 0 人排隊中</span>
             </div>
           ) : null}
 
@@ -183,6 +229,38 @@ export default function BookDetailPage() {
           </div>
         </div>
       </div>
+
+      {relatedBooks.length > 0 ? (
+        <div className="mt-12">
+          <h2 className="text-xl font-medium mb-6">相關書籍推薦</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {relatedBooks.map((relatedBook) => (
+              <button
+                key={relatedBook.userBookId}
+                type="button"
+                onClick={() =>
+                  router.push(`/book/${relatedBook.userBookId ?? ""}`)
+                }
+                className="text-left cursor-pointer group"
+              >
+                <div className="relative aspect-2/3 mb-2 overflow-hidden rounded bg-muted">
+                  <img
+                    src={DEFAULT_COVER}
+                    alt={relatedBook.title ?? ""}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <p className="text-sm font-medium line-clamp-2 leading-tight">
+                  {relatedBook.title ?? ""}
+                </p>
+                <p className="text-sm font-medium mt-1">
+                  NT$ {relatedBook.price ?? 0}
+                </p>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

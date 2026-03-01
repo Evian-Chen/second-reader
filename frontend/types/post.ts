@@ -7,6 +7,7 @@ export interface ReadingPost {
   commentCount?: number;
   updatedAt?: string;
   accountId?: string | null;
+  userBookId?: string | null;
   /** 以下為 UI 顯示用，API 不回傳，mock 或 client 可補上 */
   userName?: string;
   userAvatar?: string;

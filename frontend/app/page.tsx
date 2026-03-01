@@ -7,7 +7,8 @@ import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { Button } from "@/components/ui/button";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,10 +28,15 @@ import { useCurrentUser } from "@/clerk/useCurrentUser";
 type SortBy = "latest" | "price-low" | "price-high" | "queue";
 
 export default function Home() {
+  const searchParams = useSearchParams();
   const { user } = useCurrentUser();
   const { data: booksDto = [], isLoading: booksStatus } = useGetBooksQuery();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const urlSearch = searchParams.get("search");
+  useEffect(() => {
+    if (urlSearch) setSearchQuery(urlSearch);
+  }, [urlSearch]);
   const [postSearchQuery, setPostSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     noQueue: false,
@@ -119,7 +125,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <Tabs defaultValue="posts" className="w-full gap-0">
+      <Tabs
+        key={urlSearch ? "marketplace" : "posts"}
+        defaultValue={urlSearch ? "marketplace" : "posts"}
+        className="w-full gap-0"
+      >
         <div className="sticky top-14 z-40 bg-background border-b border-border">
           <div className="mx-auto max-w-7xl">
             <TabsList className="h-11.5 bg-transparent w-auto p-0">

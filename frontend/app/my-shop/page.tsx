@@ -4,7 +4,10 @@ import { Button } from "@/components/ui/button";
 import { BookCard } from "@/components/BookCard";
 import { CreateBookDialog } from "@/components/CreateBookDialog";
 import { Package, Plus } from "lucide-react";
-import { useGetBooksByAccountIdQuery } from "@/redux/services/api";
+import {
+  useGetBooksByAccountIdQuery,
+  useGetSalesQuery,
+} from "@/redux/services/api";
 import type { UserBookSummary } from "@/types";
 import { useCurrentUser } from "@/clerk/useCurrentUser";
 
@@ -16,7 +19,15 @@ export default function MyShopPage() {
       { accountId },
       { skip: !accountId }
     );
-  const totalRevenue = 0;
+  const { data: sales = [] } = useGetSalesQuery(undefined, {
+    skip: !accountId,
+  });
+  const completedSales = sales.filter((s) => s.orderItemStatus === "Completed");
+  const soldCount = completedSales.length;
+  const totalRevenue = completedSales.reduce(
+    (sum, s) => sum + (s.price ?? 0),
+    0
+  );
 
   return (
     <div className="min-h-screen">
@@ -46,7 +57,7 @@ export default function MyShopPage() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">已售出</p>
-              <p className="text-2xl font-medium">0</p>
+              <p className="text-2xl font-medium">{soldCount}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">總收益</p>
