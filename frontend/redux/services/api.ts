@@ -194,6 +194,11 @@ export const api = createApi({
       }),
       invalidatesTags: ["Notifications"],
     }),
+    /** 取得單一通知並標記為已讀（後端 GET 時會自動標記） */
+    markNotificationRead: builder.mutation<Notification, string>({
+      query: (id) => `/me/notification/${id}`,
+      invalidatesTags: ["Notifications"],
+    }),
 
     // ========== Me - Orders ==========
     getOrders: builder.query<Order[], void>({
@@ -492,6 +497,7 @@ export const {
   useGetNotificationsQuery,
   useGetNotificationByIdQuery,
   useReadAllNotificationsMutation,
+  useMarkNotificationReadMutation,
   useGetOrdersQuery,
   useGetOrderByIdQuery,
   useCompleteOrderItemMutation,
