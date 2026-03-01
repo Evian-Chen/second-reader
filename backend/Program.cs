@@ -182,7 +182,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.UseCors("RenderCorsPolicy");
 
 app.UseMiddleware<ApiExceptionMiddleware>();
