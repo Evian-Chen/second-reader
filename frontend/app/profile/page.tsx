@@ -1,11 +1,11 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Grid3x3, BookOpen } from "lucide-react";
+import { Grid3x3, BookOpen, Heart } from "lucide-react";
 import { PostCard } from "@/components/PostCard";
 import { BookCard } from "@/components/BookCard";
 import { useCurrentUser } from "@/clerk/useCurrentUser";
-import { useGetBooksByAccountIdQuery } from "@/redux/services/api";
+import { useGetBooksByAccountIdQuery, useGetSavedPostsQuery, useGetSavedBooksQuery } from "@/redux/services/api";
 import { mockPosts } from "@/lib/mock/posts";
 import type { UserBookSummary } from "@/types";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
@@ -19,6 +19,12 @@ export default function ProfilePage() {
     { accountId: user?.accountId ?? "" },
     { skip: !user?.accountId }
   );
+  const { data: savedPosts = [] } = useGetSavedPostsQuery(undefined, {
+    skip: !isSignedIn,
+  });
+  const { data: savedBooks = [] } = useGetSavedBooksQuery(undefined, {
+    skip: !isSignedIn,
+  });
   const myBooks: UserBookSummary[] = user?.accountId ? booksDto : [];
 
   const myPosts = isSignedIn && user
@@ -80,6 +86,20 @@ export default function ProfilePage() {
                     <BookOpen className="h-4 w-4 mr-2" />
                     書籍
                   </TabsTrigger>
+                  <TabsTrigger
+                    value="saved-posts"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent px-0 text-[13px] gap-2"
+                  >
+                    <Heart className="h-4 w-4" />
+                    貼文收藏
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="saved-books"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent px-0 text-[13px] gap-2"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    書籍收藏
+                  </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="posts" className="m-0 mt-6">
@@ -91,6 +111,7 @@ export default function ProfilePage() {
                     </div>
                   ) : (
                     <div className="text-center py-16">
+                      <Grid3x3 className="h-12 w-12 text-muted-foreground/20 mx-auto mb-3" />
                       <p className="text-sm text-muted-foreground">
                         尚無貼文
                       </p>
@@ -107,8 +128,43 @@ export default function ProfilePage() {
                     </div>
                   ) : (
                     <div className="text-center py-16">
+                      <BookOpen className="h-12 w-12 text-muted-foreground/20 mx-auto mb-3" />
                       <p className="text-sm text-muted-foreground">
                         尚未上架書籍
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="saved-posts" className="m-0 mt-6">
+                  {savedPosts.length > 0 ? (
+                    <div className="space-y-0 divide-y divide-border">
+                      {savedPosts.map((post) => (
+                        <PostCard key={post.id} post={post} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-16">
+                      <Heart className="h-12 w-12 text-muted-foreground/20 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        還沒有收藏任何貼文
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="saved-books" className="m-0 mt-6">
+                  {savedBooks.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                      {savedBooks.map((book) => (
+                        <BookCard key={book.userBookId ?? ""} book={book} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-16">
+                      <Heart className="h-12 w-12 text-muted-foreground/20 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">
+                        還沒有收藏任何書籍
                       </p>
                     </div>
                   )}

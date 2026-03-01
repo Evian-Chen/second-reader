@@ -19,6 +19,12 @@ export interface UserBookSummary {
   price?: number;
 }
 
+/** API 回傳的收藏書籍結構 (GET /me/saved/books) */
+export interface SavedBookResponse {
+  book: UserBookSummary;
+  userAccountId: string;
+}
+
 export interface UserBookDetail {
   userBookId?: string;
   bookCondition?: BookCondition;

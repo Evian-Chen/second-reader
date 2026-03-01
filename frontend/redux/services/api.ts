@@ -32,6 +32,8 @@ import type {
   LikePost,
   Waitlist,
   UserFollow,
+  SavedPostResponse,
+  SavedBookResponse,
 } from "@/types";
 
 export const api = createApi({
@@ -75,9 +77,11 @@ export const api = createApi({
     }),
 
     // ========== Me - Saved Posts ==========
-    getSavedPosts: builder.query<unknown[], void>({
+    getSavedPosts: builder.query<ReadingPost[], void>({
       query: () => "/me/saved/posts",
       providesTags: ["Me"],
+      transformResponse: (response: SavedPostResponse[] | null) =>
+        (response ?? []).map((r) => ({ ...r.post, isSaved: true })),
     }),
     savePost: builder.mutation<void, string>({
       query: (postId) => ({
@@ -95,9 +99,11 @@ export const api = createApi({
     }),
 
     // ========== Me - Saved Books ==========
-    getSavedBooks: builder.query<unknown[], void>({
+    getSavedBooks: builder.query<UserBookSummary[], void>({
       query: () => "/me/saved/books",
       providesTags: ["Me"],
+      transformResponse: (response: SavedBookResponse[] | null) =>
+        (response ?? []).map((r) => r.book),
     }),
     saveBook: builder.mutation<void, string>({
       query: (bookId) => ({
@@ -304,7 +310,13 @@ export const api = createApi({
         method: "POST",
         body,
       }),
-      invalidatesTags: [{ type: "Books", id: "LIST" }],
+      invalidatesTags: (result) =>
+        result?.length && result[0].sellerAccountId
+          ? [
+              { type: "Books", id: "LIST" },
+              { type: "Books", id: `ACCOUNT-${result[0].sellerAccountId}` },
+            ]
+          : [{ type: "Books", id: "LIST" }],
     }),
     updateBookById: builder.mutation<
       UpdateBookByIdResponse,

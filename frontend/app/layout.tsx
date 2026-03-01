@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "sonner";
 import ReduxProvider from "@/redux/ReduxProvider";
 import ApiAuthSetter from "@/clerk/ApiAuthSetter";
 import { Navbar } from "@/components/Navbar";
@@ -34,6 +35,7 @@ export default function RootLayout({
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
           >
             <ApiAuthSetter />
+            <Toaster richColors position="top-center" />
             <Navbar />
             <main className="min-h-screen pb-20 md:pb-8">{children}</main>
           </body>

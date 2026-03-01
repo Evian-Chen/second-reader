@@ -20,6 +20,12 @@ export interface ReadingPost {
   createdAt?: string;
 }
 
+/** API 回傳的收藏貼文結構 (GET /me/saved/posts) */
+export interface SavedPostResponse {
+  post: ReadingPost;
+  userAccountId: string;
+}
+
 export interface CreateReadingPost {
   id?: string;
   title?: string | null;
