@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { SignedIn, SignedOut, SignInButton, UserButton } from 'vue-clerk'
+import { SignedIn, SignedOut, SignInButton, UserButton } from 'vue-clerk'
 </script>
 
 <template>
