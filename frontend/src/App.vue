@@ -1,26 +1,20 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router';
-import HelloWorld from './components/HelloWorld.vue';
-import ClerkView from './components/clerk/ClerkView.vue';
+import { RouterView } from 'vue-router';
+import Navbar from './components/layout/Navbar.vue';
+import TabSwitcher from './components/layout/TabSwitcher.vue';
+
+
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  
+  <Navbar />
+  <TabSwitcher />
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <ClerkView></ClerkView>
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+  <main>
+    <RouterView />
+  </main>
+  
 </template>
 
 <style scoped>
@@ -86,3 +80,4 @@ nav a:first-of-type {
   }
 }
 </style>
+
