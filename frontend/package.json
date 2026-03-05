@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.3",
+    "axios": "^1.13.6",
     "pinia": "^3.0.4",
     "primeicons": "^7.0.0",
     "vue": "^3.5.29",
