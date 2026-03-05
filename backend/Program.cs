@@ -165,10 +165,10 @@ builder.Services.AddAuthorization();
 // CORS：允許前端 origin（localhost 開發、正式網域上線時再補）
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
+    options.AddPolicy("AllowFrontendDev",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000")
+            policy.WithOrigins("http://localhost:5173/")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -182,7 +182,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors("RenderCorsPolicy");
+app.UseCors("AllowFrontendDev");
 
 app.UseCors("RenderCorsPolicy");
 

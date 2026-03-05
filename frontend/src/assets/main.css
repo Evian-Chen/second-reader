@@ -1,0 +1,30 @@
+/* main.css */
+@import './base.css';
+
+#app {
+  /* 刪除或註解掉原本的寬度限制 */
+  /* max-width: 1280px; */
+  /* margin: 0 auto; */
+  /* padding: 2rem; */
+  
+  width: 100%;
+  font-weight: normal;
+}
+
+/* 也要移除 1024px 以上的 Flex 置中佈局，否則導覽列會飛到畫面中間 */
+@media (min-width: 1024px) {
+  body {
+    /* 刪除這兩行，否則你的頁面會變成水平排列並置中 */
+    /* display: flex; */
+    /* place-items: center; */
+    display: block; /* 確保內容由上而下正常堆疊 */
+  }
+
+  #app {
+    /* 移除 grid 佈局，除非你希望整個網站永遠是左右兩欄 */
+    /* display: grid; */
+    /* grid-template-columns: 1fr 1fr; */
+    display: block;
+    padding: 0;
+  }
+}
