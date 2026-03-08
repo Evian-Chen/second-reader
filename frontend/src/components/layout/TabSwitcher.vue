@@ -4,52 +4,33 @@ const activeTab = ref('reading')
 </script>
 
 <template>
-  <div class="tabs-container">
-    <button 
-      class="tab-link" 
-      :class="{ active: activeTab === 'reading' }"
+  <div class="flex border-b border-[var(--color-border)] w-full">
+    <button
+      class="flex-1 py-5 text-center font-medium transition-colors relative"
+      :class="activeTab === 'reading'
+        ? 'text-[var(--color-text)]'
+        : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'"
       @click="activeTab = 'reading'"
     >
       閱讀分享
+      <span
+        v-if="activeTab === 'reading'"
+        class="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--color-text)]"
+      ></span>
     </button>
-    <button 
-      class="tab-link" 
-      :class="{ active: activeTab === 'market' }"
+
+    <button
+      class="flex-1 py-4 text-center font-medium transition-colors relative"
+      :class="activeTab === 'market'
+        ? 'text-[var(--color-text)]'
+        : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'"
       @click="activeTab = 'market'"
     >
       二手書市集
+      <span
+        v-if="activeTab === 'market'"
+        class="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--color-text)]"
+      ></span>
     </button>
   </div>
 </template>
-
-<style scoped>
-.tabs-container {
-  display: flex;
-  border-bottom: 1px solid #e5e7eb;
-  width: 100%;
-}
-.tab-link {
-  flex: 1;
-  padding: 1rem 0;
-  text-align: center;
-  font-weight: 500;
-  color: #6b7280;
-  background: none;
-  border: none;
-  cursor: pointer;
-  position: relative;
-  transition: color 0.2s;
-}
-.tab-link.active {
-  color: black;
-}
-.tab-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: black;
-}
-</style>

@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router';
-import Navbar from './components/layout/Navbar.vue';
+import NavBar from './components/layout/NavBar.vue';
 import TabSwitcher from './components/layout/TabSwitcher.vue';
 
 
 </script>
 
 <template>
-  
-  <Navbar />
+
+  <NavBar />
   <TabSwitcher />
 
   <main>
     <RouterView />
   </main>
-  
+
 </template>
 
 <style scoped>

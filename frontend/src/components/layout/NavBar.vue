@@ -1,106 +1,87 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import ClerkView from '../clerk/ClerkView.vue';
 
+const menuOpen = ref(false)
 </script>
 
 <template>
-  <nav class="navbar">
-    <div class="nav-content">
-      <div class="logo">
-        <RouterLink to="/" class="logo-link">
-            <img src="../../assets/logo.png" alt="logo" class="logo-img">
+  <nav class="sticky top-0 z-50 bg-[var(--color-background)] border-b border-[var(--color-border)] px-4 py-3">
+    <div class="max-w-[1200px] mx-auto flex items-center justify-between">
+
+      <!-- Logo -->
+      <div class="flex items-center gap-2">
+        <RouterLink to="/" class="flex items-center">
+          <img src="../../assets/logo.png" alt="logo" class="h-8 w-auto">
         </RouterLink>
       </div>
 
-      <div class="icon-actions">
-        
-        <i class="pi pi-pen-to-square icon-btn"></i>
-        <i class="pi pi-file-plus icon-btn"></i>
-        <div class="cart-container">
-          <i class="pi pi-shopping-cart icon-btn"></i>
-          <span class="cart-badge">3</span>
+      <!-- Desktop Icon Actions -->
+      <div class="hidden md:flex items-center gap-5">
+        <i class="pi pi-pen-to-square text-2xl text-[var(--color-text-muted)] cursor-pointer hover:text-[var(--color-text)] transition-colors"></i>
+        <i class="pi pi-file-plus text-2xl text-[var(--color-text-muted)] cursor-pointer hover:text-[var(--color-text)] transition-colors"></i>
+
+        <div class="relative flex items-center">
+          <i class="pi pi-shopping-cart text-2xl text-[var(--color-text-muted)] cursor-pointer hover:text-[var(--color-text)] transition-colors"></i>
+          <span class="absolute -top-2 -right-2 bg-[var(--color-text)] text-[var(--color-background)] text-[10px] w-5 h-5 rounded-full flex items-center justify-center">
+            3
+          </span>
         </div>
-        <i class="pi pi-bell icon-btn"></i>
+
+        <i class="pi pi-bell text-2xl text-[var(--color-text-muted)] cursor-pointer hover:text-[var(--color-text)] transition-colors"></i>
         <ClerkView />
       </div>
+
+      <!-- Hamburger Button（mobile only） -->
+      <button
+        class="md:hidden flex flex-col justify-center items-center w-9 h-9 gap-1.5 cursor-pointer"
+        @click="menuOpen = !menuOpen"
+        aria-label="開啟選單"
+      >
+        <span
+          class="block w-6 h-0.5 bg-[var(--color-text)] transition-all duration-300 origin-center"
+          :class="menuOpen ? 'rotate-45 translate-y-2' : ''"
+        ></span>
+        <span
+          class="block w-6 h-0.5 bg-[var(--color-text)] transition-all duration-300"
+          :class="menuOpen ? 'opacity-0 scale-x-0' : ''"
+        ></span>
+        <span
+          class="block w-6 h-0.5 bg-[var(--color-text)] transition-all duration-300 origin-center"
+          :class="menuOpen ? '-rotate-45 -translate-y-2' : ''"
+        ></span>
+      </button>
+
     </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div
+      class="md:hidden overflow-hidden transition-all duration-300"
+      :class="menuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'"
+    >
+      <div class="flex flex-col gap-1 pt-3 pb-2 border-t border-[var(--color-border)] mt-3">
+        <button class="flex items-center gap-3 px-2 py-3 rounded-[var(--radius-md)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors w-full text-left">
+          <i class="pi pi-pen-to-square text-xl"></i>
+          <span class="text-sm font-medium">編輯</span>
+        </button>
+        <button class="flex items-center gap-3 px-2 py-3 rounded-[var(--radius-md)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors w-full text-left">
+          <i class="pi pi-file-plus text-xl"></i>
+          <span class="text-sm font-medium">新增文件</span>
+        </button>
+        <button class="flex items-center gap-3 px-2 py-3 rounded-[var(--radius-md)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors w-full text-left">
+          <i class="pi pi-shopping-cart text-xl"></i>
+          <span class="text-sm font-medium">購物車</span>
+          <span class="ml-auto bg-[var(--color-text)] text-[var(--color-background)] text-[10px] w-5 h-5 rounded-full flex items-center justify-center">3</span>
+        </button>
+        <button class="flex items-center gap-3 px-2 py-3 rounded-[var(--radius-md)] text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors w-full text-left">
+          <i class="pi pi-bell text-xl"></i>
+          <span class="text-sm font-medium">通知</span>
+        </button>
+        <div class="px-2 py-2">
+          <ClerkView />
+        </div>
+      </div>
+    </div>
+
   </nav>
 </template>
-
-<style scoped>
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background-color: white;
-  border-bottom: 1px solid #f3f4f6;
-  padding: 0.75rem 1rem;
-}
-.nav-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.logo-link {
-  display: flex;
-  align-items: center;
-}
-.logo-img {
-  height: 2rem;
-  width: auto;
-}
-.logo-icon {
-  width: 2rem;
-  height: 1.5rem;
-  background-color: black;
-  border-radius: 2px;
-}
-.logo-name {
-  font-weight: 700;
-  font-size: 1.25rem;
-  letter-spacing: -0.025em;
-}
-.icon-actions {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-}
-.icon-btn {
-  font-size: 1.5rem;
-  color: #4b5563;
-  cursor: pointer;
-}
-.cart-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-.cart-badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background-color: black;
-  color: white;
-  font-size: 10px;
-  width: 1.2rem;
-  height: 1.2rem;
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.user-avatar {
-  width: 2rem;
-  height: 2rem;
-  background-color: #e5e7eb;
-  border-radius: 9999px;
-  border: 1px solid #f3f4f6;
-}
-</style>
