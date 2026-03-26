@@ -16,18 +16,12 @@ const router = createRouter({
           component: HomeView,
           meta: { requiresAuth: true, title: 'Scheduler', showInNav: true },
         },
-        {
-          path: 'interviewerList',
-          name: 'Interviewer List',
-          component: () => import('../views/InterviewerList.vue'),
-          meta: { requiresAuth: true, title: 'Interviewer List', showInNav: true },
-        },
-        {
-          path: 'suspensionList',
-          name: 'Suspension List',
-          component: () => import('../views/SuspensionList.vue'),
-          meta: { requiresAuth: true, title: 'Suspension List', showInNav: true },
-        }
+        // {
+        //   path: 'interviewerList',
+        //   name: 'Interviewer List',
+        //   component: () => import('../views/InterviewerList.vue'),
+        //   meta: { requiresAuth: true, title: 'Interviewer List', showInNav: true },
+        // },
       ],
     },
     {
