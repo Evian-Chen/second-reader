@@ -1,75 +1,104 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router';
+import { RouterView } from 'vue-router'
+import { onMounted } from 'vue'
+import { useAuthStore } from './stores/auth.ts'
+import {useInterviewerStore} from "@/stores/interviewerStore.ts";
+
+const authStore = useAuthStore()
+const interviewerStore = useInterviewerStore()
+
+onMounted(async () => {
+  await authStore.checkAuth()
+  await interviewerStore.fetchAllInterviewers()
+})
 </script>
 
 <template>
-  <main>
-    <RouterView />
-  </main>
-  
+  <div v-if="!authStore.isInitialized" class="loading-wrapper">
+    <div class="loader"></div>
+  </div>
+  <RouterView v-else />
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
+body,
+html,
+#app {
+  margin: 0;
+  padding: 0;
   width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
 }
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+}
+.loader {
+  position: relative;
+  width: 120px;
+  height: 90px;
+  margin: 0 auto;
 }
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
+.loader:before {
+  content: "";
+  position: absolute;
+  bottom: 30px;
+  left: 50px;
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  background: #6e5b55;
+  animation: loading-bounce 0.5s ease-in-out infinite alternate;
 }
 
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+.loader:after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 7px;
+  width: 45px;
+  border-radius: 4px;
+  box-shadow: 0 5px 0 #f2f2f2, -35px 50px 0 #f2f2f2, -70px 95px 0 #f2f2f2;
+  animation: loading-step 1s ease-in-out infinite;
 }
 
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
+@keyframes loading-bounce {
+  0% {
+    transform: scale(1, 0.7);
   }
 
-  .logo {
-    margin: 0 2rem 0 0;
+  40% {
+    transform: scale(0.8, 1.2);
   }
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
+  60% {
+    transform: scale(1, 1);
   }
 
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
+  100% {
+    bottom: 140px;
   }
 }
+
+@keyframes loading-step {
+  0% {
+    box-shadow: 0 10px 0 rgba(0, 0, 0, 0),
+    0 10px 0 #f2f2f2,
+    -35px 50px 0 #f2f2f2,
+    -70px 90px 0 #f2f2f2;
+  }
+
+  100% {
+    box-shadow: 0 10px 0 #f2f2f2,
+    -35px 50px 0 #f2f2f2,
+    -70px 90px 0 #f2f2f2,
+    -70px 90px 0 rgba(0, 0, 0, 0);
+  }
+}
+
 </style>
-

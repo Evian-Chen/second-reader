@@ -37,10 +37,3 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
-
-# Environment files (may contain secrets)
-.env
-.env.*.local
-
-# Vite cache
-.vite
