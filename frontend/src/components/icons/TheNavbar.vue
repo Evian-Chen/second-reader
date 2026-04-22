@@ -1,29 +1,35 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
 import { useRoute, useRouter } from 'vue-router'
-import { onMounted, ref, computed } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import PostComposerModal from '@/components/modals/PostComposerModal.vue'
+import BookUploadModal from '@/components/modals/BookUploadModal.vue'
+import NotificationDropdown from '@/components/NotificationDropdown.vue'
+import { useUiStore } from '@/stores/ui'
+import { isDemoMode } from '@/config/demoMode'
 
 const authStore = useAuthStore()
+const uiStore = useUiStore()
+const { showNotificationDropdown } = storeToRefs(uiStore)
 const router = useRouter()
 const route = useRoute()
 
 const isSidebarOpen = ref(false)
-const currentTab = ref('')
+const showProfileMenu = ref(false)
 
 const navLinks = computed(() => {
   const mainRoute = router.options.routes.find((r) => r.path === '/')
   if (!mainRoute || !mainRoute.children) return []
   return mainRoute.children
     .filter((route) => route.meta?.showInNav)
+    .filter(
+      (route) => isDemoMode || !route.meta?.requiresAuth || authStore.isLoggedIn
+    )
     .map((route) => ({
       name: (route.meta?.title as string) || route.name,
       path: route.path === '' ? '/' : `/${route.path}`,
     }))
-})
-
-onMounted(() => {
-  console.log('current tab:', currentTab.value)
-  currentTab.value = route.path
 })
 
 const toggleSidebar = () => {
@@ -35,206 +41,382 @@ const closeSidebar = () => {
 }
 
 const navigateTo = (path: string) => {
+  uiStore.setNotificationDropdown(false)
   router.push(path)
   closeSidebar()
-  currentTab.value = path
+  showProfileMenu.value = false
 }
 
 const handleLogout = () => {
   closeSidebar()
+  uiStore.setNotificationDropdown(false)
   authStore.logout()
-  router.push('/login')
+  void router.push('/login')
 }
+
+const displayName = computed(() => {
+  return authStore.userProfile?.userProfile?.displayName || authStore.userProfile?.accountId || 'User'
+})
+
+const marketTabs = computed(() => [
+  { label: '閱讀分享', path: '/posts' },
+  { label: '二手書市集', path: '/books' },
+])
+
+const openPostModal = () => {
+  if (!isDemoMode && !authStore.isLoggedIn) return navigateTo('/login')
+  uiStore.openPostComposer()
+}
+
+const openUploadModal = () => {
+  if (!isDemoMode && !authStore.isLoggedIn) return navigateTo('/login')
+  uiStore.openBookUpload()
+}
+
+const toggleNotification = () => {
+  if (!isDemoMode && !authStore.isLoggedIn) return navigateTo('/login')
+  uiStore.toggleNotificationDropdown()
+}
+
+const openFromSidebar = (fn: () => void) => {
+  closeSidebar()
+  showProfileMenu.value = false
+  fn()
+}
+
+const openNotifAndClose = () => {
+  if (!isDemoMode && !authStore.isLoggedIn) {
+    void router.push('/login')
+    return closeSidebar()
+  }
+  openFromSidebar(() => uiStore.setNotificationDropdown(true))
+}
+
+const navLabelByPath: Record<string, string> = {
+  '/books': '二手書市集',
+  '/posts': '閱讀分享',
+  '/cart': '購物車',
+  '/me': '個人頁面',
+  '/orders': '訂單管理',
+  '/sales': '我的賣場',
+  '/notifications': '通知',
+}
+
+const navLinksDisplay = computed(() =>
+  navLinks.value.map((l) => ({
+    ...l,
+    label: navLabelByPath[l.path] ?? l.name,
+  }))
+)
+
+const browseOrder = ['/posts', '/books', '/cart', '/notifications'] as const
+const accountOrder = ['/me', '/sales', '/orders'] as const
+
+const sidebarBrowseLinks = computed(() => {
+  const map = new Map(navLinksDisplay.value.map((l) => [l.path, l] as const))
+  return browseOrder.map((p) => map.get(p)).filter((x): x is NonNullable<typeof x> => Boolean(x))
+})
+const sidebarAccountLinks = computed(() => {
+  const map = new Map(navLinksDisplay.value.map((l) => [l.path, l] as const))
+  return accountOrder.map((p) => map.get(p)).filter((x): x is NonNullable<typeof x> => Boolean(x))
+})
+
+const sidebarOpenComposer = () => {
+  if (!isDemoMode && !authStore.isLoggedIn) {
+    openFromSidebar(() => void router.push('/login'))
+    return
+  }
+  openFromSidebar(() => uiStore.openPostComposer())
+}
+
+const sidebarOpenUpload = () => {
+  if (!isDemoMode && !authStore.isLoggedIn) {
+    openFromSidebar(() => void router.push('/login'))
+    return
+  }
+  openFromSidebar(() => uiStore.openBookUpload())
+}
+
+const goCart = () => openFromSidebar(() => void router.push('/cart'))
+
+watch(
+  isSidebarOpen,
+  (open) => {
+    if (typeof document === 'undefined') return
+    document.body.style.overflow = open ? 'hidden' : ''
+    if (open) {
+      showProfileMenu.value = false
+      uiStore.setNotificationDropdown(false)
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => showProfileMenu.value,
+  (open) => {
+    if (open) uiStore.setNotificationDropdown(false)
+  }
+)
+
+onBeforeUnmount(() => {
+  if (typeof document !== 'undefined') document.body.style.overflow = ''
+})
 </script>
 
 <template>
-  <nav class="custom-navbar">
+  <nav class="top-navbar">
     <div class="nav-container">
-      <div class="logo-wrapper" @click="router.push('/')">
-        <span class="logo-text">Tiramisu</span>
+      <div class="brand" @click="router.push('/posts')">
+        <span class="brand-logo">📚</span>
+        <div>
+          <p class="brand-title">黑白冊</p>
+          <p class="brand-sub">0. Phil Check</p>
+        </div>
       </div>
 
-      <div class="nav-action desktop-only">
-        <div class="nav-links">
-          <a
-            v-for="link in navLinks"
-            :key="link.path"
-            @click.prevent="navigateTo(link.path)"
-            :class="{
-              'nav-item-selected': currentTab === link.path,
-              'nav-item': currentTab !== link.path,
-            }"
-          >
-            {{ link.name }}
-          </a>
-        </div>
-        <div v-if="authStore.isLoggedIn" class="user-info">
-          <span>{{ authStore.userProfile?.name }}</span>
-        </div>
+      <div class="actions desktop-only">
+        <button class="icon-btn" title="發布貼文" @click="openPostModal">✎</button>
+        <button class="icon-btn" title="上架書籍" @click="openUploadModal">⊞</button>
+        <button class="icon-btn" title="購物車" @click="navigateTo('/cart')">🛒</button>
+        <button class="icon-btn" title="通知" @click="toggleNotification">🔔</button>
+        <button class="avatar-btn" @click="showProfileMenu = !showProfileMenu">{{ displayName.slice(0, 1) }}</button>
+      </div>
 
-        <button v-if="authStore.isLoggedIn" class="btn-logout" @click="handleLogout">Logout</button>
+      <div v-if="showProfileMenu" class="profile-menu desktop-only">
+        <p class="profile-name">{{ displayName }}</p>
+        <p class="profile-account">@{{ authStore.userProfile?.accountId || 'guest' }}</p>
+        <button @click="navigateTo('/me')">個人頁面</button>
+        <button @click="navigateTo('/sales')">我的賣場</button>
+        <button @click="navigateTo('/orders')">訂單管理</button>
+        <button v-if="authStore.isLoggedIn" class="danger" @click="handleLogout">登出</button>
+        <button v-else class="primary" @click="navigateTo('/login')">登入</button>
       </div>
 
       <button class="hamburger-btn mobile-only" @click="toggleSidebar">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
+        ☰
+      </button>
+    </div>
+    <div class="market-tabs">
+      <button
+        v-for="tab in marketTabs"
+        :key="tab.path"
+        :class="['tab-btn', { active: route.path.startsWith(tab.path) }]"
+        @click="navigateTo(tab.path)"
+      >
+        {{ tab.label }}
       </button>
     </div>
   </nav>
+  <PostComposerModal :open="uiStore.showPostModal" @close="uiStore.closePostComposer" />
+  <BookUploadModal :open="uiStore.showUploadModal" @close="uiStore.closeBookUpload" />
+  <NotificationDropdown :open="showNotificationDropdown" />
 
   <div v-if="isSidebarOpen" class="sidebar-overlay" @click="closeSidebar"></div>
 
   <aside :class="['sidebar', { 'is-open': isSidebarOpen }]">
     <div class="sidebar-header">
-      <span class="logo-text">側選單</span>
-      <button class="close-btn" @click="closeSidebar">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <span class="sb-title">選單</span>
+      <button class="close-btn" type="button" aria-label="關閉" @click="closeSidebar">✕</button>
     </div>
 
     <div class="sidebar-content">
-      <div v-if="authStore.isLoggedIn" class="sidebar-user-info">
-        <span>Hi~Hi~ {{ authStore.userProfile?.name }}</span>
+      <div class="sb-profile">
+        <div class="sb-avatar">{{ displayName.slice(0, 1) }}</div>
+        <div class="sb-id">
+          <p class="sb-name">{{ displayName }}</p>
+          <p class="sb-handle">@{{ authStore.userProfile?.accountId || (isDemoMode ? 'demo' : 'guest') }}</p>
+        </div>
       </div>
+
+      <p class="sb-section">快捷</p>
+      <div class="sb-quick">
+        <button type="button" class="sb-quick-btn" @click="sidebarOpenComposer">✎ 發文</button>
+        <button type="button" class="sb-quick-btn" @click="sidebarOpenUpload">⊞ 上架</button>
+        <button type="button" class="sb-quick-btn" @click="goCart">🛒 購物車</button>
+        <button type="button" class="sb-quick-btn" @click="openNotifAndClose">🔔 通知</button>
+      </div>
+
+      <p class="sb-section">帳戶</p>
       <div class="sidebar-links">
         <a
-          v-for="link in navLinks"
-          :key="link.path"
-          @click.prevent="navigateTo(link.path)"
+          v-for="link in sidebarAccountLinks"
+          :key="`acc-${link.path}`"
           class="sidebar-nav-item"
+          @click.prevent="navigateTo(link.path)"
         >
-          {{ link.name }}
+          {{ link.label }}
         </a>
       </div>
-      <button v-if="authStore.isLoggedIn" class="btn-logout w-full" @click="handleLogout">
-        Logout
-      </button>
+
+      <p class="sb-section">瀏覽</p>
+      <div class="sidebar-links">
+        <a
+          v-for="link in sidebarBrowseLinks"
+          :key="`br-${link.path}`"
+          class="sidebar-nav-item"
+          @click.prevent="navigateTo(link.path)"
+        >
+          {{ link.label }}
+        </a>
+      </div>
+
+      <div class="sb-footer">
+        <button
+          v-if="authStore.isLoggedIn"
+          type="button"
+          class="btn-logout w-full"
+          @click="handleLogout"
+        >
+          登出
+        </button>
+        <button
+          v-else
+          type="button"
+          class="btn-login w-full"
+          @click="openFromSidebar(() => void router.push('/login'))"
+        >
+          登入
+        </button>
+      </div>
     </div>
   </aside>
 </template>
 
 <style scoped>
-.custom-navbar {
+.top-navbar {
   position: sticky;
   top: 0;
   z-index: 1000;
   width: 100%;
   background-color: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-  height: 64px;
-  display: flex;
-  align-items: center;
+  border-bottom: 1px solid #ececec;
 }
 
 .nav-container {
   width: 100%;
-  max-width: 1500px;
+  max-width: 1220px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 10px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
 }
 
-.logo-wrapper {
+.brand {
+  display: flex;
+  gap: 8px;
+  align-items: center;
   cursor: pointer;
 }
 
-.logo-text {
-  font-size: 1.25rem;
+.brand-logo {
+  font-size: 22px;
+}
+
+.brand-title {
+  font-size: 16px;
+  line-height: 1;
   font-weight: 700;
-  color: #4a3728;
-  letter-spacing: 1px;
 }
 
-.nav-action {
+.brand-sub {
+  color: #7a7a7a;
+  font-size: 11px;
+}
+
+.actions {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 8px;
 }
 
-.nav-links {
-  display: flex;
-  gap: 1.5rem;
-  margin-right: 1rem;
-}
-
-.nav-item {
-  color: #4a3728;
-  font-weight: 500;
+.icon-btn,
+.avatar-btn {
+  border: 1px solid transparent;
+  background: transparent;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
   cursor: pointer;
-  padding: 4px 8px;
 }
 
-.nav-item:hover {
-  background-color: rgba(73, 101, 91, 0.2);
-  border-radius: 4px;
+.icon-btn:hover,
+.avatar-btn:hover {
+  background: #f1f1f1;
 }
 
-.nav-item-selected {
-  color: #4a3728;
-  font-weight: 500;
+.avatar-btn {
+  background: #111827;
+  color: #fff;
+  font-weight: 700;
+}
+
+.market-tabs {
+  max-width: 1220px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 20px 10px;
+}
+
+.tab-btn {
+  border: 1px solid #ddd;
+  background: #fff;
+  padding: 10px 12px;
+  font-size: 16px;
   cursor: pointer;
-  padding: 4px 8px;
-  background-color: rgba(73, 101, 91, 0.2);
-  border-radius: 4px;
 }
 
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding-right: 1rem;
-  border-right: 1px solid #e2e8f0;
+.tab-btn.active {
+  border-color: #111;
+  font-weight: 700;
 }
 
-.btn-logout {
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #ef4444;
-  background-color: transparent;
-  border: 1px solid #fee2e2;
-  border-radius: 6px;
+.profile-menu {
+  position: absolute;
+  right: 20px;
+  top: 56px;
+  width: 220px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.profile-name {
+  font-weight: 700;
+}
+
+.profile-account {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+.profile-menu button {
+  border: 1px solid #ececec;
+  background: #fff;
+  text-align: left;
+  border-radius: 8px;
+  padding: 8px;
   cursor: pointer;
-  transition: all 0.2s;
 }
 
-.btn-logout:hover {
-  background-color: #fef2f2;
-  border-color: #fecaca;
+.profile-menu .primary {
+  text-align: center;
+  background: #111827;
+  color: #fff;
 }
 
-.btn-logout.w-full {
-  width: 100%;
-  margin-top: 1rem;
+.profile-menu .danger {
+  text-align: center;
+  color: #b91c1c;
 }
 
 .hamburger-btn,
@@ -256,7 +438,7 @@ const handleLogout = () => {
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.4);
-  z-index: 40;
+  z-index: 1100;
 }
 
 .sidebar {
@@ -264,39 +446,128 @@ const handleLogout = () => {
   top: 0;
   right: -280px;
   width: 280px;
+  max-width: min(280px, 100vw);
   height: 100vh;
   background-color: #ffffff;
   box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
-  z-index: 50;
+  z-index: 1101;
   transition: right 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
+}
+
+.sidebar-links {
+  display: grid;
 }
 
 .sidebar.is-open {
   right: 0;
 }
 
+.sb-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
 .sidebar-header {
-  height: 64px;
+  flex-shrink: 0;
+  height: 56px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 1.5rem;
+  padding: 0 1.25rem;
   border-bottom: 1px solid #e2e8f0;
+  background: #fff;
 }
 
 .sidebar-content {
-  padding: 1.5rem;
+  padding: 1rem 1rem 1.25rem;
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-.sidebar-user-info {
-  font-weight: 500;
-  color: #4a3728;
+.sb-profile {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
   padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f1f1;
+}
+.sb-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: #111827;
+  color: #fff;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+.sb-id {
+  min-width: 0;
+}
+.sb-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #111827;
+  margin: 0;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sb-handle {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0.2rem 0 0;
+}
+
+.sb-section {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0.75rem 0 0.4rem;
+}
+.sb-section:first-of-type {
+  margin-top: 0;
+}
+
+.sb-quick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 0.25rem;
+}
+.sb-quick-btn {
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 0.55rem 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #111827;
+  cursor: pointer;
+  text-align: center;
+}
+.sb-quick-btn:hover {
+  border-color: #111827;
+  background: #fff;
+}
+
+.sb-footer {
+  margin-top: auto;
+  padding-top: 1.25rem;
+  border-top: 1px solid #f1f1f1;
 }
 
 .sidebar-nav-item {
@@ -305,14 +576,37 @@ const handleLogout = () => {
   color: #4a3728;
   font-weight: 500;
   cursor: pointer;
-  padding: 1rem 0.5rem;
+  padding: 0.75rem 0.5rem;
   text-decoration: none;
   transition: background-color 0.2s;
 }
 
 .sidebar-nav-item:hover {
-  background-color: #f8fafc;
-  border-radius: 4px;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+}
+
+.btn-logout,
+.btn-login {
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+}
+.btn-logout {
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #b91c1c;
+}
+.btn-login {
+  border: 1px solid #111827;
+  background: #111827;
+  color: #fff;
+}
+.w-full {
+  width: 100%;
 }
 
 .mobile-only {
@@ -322,6 +616,9 @@ const handleLogout = () => {
 @media (max-width: 768px) {
   .nav-container {
     padding: 0 1rem;
+  }
+  .market-tabs {
+    padding: 0 10px 10px;
   }
 
   .desktop-only {

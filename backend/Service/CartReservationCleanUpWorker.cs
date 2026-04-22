@@ -56,7 +56,7 @@ namespace backend.Service
                         await _notiRepo.CreateWaitlistAcceptedAsync(waitlist.AppUser!, waitlist.UserBookId);
                         await _notiRepo.CreateCartItemExpiredAsync(item.Cart!.AppUser!, item.UserBookId);
                         _context.CartItems.Remove(item);
-                        await _cartRepo.AddItemToCartByIdAsync(waitlist.AppUser!, waitlist.UserBookId);
+                        await _cartRepo.AddItemToCartByIdAsync(waitlist.AppUser!, waitlist.UserBookId, fromWaitlistOrPromotion: true);
                         waitlist.WaitlistStatus = Enums.WaitlistStatus.Accepted;
                     }
 

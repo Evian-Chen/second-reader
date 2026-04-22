@@ -2,39 +2,29 @@
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
-import api from '@/api/axiosInstance'
-import axios from 'axios'
-import type { ErrorResponseDTO } from '@/api/types/ErrorResponseDTO.ts'
 
 const authStore = useAuthStore()
 const router = useRouter()
 
-const name = ref('')
-const password = ref('')
+const token = ref(authStore.token)
 const isLoading = ref(false)
 const errorMessage = ref('')
 
 const login = async () => {
-  if (!name.value || !password.value) return alert('Please enter your userId and password.')
+  if (!token.value.trim()) return alert('請貼上 Bearer token')
 
   isLoading.value = true
   errorMessage.value = ''
   try {
-    const response = await api.post('/api/user/login', {
-      Name: name.value,
-      Password: password.value,
-    })
-    if (response.data) {
-      authStore.loginSuccess(response.data)
-      router.push('/')
+    authStore.setToken(token.value)
+    await authStore.checkAuth()
+    if (!authStore.isLoggedIn) {
+      errorMessage.value = 'Token 驗證失敗，請確認是否有效。'
+      return
     }
-  } catch (error: any) {
-    if (axios.isAxiosError<ErrorResponseDTO>(error)) {
-      errorMessage.value = 'Invalid username or password. Please try again.'
-    } else if (error.request) {
-      errorMessage.value = 'Cannot connect to server.'
-    }
-    password.value = ''
+    await router.push('/books')
+  } catch {
+    errorMessage.value = '無法連線到 API，請確認 VITE_API_BASE_URL 與後端服務。'
   } finally {
     isLoading.value = false
   }
@@ -45,22 +35,15 @@ const login = async () => {
   <div class="login-page">
     <div class="login-card">
       <div class="login-header">
-        <h2>Tiramisu</h2>
+        <h2>SecondReader</h2>
       </div>
 
       <div class="form-group">
-        <label>User Name</label>
-        <input v-model="name" placeholder="Please enter your user name" auto-complete="username" />
-      </div>
-
-      <div class="form-group">
-        <label>Password</label>
-        <input
-          v-model="password"
-          type="password"
-          placeholder="Please enter your password"
-          @keyup.enter="login"
-          auto-complete="current-password"
+        <label>Bearer Token</label>
+        <textarea
+          v-model="token"
+          placeholder="請貼上 JWT token（不需含 Bearer 前綴）"
+          @keyup.ctrl.enter="login"
         />
       </div>
 
@@ -69,7 +52,7 @@ const login = async () => {
       </div>
 
       <button :disabled="isLoading" @click="login">
-        {{ isLoading ? 'Login...' : 'Login' }}
+        {{ isLoading ? 'Verifying...' : 'Continue' }}
       </button>
     </div>
   </div>
@@ -133,13 +116,16 @@ label {
   margin-bottom: 0.5rem;
 }
 
-input {
+textarea {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   font-size: 1rem;
   transition: all 0.2s;
+  min-height: 9rem;
+  resize: vertical;
+  font-family: inherit;
 }
 
 button {

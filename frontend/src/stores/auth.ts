@@ -1,25 +1,38 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import api from '../api/axiosInstance'
-
-export interface LoginResponseEDTO {
-  UserId: string
-  Name: string
-}
+import { secondReaderService } from '@/services/secondReaderService'
+import type { UserDto } from '@/api/types/secondReader'
+import { isDemoMode } from '@/config/demoMode'
+import { demoUser } from '@/data/demoMocks'
 
 export const useAuthStore = defineStore('auth', () => {
   const isLoggedIn = ref(false)
-  const userProfile = ref<LoginResponseEDTO | null>(null)
+  const userProfile = ref<UserDto | null>(null)
   const isInitialized = ref(false)
+  const token = ref(localStorage.getItem('second_reader_token') || '')
 
-  function loginSuccess(data: LoginResponseEDTO) {
-    isLoggedIn.value = true
-    userProfile.value = data
+  function setToken(newToken: string) {
+    token.value = newToken.trim()
+    localStorage.setItem('second_reader_token', token.value)
   }
 
   async function checkAuth() {
+    if (isDemoMode) {
+      userProfile.value = { ...demoUser }
+      isLoggedIn.value = true
+      isInitialized.value = true
+      return
+    }
+
+    if (!token.value) {
+      isLoggedIn.value = false
+      userProfile.value = null
+      isInitialized.value = true
+      return
+    }
+
     try {
-      const res = await api.get<LoginResponseEDTO>('/api/user/checkAuthToken')
+      const res = await secondReaderService.getMe()
       userProfile.value = res.data
       isLoggedIn.value = true
     } catch (error) {
@@ -30,15 +43,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function logout() {
-    try {
-      await api.post('/api/user/logout')
-    } finally {
-      isLoggedIn.value = false
-      userProfile.value = null
-      window.location.href = '/login'
-    }
+  function logout() {
+    token.value = ''
+    localStorage.removeItem('second_reader_token')
+    isLoggedIn.value = false
+    userProfile.value = null
   }
 
-  return { isLoggedIn, userProfile, isInitialized, loginSuccess, logout, checkAuth }
+  return { isLoggedIn, userProfile, isInitialized, token, setToken, logout, checkAuth }
 })

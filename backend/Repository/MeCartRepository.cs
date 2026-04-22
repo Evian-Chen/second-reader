@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using backend.Data;
 using backend.Dto.Cart;
 using backend.Dto.Order;
+using backend.Enums;
 using backend.Interface;
 using backend.Mapper;
 using backend.Model;
@@ -48,13 +49,21 @@ namespace backend.Repository
                 .Include(ci => ci.UserBook).ThenInclude(ub => ub!.SellerDeliveryMethods);
         }
 
-        public async Task<CartItemListingDto?> AddItemToCartByIdAsync(AppUser user, Guid userBookId)
+        public async Task<CartItemListingDto?> AddItemToCartByIdAsync(AppUser user, Guid userBookId, bool fromWaitlistOrPromotion = false)
         {
             // 確認要加入購物車的書籍存在
             var bookExists = await _context.UserBooks.Include(ub => ub.Book).Include(c => c.AppUser).FirstOrDefaultAsync(ub => ub.Id == userBookId)
                                     ?? throw new InvalidOperationException("Can not add book that does not exists in databse to cart.");
             if (bookExists.AppUser!.Id == user.Id) throw new InvalidOperationException("User can not add their listed book to their own carts.");
             if (bookExists.UserBookStatus != Enums.UserBookStatus.Listed) throw new InvalidOperationException("Can not add book that is not listed.");
+
+            if (!fromWaitlistOrPromotion)
+            {
+                var anyoneWaiting = await _context.Waitlists.AnyAsync(w =>
+                    w.UserBookId == userBookId && w.WaitlistStatus == WaitlistStatus.Waiting);
+                if (anyoneWaiting)
+                    throw new InvalidOperationException("Can not add to cart while others are in the waitlist.");
+            }
 
             // abort: 已經有背景 worker 定期檢查所有購物車裡的item是否過期
             // 如果在其他購物車找到，代表此書在其他購物車尚未過期
@@ -121,7 +130,7 @@ namespace backend.Repository
                 try
                 {
                     var nextBuyer = waitlist.AppUser;
-                    var cartItemListing = await AddItemToCartByIdAsync(nextBuyer!, waitlist.UserBookId);
+                    var cartItemListing = await AddItemToCartByIdAsync(nextBuyer!, waitlist.UserBookId, fromWaitlistOrPromotion: true);
                     await _notiRepo.CreateWaitlistAcceptedAsync(nextBuyer!, userBookId);  // 買家
                     waitlist.WaitlistStatus = Enums.WaitlistStatus.Accepted;
                     await _context.SaveChangesAsync();
@@ -243,7 +252,7 @@ namespace backend.Repository
                 if (nextWaiter != null)
                 {
                     await _notiRepo.CreateWaitlistAcceptedAsync(nextWaiter.AppUser!, id);
-                    await AddItemToCartByIdAsync(nextWaiter.AppUser!, id);
+                    await AddItemToCartByIdAsync(nextWaiter.AppUser!, id, fromWaitlistOrPromotion: true);
                 }
             }
 

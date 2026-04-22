@@ -2,14 +2,11 @@
 import { RouterView } from 'vue-router'
 import { onMounted } from 'vue'
 import { useAuthStore } from './stores/auth.ts'
-import {useInterviewerStore} from "@/stores/interviewerStore.ts";
 
 const authStore = useAuthStore()
-const interviewerStore = useInterviewerStore()
 
 onMounted(async () => {
   await authStore.checkAuth()
-  await interviewerStore.fetchAllInterviewers()
 })
 </script>
 

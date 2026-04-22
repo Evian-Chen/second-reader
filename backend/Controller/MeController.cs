@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using backend.Dto.Error;
 using backend.Dto.Me;
+using backend.Dto.Waitlist;
 using backend.Interface;
 using backend.Mapper;
 using backend.Model;
@@ -19,10 +20,12 @@ namespace backend.Controller
     {
         private readonly IMeRepository _meRepo;
         private readonly IMeSavedRepository _savedRepo;
-        public MeController(IMeRepository meRepo, IMeSavedRepository saveRepo)
+        private readonly IWaitlistRepository _waitlistRepo;
+        public MeController(IMeRepository meRepo, IMeSavedRepository saveRepo, IWaitlistRepository waitlistRepo)
         {
             _meRepo = meRepo;
             _savedRepo = saveRepo;
+            _waitlistRepo = waitlistRepo;
         }
         private AppUser user => HttpContext.Items["AppUser"] as AppUser ?? throw new UnauthorizedAccessException();
 
@@ -165,6 +168,16 @@ namespace backend.Controller
             if (!success) return NotFound("該收藏紀錄不存在");
 
             return NoContent();
+        }
+
+        /// <summary>目前使用者在排隊中（等待中）的書籍，供訂單／個人管理頁顯示。</summary>
+        [HttpGet("waiting/books")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<MyWaitlistEntryDto>>> GetMyWaitingBooks()
+        {
+            var list = await _waitlistRepo.GetMyWaitingBooksAsync(user);
+            return Ok(list);
         }
 
         [HttpPost("{accountId}/follow")]

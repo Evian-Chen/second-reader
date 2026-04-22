@@ -1,27 +1,101 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../components/HomeView.vue'
 import { useAuthStore } from '@/stores/auth.ts'
 import MainLayout from '@/layouts/MainLayout.vue'
+import { isDemoMode } from '@/config/demoMode'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
+      redirect: '/books',
+    },
+    {
+      path: '/',
       component: MainLayout,
       children: [
         {
-          path: '',
-          name: 'home',
-          component: HomeView,
-          meta: { requiresAuth: true, title: 'Scheduler', showInNav: true },
+          path: 'books',
+          name: 'books',
+          component: () => import('@/views/BooksView.vue'),
+          meta: { title: 'Books', showInNav: true },
         },
-        // {
-        //   path: 'interviewerList',
-        //   name: 'Interviewer List',
-        //   component: () => import('../views/InterviewerList.vue'),
-        //   meta: { requiresAuth: true, title: 'Interviewer List', showInNav: true },
-        // },
+        {
+          path: 'book/:userBookId',
+          name: 'book-detail',
+          component: () => import('@/views/BookDetailView.vue'),
+          meta: { title: 'Book' },
+        },
+        {
+          path: 'posts',
+          name: 'posts',
+          component: () => import('@/views/PostsView.vue'),
+          meta: { title: 'Posts', showInNav: true },
+        },
+        {
+          path: 'post/:postId',
+          name: 'post-detail',
+          component: () => import('@/views/PostDetailView.vue'),
+          meta: { title: 'Post' },
+        },
+        {
+          path: 'user/:accountId',
+          name: 'user-profile',
+          component: () => import('@/views/UserProfileView.vue'),
+          meta: { title: 'User' },
+        },
+        {
+          path: 'cart',
+          name: 'cart',
+          component: () => import('@/views/CartView.vue'),
+          meta: { requiresAuth: true, title: 'Cart', showInNav: true },
+        },
+        {
+          path: 'me',
+          name: 'me',
+          component: () => import('@/views/me/MeLayout.vue'),
+          meta: { requiresAuth: true, title: 'Me', showInNav: true },
+          children: [
+            {
+              path: '',
+              name: 'me-posts',
+              component: () => import('@/views/me/MePostsTab.vue'),
+            },
+            {
+              path: 'books',
+              name: 'me-books',
+              component: () => import('@/views/me/MeBooksTab.vue'),
+            },
+            {
+              path: 'saved-posts',
+              name: 'me-saved-posts',
+              component: () => import('@/views/me/MeSavedPostsTab.vue'),
+            },
+            {
+              path: 'saved-books',
+              name: 'me-saved-books',
+              component: () => import('@/views/me/MeSavedBooksTab.vue'),
+            },
+          ],
+        },
+        {
+          path: 'orders',
+          name: 'orders',
+          component: () => import('@/views/OrdersView.vue'),
+          meta: { requiresAuth: true, title: 'Orders', showInNav: true },
+        },
+        {
+          path: 'sales',
+          name: 'sales',
+          component: () => import('@/views/SalesView.vue'),
+          meta: { requiresAuth: true, title: 'Sales', showInNav: true },
+        },
+        {
+          path: 'notifications',
+          name: 'notifications',
+          component: () => import('@/views/NotificationsView.vue'),
+          meta: { requiresAuth: true, title: 'Notifications', showInNav: true },
+        },
       ],
     },
     {
@@ -34,7 +108,7 @@ const router = createRouter({
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
       redirect: (to) => {
-        return { name: 'home' }
+        return { name: 'books' }
       },
     },
   ],
@@ -45,13 +119,13 @@ router.beforeEach(async (to, from, next) => {
   if (!authStore.isInitialized) {
     await authStore.checkAuth()
   }
-  if (to.meta.requiresAuth && !authStore.isLoggedIn) {
+  if (to.meta.requiresAuth && !authStore.isLoggedIn && !isDemoMode) {
     next({ name: 'login' })
-  } else if (to.meta.guestOnly && authStore.isLoggedIn) {
-    next({ name: 'home' })
+  } else if (to.meta.guestOnly && authStore.isLoggedIn && !isDemoMode) {
+    next({ name: 'books' })
   } else if (to.matched.length === 0) {
     if (authStore.isLoggedIn) {
-      next({ name: 'home' })
+      next({ name: 'books' })
     } else {
       next({ name: 'login' })
     }

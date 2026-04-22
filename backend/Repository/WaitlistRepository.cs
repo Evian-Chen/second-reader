@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using backend.Data;
 using backend.Dto.Cart;
 using backend.Dto.Me;
+using backend.Dto.Waitlist;
+using backend.Enums;
 using backend.Interface;
 using backend.Mapper;
 using backend.Model;
@@ -32,6 +34,11 @@ namespace backend.Repository
             existing = await _context.Waitlists.FirstOrDefaultAsync(w => w.UserBookId == userBookId && w.AppUser!.AccountId == user.AccountId);
             if (addToWaitlist)
             {
+                var userBook = await _context.UserBooks.Include(ub => ub.AppUser).FirstOrDefaultAsync(ub => ub.Id == userBookId)
+                    ?? throw new InvalidOperationException("UserBook not found");
+                if (userBook.AppUser?.Id == user.Id) throw new InvalidOperationException("Can not wait for your own book");
+                if (userBook.UserBookStatus != UserBookStatus.Listed) throw new InvalidOperationException("Can only wait for listed books");
+
                 // 加入等待清單 
                 if (existing != null && existing.WaitlistStatus == Enums.WaitlistStatus.Waiting) throw new InvalidOperationException("User is already waiting");
                 else if (existing != null && existing.WaitlistStatus == Enums.WaitlistStatus.Rejected) throw new InvalidOperationException("User is rejected");
@@ -79,7 +86,7 @@ namespace backend.Repository
             try
             {
                 var nextBuyer = waitlist.AppUser;
-                var cartItemListing = await _cartRepo.AddItemToCartByIdAsync(nextBuyer!, waitlist.UserBookId);
+                var cartItemListing = await _cartRepo.AddItemToCartByIdAsync(nextBuyer!, waitlist.UserBookId, fromWaitlistOrPromotion: true);
                 await _notiRepo.CreateWaitlistAcceptedAsync(nextBuyer!, userBookId);  // 買家
                 waitlist.WaitlistStatus = Enums.WaitlistStatus.Accepted;
                 await _context.SaveChangesAsync();
@@ -109,6 +116,38 @@ namespace backend.Repository
             }
             await _context.SaveChangesAsync();
             return users;
+        }
+
+        public async Task<List<MyWaitlistEntryDto>> GetMyWaitingBooksAsync(AppUser user)
+        {
+            var entries = await _context.Waitlists
+                .AsNoTracking()
+                .Where(w => w.WaiterId == user.Id && w.WaitlistStatus == WaitlistStatus.Waiting)
+                .OrderByDescending(w => w.CreatedAt)
+                .ToListAsync();
+            if (entries.Count == 0) return new List<MyWaitlistEntryDto>();
+
+            var ids = entries.Select(e => e.UserBookId).Distinct().ToList();
+            var userBooks = await _context.UserBooks
+                .AsNoTracking()
+                .Include(ub => ub.Book)
+                .Include(ub => ub.AppUser)
+                .Where(ub => ids.Contains(ub.Id))
+                .ToListAsync();
+            var byId = userBooks.ToDictionary(ub => ub.Id);
+
+            var list = new List<MyWaitlistEntryDto>();
+            foreach (var w in entries)
+            {
+                if (!byId.TryGetValue(w.UserBookId, out var ub) || ub.Book == null || ub.AppUser == null) continue;
+                list.Add(new MyWaitlistEntryDto
+                {
+                    UserBookId = w.UserBookId,
+                    QueuedAt = w.CreatedAt,
+                    Book = ub.ToUserBookSummaryDto()
+                });
+            }
+            return list;
         }
     }
 }

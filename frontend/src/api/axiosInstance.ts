@@ -1,23 +1,33 @@
-import axios, {type AxiosError} from 'axios'
-import type {ErrorResponseDTO} from "@/api/types/ErrorResponseDTO.ts";
+import axios, { type AxiosError } from 'axios'
+import type { ErrorResponseDTO } from '@/api/types/ErrorResponseDTO.ts'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
+})
+
+api.interceptors.request.use((config) => {
+  if (config.data instanceof FormData) {
+    // 讓瀏覽器帶上 multipart boundary，勿沿用預設的 application/json
+    delete (config.headers as { 'Content-Type'?: string })['Content-Type']
+  }
+  const token = localStorage.getItem('second_reader_token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
 })
 
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ErrorResponseDTO>) => {
     if (error.response) {
-      const { status, data } = error.response;
-      console.log("From api interceptor")
-      console.log("error status: ", status, "error detail: ", data.detail, "error title: ", data.title)
+      const { status, data } = error.response
+      console.log('API error', status, data)
     }
-    return Promise.reject(error);
+    return Promise.reject(error)
   }
 )
 

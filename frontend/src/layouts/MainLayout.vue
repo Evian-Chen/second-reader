@@ -6,7 +6,9 @@ import TheNavbar from '@/components/icons/TheNavbar.vue'
   <div class="layout-wrapper">
     <TheNavbar />
     <main class="layout-content">
-      <router-view />
+      <div class="page-shell">
+        <router-view />
+      </div>
     </main>
   </div>
 </template>
@@ -15,13 +17,18 @@ import TheNavbar from '@/components/icons/TheNavbar.vue'
 .layout-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 80vh;
+  min-height: 100vh;
   width: 100%;
 }
 .layout-content {
   flex: 1;
   width: 100%;
-  background-color: #f8f9fa;
+  background-color: #f5f5f5;
   padding: 0;
+}
+.page-shell {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 18px 20px 28px;
 }
 </style>
